@@ -1,10 +1,11 @@
 import express, { type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProductSchema, updateProductSchema } from "@shared/schema";
+import { insertProductSchema, updateProductSchema, inventory } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
+import { db } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure multer for file uploads
@@ -304,11 +305,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const newProduct = await storage.createProduct(validatedData);
           
           // Create inventory record with monthly tracking
-          if (row['在庫数'] || row['数量'] || row['quantity']) {
+          // Calculate month-end total inventory from all entries for this product
+          const monthEndQuantity = parseInt(row['在庫数'] || row['数量'] || row['quantity'] || '0');
+          
+          if (monthEndQuantity > 0) {
             const inventoryData = {
               productId: newProduct.id,
               departmentId: 1, // Default department
-              quantity: parseInt(row['在庫数'] || row['数量'] || row['quantity'] || '0'),
+              quantity: monthEndQuantity,
               lotNumber: row['LOT'] || row['ロット番号'] || '-',
               expiryDate: row['UBD'] || row['有効期限'] ? new Date(row['UBD'] || row['有効期限']) : null,
               storageLocation: row['保管場所'] || row['storage_location'] || null,
@@ -320,7 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               inventoryMonth: "2025-04", // Default to April 2025
             };
             
-            await db.insert(inventory).values(inventoryData);
+            await storage.createInventory(inventoryData);
           }
           
           results.success++;

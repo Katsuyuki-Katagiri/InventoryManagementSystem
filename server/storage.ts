@@ -28,6 +28,7 @@ export interface IStorage {
   
   // Inventory operations  
   getInventoryByProduct(productId: number): Promise<Inventory[]>;
+  createInventory(inventory: any): Promise<Inventory>;
   getInventoryStats(): Promise<{
     totalProducts: number;
     lowStockItems: number;

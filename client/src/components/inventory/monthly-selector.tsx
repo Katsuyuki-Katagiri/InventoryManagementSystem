@@ -120,6 +120,7 @@ export default function MonthlySelector({
               onMonthChange(currentMonth);
             }}
             className="text-xs"
+            type="button"
           >
             今月
           </Button>
@@ -133,6 +134,7 @@ export default function MonthlySelector({
               onMonthChange(prevMonth);
             }}
             className="text-xs"
+            type="button"
           >
             前月
           </Button>
