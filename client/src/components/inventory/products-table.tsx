@@ -9,7 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, getStockStatus, getCategoryColor, getCategoryIcon } from "@/lib/utils";
-import { PRODUCT_CATEGORIES, type Product } from "@shared/schema";
+import { MEDICAL_DEVICE_CATEGORIES, type Product } from "@shared/schema";
 import { Search, Plus, Edit, Trash2, Upload } from "lucide-react";
 
 interface ProductsTableProps {
@@ -116,7 +116,7 @@ export default function ProductsTable({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">全てのカテゴリー</SelectItem>
-                {PRODUCT_CATEGORIES.map((category) => (
+                {MEDICAL_DEVICE_CATEGORIES.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                   </SelectItem>
@@ -166,7 +166,6 @@ export default function ProductsTable({
               </TableRow>
             ) : (
               products.map((product) => {
-                const stockStatus = getStockStatus(product.quantity, product.lowStockThreshold);
                 const categoryColor = getCategoryColor(product.category);
                 const categoryIcon = getCategoryIcon(product.category);
 
@@ -180,34 +179,26 @@ export default function ProductsTable({
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-slate-900">{product.name}</div>
-                          {product.description && (
-                            <div className="text-sm text-slate-500">{product.description}</div>
+                          <div className="text-sm font-medium text-slate-900">{product.genericName}</div>
+                          {product.commercialName && (
+                            <div className="text-sm text-slate-500">{product.commercialName}</div>
                           )}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm text-slate-900">{product.sku}</TableCell>
+                    <TableCell className="text-sm text-slate-900">{product.productCode}</TableCell>
                     <TableCell>
                       <Badge className={categoryColor}>
                         {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-slate-900">{product.quantity}</TableCell>
+                    <TableCell className="text-sm text-slate-900">{product.specification || '-'}</TableCell>
                     <TableCell className="text-sm text-slate-900">
                       {formatCurrency(parseFloat(product.price))}
                     </TableCell>
                     <TableCell>
-                      <Badge 
-                        variant={stockStatus.status === "in-stock" ? "default" : 
-                                stockStatus.status === "low-stock" ? "secondary" : "destructive"}
-                        className={
-                          stockStatus.status === "in-stock" ? "bg-green-100 text-green-800" :
-                          stockStatus.status === "low-stock" ? "bg-yellow-100 text-yellow-800" :
-                          "bg-red-100 text-red-800"
-                        }
-                      >
-                        {stockStatus.label}
+                      <Badge variant="outline">
+                        {product.assetClassification || '未分類'}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
@@ -234,7 +225,7 @@ export default function ProductsTable({
                             <AlertDialogHeader>
                               <AlertDialogTitle>Delete Product</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to delete "{product.name}"? This action cannot be undone.
+                                Are you sure you want to delete "{product.genericName}"? This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
