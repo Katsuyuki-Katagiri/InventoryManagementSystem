@@ -4,6 +4,7 @@ import StatsCards from "@/components/inventory/stats-cards";
 import ProductsTable from "@/components/inventory/products-table";
 import AddProductModal from "@/components/inventory/add-product-modal";
 import EditProductModal from "@/components/inventory/edit-product-modal";
+import ExcelImportModal from "@/components/inventory/excel-import-modal";
 import { type Product } from "@shared/schema";
 import { Box, Bell, User } from "lucide-react";
 
@@ -11,6 +12,7 @@ export default function InventoryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const { data: products = [], isLoading, refetch } = useQuery({
@@ -75,6 +77,7 @@ export default function InventoryPage() {
           onAddProduct={() => setIsAddModalOpen(true)}
           onEditProduct={handleEditProduct}
           onRefetch={handleRefetch}
+          onImportExcel={() => setIsImportModalOpen(true)}
         />
       </main>
 
@@ -82,6 +85,12 @@ export default function InventoryPage() {
       <AddProductModal 
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleRefetch}
+      />
+
+      <ExcelImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
         onSuccess={handleRefetch}
       />
       

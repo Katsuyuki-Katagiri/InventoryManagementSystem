@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { formatCurrency, getStockStatus, getCategoryColor, getCategoryIcon } from "@/lib/utils";
 import { PRODUCT_CATEGORIES, type Product } from "@shared/schema";
-import { Search, Plus, Edit, Trash2 } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Upload } from "lucide-react";
 
 interface ProductsTableProps {
   products: Product[];
@@ -22,6 +22,7 @@ interface ProductsTableProps {
   onAddProduct: () => void;
   onEditProduct: (product: Product) => void;
   onRefetch: () => void;
+  onImportExcel: () => void;
 }
 
 export default function ProductsTable({
@@ -34,6 +35,7 @@ export default function ProductsTable({
   onAddProduct,
   onEditProduct,
   onRefetch,
+  onImportExcel,
 }: ProductsTableProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -121,6 +123,16 @@ export default function ProductsTable({
                 ))}
               </SelectContent>
             </Select>
+            
+            {/* Import Excel Button */}
+            <Button 
+              variant="outline" 
+              onClick={onImportExcel} 
+              className="flex items-center"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Excelインポート
+            </Button>
             
             {/* Add Product Button */}
             <Button onClick={onAddProduct} className="flex items-center">

@@ -73,7 +73,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md w-full">
         <DialogHeader>
-          <DialogTitle>Add New Product</DialogTitle>
+          <DialogTitle>新商品追加</DialogTitle>
         </DialogHeader>
         
         <Form {...form}>
@@ -83,9 +83,9 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product Name</FormLabel>
+                  <FormLabel>商品名</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter product name" {...field} />
+                    <Input placeholder="商品名を入力" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
