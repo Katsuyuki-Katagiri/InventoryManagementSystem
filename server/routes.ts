@@ -6,7 +6,7 @@ import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
 import { medicalProducts, inventory, departments, insertMedicalProductSchema } from '../shared/medical-schema';
-import { and, eq, sql } from 'drizzle-orm';
+import { eq, and, sql, isNull } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure multer for file uploads
@@ -441,7 +441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Check if this exact inventory record (product + lot + expiry) already exists
           let existingInventory;
-          
+
           if (expiryDate) {
             existingInventory = await db
               .select()
@@ -458,7 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               .where(and(
                 eq(inventory.productId, productToUse.id),
                 eq(inventory.lotNumber, lotNumber),
-                eq(inventory.expiryDate, null)
+                isNull(inventory.expiryDate)
               ));
           }
 
