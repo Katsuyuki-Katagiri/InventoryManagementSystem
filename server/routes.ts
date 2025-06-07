@@ -6,6 +6,7 @@ import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
+import { eq, and, sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure multer for file uploads
@@ -213,15 +214,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let data: any[] = [];
       
       try {
-        // Parse Excel file
-        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        // Parse Excel file with better options
+        const workbook = XLSX.read(req.file.buffer, { 
+          type: 'buffer',
+          cellDates: true,
+          cellStyles: false,
+          sheetStubs: false
+        });
+        
         const sheetName = workbook.SheetNames[0];
         if (!sheetName) {
           return res.status(400).json({ message: "Excelファイルにシートが見つかりません" });
         }
         
+        console.log('Available sheets:', workbook.SheetNames);
+        
         const worksheet = workbook.Sheets[sheetName];
-        data = XLSX.utils.sheet_to_json(worksheet);
+        
+        // Convert with header row detection
+        data = XLSX.utils.sheet_to_json(worksheet, {
+          header: 1,
+          defval: "",
+          blankrows: false
+        });
+        
+        // Convert to object format using first row as headers
+        if (data.length > 1) {
+          const headers = data[0] as string[];
+          const rows = data.slice(1);
+          data = rows.map(row => {
+            const obj: any = {};
+            headers.forEach((header, index) => {
+              obj[header] = (row as any[])[index] || '';
+            });
+            return obj;
+          });
+        }
+        
+        console.log('Parsed Excel data length:', data.length);
+        if (data.length > 0) {
+          console.log('Sample headers:', Object.keys(data[0]));
+          console.log('First row sample:', data[0]);
+        }
         
         if (data.length === 0) {
           return res.status(400).json({ message: "Excelファイルにデータが見つかりません" });
@@ -258,15 +292,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           console.log(`Processing row ${i + 1}:`, row);
 
-          // Map Excel columns based on your template structure
+          // Map Excel columns based on your template structure - support multiple column name variations
           const productData = {
-            productCode: String(row['商品コード'] || '').trim(),
-            genericName: String(row['商品名'] || row['メラ商品名'] || '').trim(),
-            commercialName: String(row['販売名'] || '').trim(),
-            specification: String(row['規格'] || '').trim(),
-            category: String(row['品種名'] || '医療機器').trim(),
-            assetClassification: String(row['資産分類名'] || '').trim(),
-            price: "0", // Default price since not in Excel data
+            productCode: String(row['商品コード'] || row['製品コード'] || row['コード'] || '').trim(),
+            genericName: String(row['商品名'] || row['メラ商品名'] || row['製品名'] || row['一般名'] || '').trim(),
+            commercialName: String(row['販売名'] || row['商品名'] || row['製品名'] || '').trim(),
+            specification: String(row['規格'] || row['仕様'] || '').trim(),
+            category: String(row['品種名'] || row['カテゴリ'] || row['分類'] || '医療機器').trim(),
+            assetClassification: String(row['資産分類名'] || row['資産分類'] || '').trim(),
+            price: "0",
             lowStockThreshold: 10,
             isActive: 1
           };
@@ -307,25 +341,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           // Always create inventory record for each lot/expiry combination
-          const monthEndQuantity = parseInt(String(row['当月末総在庫数'] || row['当月末在庫数合計'] || '0'));
-          const lotNumber = String(row['ロット番号'] || '-');
-          const expiryDate = row['有効期限'] ? new Date(row['有効期限']) : null;
+          const quantityStr = String(row['当月末総在庫数'] || row['当月末在庫数合計'] || row['在庫数'] || '0');
+          const monthEndQuantity = parseInt(quantityStr.replace(/[^\d]/g, '')) || 0; // Remove non-numeric characters
+          const lotNumber = String(row['ロット番号'] || row['ロット'] || '-');
+          
+          let expiryDate = null;
+          if (row['有効期限']) {
+            try {
+              const dateValue = row['有効期限'];
+              if (dateValue instanceof Date) {
+                expiryDate = dateValue;
+              } else if (typeof dateValue === 'number') {
+                // Excel date serial number
+                expiryDate = new Date((dateValue - 25569) * 86400 * 1000);
+              } else {
+                expiryDate = new Date(dateValue);
+              }
+              // Check if date is valid
+              if (isNaN(expiryDate.getTime())) {
+                expiryDate = null;
+              }
+            } catch (e) {
+              console.log(`Invalid expiry date for row ${i + 2}:`, row['有効期限']);
+              expiryDate = null;
+            }
+          }
           
           // Check if this exact inventory record (product + lot + expiry) already exists
+          let whereConditions = [
+            eq(inventory.productId, productToUse.id),
+            eq(inventory.lotNumber, lotNumber)
+          ];
+          
+          if (expiryDate) {
+            whereConditions.push(eq(inventory.expiryDate, expiryDate));
+          } else {
+            whereConditions.push(sql`${inventory.expiryDate} IS NULL`);
+          }
+          
           const existingInventory = await db
             .select()
             .from(inventory)
-            .where(
-              and(
-                eq(inventory.productId, productToUse.id),
-                eq(inventory.lotNumber, lotNumber),
-                expiryDate ? eq(inventory.expiryDate, expiryDate) : sql`${inventory.expiryDate} IS NULL`
-              )
-            );
+            .where(and(...whereConditions));
           
+          // Skip if quantity is 0 or negative
+          if (monthEndQuantity <= 0) {
+            console.log(`Skipping row ${i + 2}: quantity is ${monthEndQuantity}`);
+            continue;
+          }
+
           if (existingInventory.length > 0) {
             // Update existing inventory quantity
-            const currentQuantity = existingInventory[0].quantity;
+            const currentQuantity = existingInventory[0].quantity || 0;
             const newQuantity = currentQuantity + monthEndQuantity;
             
             await db
@@ -341,21 +408,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Create new inventory record
             const inventoryData = {
               productId: productToUse.id,
-              departmentId: 1, // Default department - will map from 部門コード later
+              departmentId: 1, // Default department
               quantity: monthEndQuantity,
               lotNumber: lotNumber,
               expiryDate: expiryDate,
-              storageLocation: String(row['事業所名'] || ''),
+              storageLocation: String(row['事業所名'] || row['保管場所'] || ''),
               shipmentDate: null,
               shipmentNumber: null,
               facilityName: String(row['事業所名'] || ''),
-              responsiblePerson: String(row['部門名'] || ''),
-              remarks: null,
-              inventoryMonth: "2025-04", // April 2025 from your data
+              responsiblePerson: String(row['部門名'] || row['担当者'] || ''),
+              remarks: String(row['備考'] || row['メモ'] || '').trim() || null,
+              inventoryMonth: "2025-04",
             };
             
-            await db.insert(inventory).values(inventoryData);
-            console.log(`Created new inventory record for product ${productData.productCode}, lot ${lotNumber}, quantity: ${monthEndQuantity}`);
+            try {
+              await db.insert(inventory).values(inventoryData);
+              console.log(`Created new inventory record for product ${productData.productCode}, lot ${lotNumber}, quantity: ${monthEndQuantity}`);
+            } catch (inventoryError: any) {
+              console.error(`Failed to create inventory record for ${productData.productCode}:`, inventoryError);
+              results.errors.push(`行 ${i + 2}: 在庫レコード作成エラー - ${inventoryError.message}`);
+              continue;
+            }
           }
           
           results.success++;
