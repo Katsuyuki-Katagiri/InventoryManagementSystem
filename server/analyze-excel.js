@@ -1,3 +1,4 @@
+
 import XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
@@ -7,16 +8,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 try {
-  const filePath = path.resolve('attached_assets/在庫データ2025.04_1749304674708.xlsx');
-  console.log('Attempting to read file:', filePath);
+  // 最新のExcelファイルを探す
+  const attachedDir = path.resolve('attached_assets');
+  const files = fs.readdirSync(attachedDir);
+  const excelFiles = files.filter(file => file.endsWith('.xlsx') || file.endsWith('.xls'));
   
-  if (!fs.existsSync(filePath)) {
-    console.log('File does not exist. Checking directory contents:');
-    const dir = path.dirname(filePath);
-    const files = fs.readdirSync(dir);
-    console.log('Files in directory:', files);
+  console.log('Available Excel files:', excelFiles);
+  
+  if (excelFiles.length === 0) {
+    console.log('No Excel files found in attached_assets directory');
     process.exit(1);
   }
+  
+  // 最新のファイルを使用
+  const latestFile = excelFiles[excelFiles.length - 1];
+  const filePath = path.join(attachedDir, latestFile);
+  
+  console.log('Analyzing file:', latestFile);
+  console.log('Full path:', filePath);
   
   const workbook = XLSX.readFile(filePath);
   const sheetNames = workbook.SheetNames;
@@ -34,17 +43,25 @@ try {
       console.log(`Column ${i + 1}: "${header}"`);
     });
     
-    console.log('\nFirst 3 data rows:');
-    data.slice(1, 4).forEach((row, i) => {
+    console.log('\nFirst 5 data rows:');
+    data.slice(1, 6).forEach((row, i) => {
       console.log(`Data Row ${i + 1}:`, row);
     });
   }
   
-  // Convert to JSON format for template creation
+  // Convert to JSON format
   const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-  console.log('\nSample JSON data (first 2 records):');
-  console.log(JSON.stringify(jsonData.slice(0, 2), null, 2));
+  console.log('\nDetected column names:');
+  if (jsonData.length > 0) {
+    Object.keys(jsonData[0]).forEach((key, i) => {
+      console.log(`${i + 1}. "${key}"`);
+    });
+  }
+  
+  console.log('\nSample JSON data (first 3 records):');
+  console.log(JSON.stringify(jsonData.slice(0, 3), null, 2));
   
 } catch (error) {
   console.error('Error reading Excel file:', error.message);
+  console.error('Full error:', error);
 }

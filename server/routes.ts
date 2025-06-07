@@ -211,15 +211,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Excelファイルが必要です" });
       }
 
+      console.log('File received:', req.file.originalname, 'Size:', req.file.size);
+
       let data: any[] = [];
       
       try {
-        // Parse Excel file with better options
+        // Parse Excel file with comprehensive options
         const workbook = XLSX.read(req.file.buffer, { 
           type: 'buffer',
           cellDates: true,
           cellStyles: false,
-          sheetStubs: false
+          sheetStubs: false,
+          raw: false,
+          codepage: 65001 // UTF-8
         });
         
         const sheetName = workbook.SheetNames[0];
@@ -228,43 +232,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         
         console.log('Available sheets:', workbook.SheetNames);
+        console.log('Processing sheet:', sheetName);
         
         const worksheet = workbook.Sheets[sheetName];
         
-        // Convert with header row detection
-        data = XLSX.utils.sheet_to_json(worksheet, {
-          header: 1,
+        // First try with JSON conversion to get column names
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
           defval: "",
-          blankrows: false
+          blankrows: false,
+          raw: false
         });
         
-        // Convert to object format using first row as headers
-        if (data.length > 1) {
-          const headers = data[0] as string[];
-          const rows = data.slice(1);
-          data = rows.map(row => {
-            const obj: any = {};
-            headers.forEach((header, index) => {
-              obj[header] = (row as any[])[index] || '';
-            });
-            return obj;
-          });
-        }
+        console.log('Raw JSON data length:', jsonData.length);
         
-        console.log('Parsed Excel data length:', data.length);
-        if (data.length > 0) {
-          console.log('Sample headers:', Object.keys(data[0]));
-          console.log('First row sample:', data[0]);
-        }
-        
-        if (data.length === 0) {
+        if (jsonData.length === 0) {
           return res.status(400).json({ message: "Excelファイルにデータが見つかりません" });
         }
+
+        // Log detected columns
+        const detectedColumns = Object.keys(jsonData[0] || {});
+        console.log('Detected columns:', detectedColumns);
+        
+        data = jsonData;
+        
       } catch (parseError: any) {
         console.error("Excel parsing error:", parseError);
         return res.status(400).json({ 
           message: "Excelファイルの解析に失敗しました",
-          error: parseError.message 
+          error: parseError.message,
+          details: "ファイル形式を確認してください。Excel 2007以降の.xlsxファイルが推奨です。"
         });
       }
 
@@ -292,14 +288,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           console.log(`Processing row ${i + 1}:`, row);
 
-          // Map Excel columns based on your template structure - support multiple column name variations
+          // Enhanced column mapping with more variations
+          const findColumnValue = (row: any, ...columnNames: string[]): string => {
+            for (const colName of columnNames) {
+              if (row[colName] !== undefined && row[colName] !== null && row[colName] !== '') {
+                return String(row[colName]).trim();
+              }
+            }
+            return '';
+          };
+
           const productData = {
-            productCode: String(row['商品コード'] || row['製品コード'] || row['コード'] || '').trim(),
-            genericName: String(row['商品名'] || row['メラ商品名'] || row['製品名'] || row['一般名'] || '').trim(),
-            commercialName: String(row['販売名'] || row['商品名'] || row['製品名'] || '').trim(),
-            specification: String(row['規格'] || row['仕様'] || '').trim(),
-            category: String(row['品種名'] || row['カテゴリ'] || row['分類'] || '医療機器').trim(),
-            assetClassification: String(row['資産分類名'] || row['資産分類'] || '').trim(),
+            productCode: findColumnValue(row, 
+              '商品コード', '製品コード', 'コード', 'SKU', 'Product Code', 
+              '品目コード', 'アイテムコード', '商品番号'
+            ),
+            genericName: findColumnValue(row,
+              '商品名', 'メラ商品名', '製品名', '一般名', 'Product Name',
+              '品名', '商品', '医療機器名', '機器名', '名称'
+            ),
+            commercialName: findColumnValue(row,
+              '販売名', '商品名', '製品名', 'Commercial Name',
+              'ブランド名', '型番', 'Model'
+            ),
+            specification: findColumnValue(row,
+              '規格', '仕様', 'Specification', 'Spec', 
+              'サイズ', '型式', '単位'
+            ),
+            category: findColumnValue(row,
+              '品種名', 'カテゴリ', '分類', 'Category', 
+              '種別', 'タイプ', '品目分類', '機器分類'
+            ) || '医療機器',
+            assetClassification: findColumnValue(row,
+              '資産分類名', '資産分類', 'Asset Classification',
+              '固定資産', '資産区分'
+            ),
             price: "0",
             lowStockThreshold: 10,
             isActive: 1
@@ -340,29 +363,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`Created new product ${productData.productCode} with ID: ${productToUse.id}`);
           }
           
-          // Always create inventory record for each lot/expiry combination
-          const quantityStr = String(row['当月末総在庫数'] || row['当月末在庫数合計'] || row['在庫数'] || '0');
-          const monthEndQuantity = parseInt(quantityStr.replace(/[^\d]/g, '')) || 0; // Remove non-numeric characters
-          const lotNumber = String(row['ロット番号'] || row['ロット'] || '-');
+          // Enhanced quantity extraction with more column variations
+          const quantityStr = findColumnValue(row,
+            '当月末総在庫数', '当月末在庫数合計', '在庫数', '在庫量', 'Quantity',
+            '数量', '個数', '本数', '枚数', '総在庫', '現在庫'
+          );
           
+          console.log(`Row ${i + 1} quantity extraction:`, {
+            rawValue: quantityStr,
+            availableColumns: Object.keys(row)
+          });
+          
+          const monthEndQuantity = parseInt(quantityStr.replace(/[^\d]/g, '')) || 0;
+          const lotNumber = findColumnValue(row,
+            'ロット番号', 'ロット', 'Lot Number', 'LOT', 
+            'バッチ番号', 'Batch', 'ロット・番号'
+          ) || '-';
+          
+          // Enhanced expiry date extraction
           let expiryDate = null;
-          if (row['有効期限']) {
+          const expiryValue = findColumnValue(row,
+            '有効期限', '使用期限', 'Expiry Date', 'Expiration Date',
+            '期限', '満了日', '失効日'
+          );
+          
+          if (expiryValue) {
             try {
-              const dateValue = row['有効期限'];
-              if (dateValue instanceof Date) {
-                expiryDate = dateValue;
-              } else if (typeof dateValue === 'number') {
+              if (expiryValue instanceof Date) {
+                expiryDate = expiryValue;
+              } else if (typeof expiryValue === 'number') {
                 // Excel date serial number
-                expiryDate = new Date((dateValue - 25569) * 86400 * 1000);
+                expiryDate = new Date((Number(expiryValue) - 25569) * 86400 * 1000);
               } else {
-                expiryDate = new Date(dateValue);
+                // Try parsing as string
+                const dateStr = String(expiryValue);
+                expiryDate = new Date(dateStr);
               }
               // Check if date is valid
               if (isNaN(expiryDate.getTime())) {
+                console.log(`Invalid expiry date for row ${i + 2}:`, expiryValue);
                 expiryDate = null;
+              } else {
+                console.log(`Parsed expiry date for row ${i + 2}:`, expiryDate);
               }
             } catch (e) {
-              console.log(`Invalid expiry date for row ${i + 2}:`, row['有効期限']);
+              console.log(`Error parsing expiry date for row ${i + 2}:`, expiryValue, e);
               expiryDate = null;
             }
           }
@@ -405,21 +450,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
             console.log(`Updated inventory for product ${productData.productCode}, lot ${lotNumber}: ${currentQuantity} + ${monthEndQuantity} = ${newQuantity}`);
           } else {
-            // Create new inventory record
+            // Create new inventory record with enhanced field mapping
             const inventoryData = {
               productId: productToUse.id,
               departmentId: 1, // Default department
               quantity: monthEndQuantity,
               lotNumber: lotNumber,
               expiryDate: expiryDate,
-              storageLocation: String(row['事業所名'] || row['保管場所'] || ''),
+              storageLocation: findColumnValue(row,
+                '事業所名', '保管場所', 'Storage Location', '場所',
+                '倉庫', '保管先', '施設名'
+              ),
               shipmentDate: null,
               shipmentNumber: null,
-              facilityName: String(row['事業所名'] || ''),
-              responsiblePerson: String(row['部門名'] || row['担当者'] || ''),
-              remarks: String(row['備考'] || row['メモ'] || '').trim() || null,
+              facilityName: findColumnValue(row,
+                '事業所名', '施設名', 'Facility', '拠点名'
+              ),
+              responsiblePerson: findColumnValue(row,
+                '部門名', '担当者', 'Responsible Person', '責任者',
+                '管理者', '部署'
+              ),
+              remarks: findColumnValue(row,
+                '備考', 'メモ', 'Remarks', 'Notes', 'Comment'
+              ) || null,
               inventoryMonth: "2025-04",
             };
+            
+            console.log(`Creating inventory record for ${productData.productCode}:`, {
+              quantity: monthEndQuantity,
+              lotNumber: lotNumber,
+              expiryDate: expiryDate,
+              storageLocation: inventoryData.storageLocation
+            });
             
             try {
               await db.insert(inventory).values(inventoryData);
