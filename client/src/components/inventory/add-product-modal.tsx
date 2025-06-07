@@ -32,6 +32,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
     responsiblePerson: string;
     remarks: string;
   }>({
+    resolver: zodResolver(insertProductSchema),
     defaultValues: {
       productCode: "",
       genericName: "",
@@ -52,15 +53,37 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
   });
 
   const createProductMutation = useMutation({
-    mutationFn: async (data: InsertProduct) => {
-      const response = await fetch("/api/products", {
+    mutationFn: async (data: any) => {
+      // Separate product data from inventory data
+      const productData = {
+        productCode: data.productCode,
+        genericName: data.genericName,
+        commercialName: data.commercialName,
+        category: data.category,
+        specification: data.specification,
+        assetClassification: data.assetClassification,
+        price: data.price,
+        lowStockThreshold: data.lowStockThreshold,
+      };
+
+      const inventoryData = {
+        quantity: data.quantity,
+        lotNumber: data.lotNumber,
+        expiryDate: data.expiryDate,
+        storageLocation: data.storageLocation,
+        facilityName: data.facilityName,
+        responsiblePerson: data.responsiblePerson,
+        remarks: data.remarks,
+      };
+
+      const response = await fetch("/api/products/with-inventory", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ product: productData, inventory: inventoryData }),
       });
-      if (!response.ok) throw new Error("Failed to create product");
+      if (!response.ok) throw new Error("Failed to create product with inventory");
       return response.json();
     },
     onSuccess: () => {
@@ -256,6 +279,126 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
                       onBlur={field.onBlur}
                       name={field.name}
                       ref={field.ref}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Inventory Information */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Quantity */}
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>在庫数 *</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        placeholder="0" 
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Lot Number */}
+              <FormField
+                control={form.control}
+                name="lotNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ロット番号</FormLabel>
+                    <FormControl>
+                      <Input placeholder="ロット番号を入力" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Expiry Date */}
+              <FormField
+                control={form.control}
+                name="expiryDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>有効期限</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="date" 
+                        {...field} 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Storage Location */}
+              <FormField
+                control={form.control}
+                name="storageLocation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>保管場所</FormLabel>
+                    <FormControl>
+                      <Input placeholder="保管場所を入力" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Facility Name */}
+              <FormField
+                control={form.control}
+                name="facilityName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>施設名</FormLabel>
+                    <FormControl>
+                      <Input placeholder="施設名を入力" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Responsible Person */}
+              <FormField
+                control={form.control}
+                name="responsiblePerson"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>担当者</FormLabel>
+                    <FormControl>
+                      <Input placeholder="担当者名を入力" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            {/* Remarks */}
+            <FormField
+              control={form.control}
+              name="remarks"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>備考</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="備考を入力"
+                      className="resize-none"
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

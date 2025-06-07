@@ -117,6 +117,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create product with inventory data
+  app.post("/api/products/with-inventory", async (req, res) => {
+    try {
+      const { product: productData, inventory: inventoryData } = req.body;
+      
+      // Validate product data
+      const validatedProductData = insertProductSchema.parse(productData);
+      
+      // Check if product code already exists
+      const existingProduct = await storage.getProductByCode(validatedProductData.productCode);
+      if (existingProduct) {
+        return res.status(409).json({ message: "Product with this code already exists" });
+      }
+      
+      // Create the product first
+      const newProduct = await storage.createProduct(validatedProductData);
+      
+      // If inventory data is provided and quantity > 0, create inventory record
+      if (inventoryData && inventoryData.quantity > 0) {
+        const inventoryRecord = {
+          productId: newProduct.id,
+          departmentId: 1, // Default department
+          quantity: inventoryData.quantity,
+          lotNumber: inventoryData.lotNumber || '',
+          expiryDate: inventoryData.expiryDate ? inventoryData.expiryDate : null,
+          storageLocation: inventoryData.storageLocation || '',
+          shipmentDate: null,
+          shipmentNumber: null,
+          facilityName: inventoryData.facilityName || '',
+          responsiblePerson: inventoryData.responsiblePerson || '',
+          remarks: inventoryData.remarks || '',
+          inventoryMonth: "2025-04",
+          receivedDate: null,
+        };
+        
+        await storage.createInventory(inventoryRecord);
+      }
+      
+      res.status(201).json({
+        product: newProduct,
+        message: "製品と在庫が正常に作成されました"
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "バリデーションに失敗しました", 
+          errors: error.errors 
+        });
+      }
+      console.error("Error creating product with inventory:", error);
+      res.status(500).json({ message: "製品の作成に失敗しました" });
+    }
+  });
+
   // Update product
   app.put("/api/products/:id", async (req, res) => {
     try {
