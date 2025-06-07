@@ -41,7 +41,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               <Box className="text-primary text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Products</p>
+              <p className="text-sm font-medium text-slate-600">総商品数</p>
               <p className="text-2xl font-semibold text-slate-900">{stats.totalProducts}</p>
             </div>
           </div>
@@ -55,7 +55,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               <AlertTriangle className="text-warning text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Low Stock Items</p>
+              <p className="text-sm font-medium text-slate-600">在庫不足商品</p>
               <p className="text-2xl font-semibold text-warning">{stats.lowStockItems}</p>
             </div>
           </div>
@@ -69,9 +69,9 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               <DollarSign className="text-success text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Total Value</p>
+              <p className="text-sm font-medium text-slate-600">総在庫価値</p>
               <p className="text-2xl font-semibold text-slate-900">
-                {formatCurrency(stats.totalValue)}
+                ¥{Math.round(stats.totalValue).toLocaleString()}
               </p>
             </div>
           </div>
@@ -85,7 +85,7 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               <Tags className="text-secondary text-2xl" />
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-slate-600">Categories</p>
+              <p className="text-sm font-medium text-slate-600">カテゴリー数</p>
               <p className="text-2xl font-semibold text-slate-900">{stats.categories}</p>
             </div>
           </div>

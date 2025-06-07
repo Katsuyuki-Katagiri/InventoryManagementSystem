@@ -47,7 +47,7 @@ export default function InventoryPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Box className="text-primary text-2xl mr-3" />
-              <h1 className="text-xl font-semibold text-slate-900">Inventory Manager</h1>
+              <h1 className="text-xl font-semibold text-slate-900">在庫管理システム</h1>
             </div>
             <div className="flex items-center space-x-4">
               <button className="text-slate-600 hover:text-slate-900 transition-colors">

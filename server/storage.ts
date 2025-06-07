@@ -35,37 +35,37 @@ export class MemStorage implements IStorage {
       {
         name: "iPhone 14 Pro",
         sku: "IPH14P-128-BK",
-        category: "electronics",
+        category: "電子機器",
         quantity: 45,
         price: "999.00",
-        description: "128GB Space Black",
+        description: "128GB スペースブラック",
         lowStockThreshold: 10
       },
       {
         name: "MacBook Air M2",
         sku: "MBA-M2-256",
-        category: "electronics", 
+        category: "電子機器", 
         quantity: 8,
         price: "1199.00",
-        description: "13-inch, 256GB SSD",
+        description: "13インチ, 256GB SSD",
         lowStockThreshold: 10
       },
       {
-        name: "Cotton T-Shirt",
+        name: "コットンTシャツ",
         sku: "TSH-CTN-NVY-M",
-        category: "clothing",
+        category: "衣類",
         quantity: 0,
         price: "24.99",
-        description: "Navy Blue, Size M",
+        description: "ネイビーブルー, サイズM",
         lowStockThreshold: 5
       },
       {
-        name: "JavaScript Guide",
+        name: "JavaScript入門書",
         sku: "BK-JS-001",
-        category: "books",
+        category: "書籍",
         quantity: 32,
         price: "39.99",
-        description: "Programming Book",
+        description: "プログラミング入門書",
         lowStockThreshold: 5
       }
     ];

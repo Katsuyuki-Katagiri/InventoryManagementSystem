@@ -93,13 +93,13 @@ export default function ProductsTable({
       {/* Table Header */}
       <div className="px-6 py-4 border-b border-slate-200">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4 sm:mb-0">Product Inventory</h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4 sm:mb-0">商品在庫</h2>
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search Bar */}
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Search products..."
+                placeholder="商品を検索..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 className="pl-10 w-full sm:w-64"
@@ -110,10 +110,10 @@ export default function ProductsTable({
             {/* Filter Dropdown */}
             <Select value={categoryFilter || undefined} onValueChange={onCategoryChange}>
               <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="All Categories" />
+                <SelectValue placeholder="全てのカテゴリー" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="all">全てのカテゴリー</SelectItem>
                 {PRODUCT_CATEGORIES.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1)}

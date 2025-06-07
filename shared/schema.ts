@@ -30,14 +30,14 @@ export type Product = typeof products.$inferSelect;
 
 // Categories for dropdown
 export const PRODUCT_CATEGORIES = [
-  "electronics",
-  "clothing", 
-  "books",
-  "home",
-  "sports",
-  "toys",
-  "beauty",
-  "automotive"
+  "電子機器",
+  "衣類", 
+  "書籍",
+  "家庭用品",
+  "スポーツ",
+  "玩具",
+  "美容",
+  "自動車"
 ] as const;
 
 export type ProductCategory = typeof PRODUCT_CATEGORIES[number];
