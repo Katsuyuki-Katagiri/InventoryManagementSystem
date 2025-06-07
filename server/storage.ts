@@ -13,7 +13,7 @@ import {
   type InsertFacility
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, like, ilike, or, sum, count, sql, desc } from "drizzle-orm";
+import { eq, like, ilike, or, sum, count, sql, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // Medical Product CRUD operations
@@ -269,7 +269,8 @@ export class DatabaseStorage implements IStorage {
   // Detailed inventory operations
   async getDetailedInventoryData(month?: string): Promise<any[]> {
     try {
-      let query = db
+      // Base query without month filter
+      let result = await db
         .select({
           id: products.id,
           productCode: products.productCode,
@@ -292,15 +293,10 @@ export class DatabaseStorage implements IStorage {
         .leftJoin(inventory, eq(inventory.productId, products.id))
         .where(eq(products.isActive, 1));
 
-      // Add month filter if provided
+      // Filter by month if specified
       if (month) {
-        query = query.where(and(
-          eq(products.isActive, 1),
-          eq(inventory.inventoryMonth, month)
-        ));
+        result = result.filter(item => item.inventoryMonth === month);
       }
-
-      const result = await query;
 
       return result.map(item => ({
         ...item,

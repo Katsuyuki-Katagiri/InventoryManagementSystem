@@ -29,7 +29,25 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    let url = queryKey[0] as string;
+    
+    // Handle month parameter for inventory queries
+    if (queryKey.length > 1 && queryKey[1]) {
+      const params = new URLSearchParams();
+      if (typeof queryKey[1] === 'string') {
+        params.append('month', queryKey[1]);
+      } else if (typeof queryKey[1] === 'object') {
+        Object.entries(queryKey[1] as Record<string, string>).forEach(([key, value]) => {
+          if (value) params.append(key, value);
+        });
+      }
+      
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
+    }
+    
+    const res = await fetch(url, {
       credentials: "include",
     });
 
