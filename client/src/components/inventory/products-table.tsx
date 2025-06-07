@@ -125,7 +125,7 @@ export default function ProductsTable({
             {/* Add Product Button */}
             <Button onClick={onAddProduct} className="flex items-center">
               <Plus className="mr-2 h-4 w-4" />
-              Add Product
+              商品追加
             </Button>
           </div>
         </div>
@@ -136,13 +136,13 @@ export default function ProductsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Product</TableHead>
+              <TableHead>商品名</TableHead>
               <TableHead>SKU</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>カテゴリー</TableHead>
+              <TableHead>在庫数</TableHead>
+              <TableHead>価格</TableHead>
+              <TableHead>状態</TableHead>
+              <TableHead className="text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
