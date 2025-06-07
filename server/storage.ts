@@ -49,6 +49,10 @@ export interface IStorage {
   getFacilities(): Promise<Facility[]>;
   getFacilityById(id: number): Promise<Facility | undefined>;
   createFacility(facility: InsertFacility): Promise<Facility>;
+
+  // Detailed inventory operations
+  getDetailedInventoryData(): Promise<any[]>;
+  updateInventoryItem(id: number, updates: any): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {

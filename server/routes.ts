@@ -333,6 +333,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get detailed inventory data with product information
+  app.get("/api/inventory/detailed", async (req: Request, res: Response) => {
+    try {
+      const inventoryData = await storage.getDetailedInventoryData();
+      res.json(inventoryData);
+    } catch (error) {
+      console.error("Error getting detailed inventory:", error);
+      res.status(500).json({ error: "詳細在庫データの取得に失敗しました" });
+    }
+  });
+
+  // Update inventory item
+  app.patch("/api/inventory/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const updatedItem = await storage.updateInventoryItem(id, updates);
+      if (!updatedItem) {
+        return res.status(404).json({ error: "在庫アイテムが見つかりません" });
+      }
+      res.json(updatedItem);
+    } catch (error) {
+      console.error("Error updating inventory:", error);
+      res.status(500).json({ error: "在庫の更新に失敗しました" });
+    }
+  });
+
   // Department routes
   app.get("/api/departments", async (req: Request, res: Response) => {
     try {

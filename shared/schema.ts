@@ -42,6 +42,11 @@ export const inventory = pgTable("inventory", {
   expiryDate: timestamp("expiry_date"),
   quantity: integer("quantity").notNull().default(0),
   storageLocation: text("storage_location"),
+  shipmentDate: timestamp("shipment_date"),
+  shipmentNumber: text("shipment_number"),
+  facilityName: text("facility_name"),
+  responsiblePerson: text("responsible_person"),
+  remarks: text("remarks"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -52,7 +52,7 @@ export default function DepartmentsPage() {
   const filteredDepartments = departments.filter(dept => {
     const matchesSearch = dept.departmentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          dept.departmentCode.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFacility = !selectedFacility || dept.facilityId.toString() === selectedFacility;
+    const matchesFacility = !selectedFacility || selectedFacility === "all" || dept.facilityId.toString() === selectedFacility;
     return matchesSearch && matchesFacility;
   });
 
@@ -139,7 +139,7 @@ export default function DepartmentsPage() {
                     <SelectValue placeholder="すべての施設" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">すべての施設</SelectItem>
+                    <SelectItem value="all">すべての施設</SelectItem>
                     {facilities.map((facility) => (
                       <SelectItem key={facility.id} value={facility.id.toString()}>
                         {facility.facilityName}
