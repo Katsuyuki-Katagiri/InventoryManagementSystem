@@ -6,7 +6,11 @@ import {
   type Product, 
   type InsertProduct, 
   type UpdateProduct,
-  type Inventory
+  type Inventory,
+  type Department,
+  type InsertDepartment,
+  type Facility,
+  type InsertFacility
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, like, ilike, or, sum, count, sql, desc } from "drizzle-orm";
@@ -33,6 +37,18 @@ export interface IStorage {
   }>;
   getExpiringProducts(days: number): Promise<any[]>;
   getLowStockProducts(): Promise<any[]>;
+
+  // Department operations
+  getDepartments(): Promise<Department[]>;
+  getDepartmentById(id: number): Promise<Department | undefined>;
+  getDepartmentsByFacility(facilityId: number): Promise<Department[]>;
+  createDepartment(department: InsertDepartment): Promise<Department>;
+  updateDepartment(id: number, updates: Partial<Department>): Promise<Department | undefined>;
+  
+  // Facility operations
+  getFacilities(): Promise<Facility[]>;
+  getFacilityById(id: number): Promise<Facility | undefined>;
+  createFacility(facility: InsertFacility): Promise<Facility>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -201,6 +217,49 @@ export class DatabaseStorage implements IStorage {
       .having(sql`SUM(${inventory.quantity}) <= ${products.lowStockThreshold}`);
 
     return inventoryTotals;
+  }
+
+  // Department operations
+  async getDepartments(): Promise<Department[]> {
+    return await db.select().from(departments).where(eq(departments.isActive, 1));
+  }
+
+  async getDepartmentById(id: number): Promise<Department | undefined> {
+    const [department] = await db.select().from(departments).where(eq(departments.id, id));
+    return department || undefined;
+  }
+
+  async getDepartmentsByFacility(facilityId: number): Promise<Department[]> {
+    return await db.select().from(departments)
+      .where(eq(departments.facilityId, facilityId));
+  }
+
+  async createDepartment(department: InsertDepartment): Promise<Department> {
+    const [newDepartment] = await db.insert(departments).values(department).returning();
+    return newDepartment;
+  }
+
+  async updateDepartment(id: number, updates: Partial<Department>): Promise<Department | undefined> {
+    const [updatedDepartment] = await db.update(departments)
+      .set(updates)
+      .where(eq(departments.id, id))
+      .returning();
+    return updatedDepartment || undefined;
+  }
+
+  // Facility operations
+  async getFacilities(): Promise<Facility[]> {
+    return await db.select().from(facilities).where(eq(facilities.isActive, 1));
+  }
+
+  async getFacilityById(id: number): Promise<Facility | undefined> {
+    const [facility] = await db.select().from(facilities).where(eq(facilities.id, id));
+    return facility || undefined;
+  }
+
+  async createFacility(facility: InsertFacility): Promise<Facility> {
+    const [newFacility] = await db.insert(facilities).values(facility).returning();
+    return newFacility;
   }
 }
 
