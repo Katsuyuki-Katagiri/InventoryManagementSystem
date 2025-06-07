@@ -440,27 +440,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const departmentId = department[0].id;
 
           // Check if this exact inventory record (product + lot + expiry) already exists
-          let existingInventory;
+          const whereConditions = [
+            eq(inventory.productId, productToUse.id),
+            eq(inventory.lotNumber, lotNumber)
+          ];
 
           if (expiryDate) {
-            existingInventory = await db
-              .select()
-              .from(inventory)
-              .where(and(
-                eq(inventory.productId, productToUse.id),
-                eq(inventory.lotNumber, lotNumber),
-                eq(inventory.expiryDate, expiryDate)
-              ));
+            whereConditions.push(eq(inventory.expiryDate, expiryDate));
           } else {
-            existingInventory = await db
-              .select()
-              .from(inventory)
-              .where(and(
-                eq(inventory.productId, productToUse.id),
-                eq(inventory.lotNumber, lotNumber),
-                isNull(inventory.expiryDate)
-              ));
+            whereConditions.push(isNull(inventory.expiryDate));
           }
+
+          const existingInventory = await db
+            .select()
+            .from(inventory)
+            .where(and(...whereConditions));
 
           // Skip if quantity is 0 or negative
           if (monthEndQuantity <= 0) {
