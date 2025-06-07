@@ -1,4 +1,6 @@
 import { products, type Product, type InsertProduct, type UpdateProduct } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Product CRUD operations
@@ -19,113 +21,47 @@ export interface IStorage {
   }>;
 }
 
-export class MemStorage implements IStorage {
-  private products: Map<number, Product>;
-  private currentId: number;
-
-  constructor() {
-    this.products = new Map();
-    this.currentId = 1;
-    this.initializeSampleData();
-  }
-
-  private initializeSampleData() {
-    // Initialize with a few sample products for demo
-    const sampleProducts: InsertProduct[] = [
-      {
-        name: "iPhone 14 Pro",
-        sku: "IPH14P-128-BK",
-        category: "電子機器",
-        quantity: 45,
-        price: "999.00",
-        description: "128GB スペースブラック",
-        lowStockThreshold: 10
-      },
-      {
-        name: "MacBook Air M2",
-        sku: "MBA-M2-256",
-        category: "電子機器", 
-        quantity: 8,
-        price: "1199.00",
-        description: "13インチ, 256GB SSD",
-        lowStockThreshold: 10
-      },
-      {
-        name: "コットンTシャツ",
-        sku: "TSH-CTN-NVY-M",
-        category: "衣類",
-        quantity: 0,
-        price: "24.99",
-        description: "ネイビーブルー, サイズM",
-        lowStockThreshold: 5
-      },
-      {
-        name: "JavaScript入門書",
-        sku: "BK-JS-001",
-        category: "書籍",
-        quantity: 32,
-        price: "39.99",
-        description: "プログラミング入門書",
-        lowStockThreshold: 5
-      }
-    ];
-
-    sampleProducts.forEach(product => {
-      const id = this.currentId++;
-      const newProduct: Product = { 
-        ...product, 
-        id,
-        quantity: product.quantity ?? 0,
-        lowStockThreshold: product.lowStockThreshold ?? 10,
-        description: product.description ?? null
-      };
-      this.products.set(id, newProduct);
-    });
-  }
-
+export class DatabaseStorage implements IStorage {
   async getProducts(): Promise<Product[]> {
-    return Array.from(this.products.values());
+    return await db.select().from(products);
   }
 
   async getProductById(id: number): Promise<Product | undefined> {
-    return this.products.get(id);
+    const [product] = await db.select().from(products).where(eq(products.id, id));
+    return product || undefined;
   }
 
   async getProductBySku(sku: string): Promise<Product | undefined> {
-    return Array.from(this.products.values()).find(product => product.sku === sku);
+    const [product] = await db.select().from(products).where(eq(products.sku, sku));
+    return product || undefined;
   }
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
-    const id = this.currentId++;
-    const product: Product = { 
-      ...insertProduct, 
-      id,
-      quantity: insertProduct.quantity ?? 0,
-      lowStockThreshold: insertProduct.lowStockThreshold ?? 10,
-      description: insertProduct.description ?? null
-    };
-    this.products.set(id, product);
+    const [product] = await db
+      .insert(products)
+      .values(insertProduct)
+      .returning();
     return product;
   }
 
   async updateProduct(id: number, updates: UpdateProduct): Promise<Product | undefined> {
-    const existingProduct = this.products.get(id);
-    if (!existingProduct) {
-      return undefined;
-    }
-
-    const updatedProduct: Product = { ...existingProduct, ...updates };
-    this.products.set(id, updatedProduct);
-    return updatedProduct;
+    const [updatedProduct] = await db
+      .update(products)
+      .set(updates)
+      .where(eq(products.id, id))
+      .returning();
+    return updatedProduct || undefined;
   }
 
   async deleteProduct(id: number): Promise<boolean> {
-    return this.products.delete(id);
+    const result = await db.delete(products).where(eq(products.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
   }
 
   async searchProducts(query: string): Promise<Product[]> {
+    const allProducts = await db.select().from(products);
     const lowercaseQuery = query.toLowerCase();
-    return Array.from(this.products.values()).filter(product =>
+    return allProducts.filter(product =>
       product.name.toLowerCase().includes(lowercaseQuery) ||
       product.sku.toLowerCase().includes(lowercaseQuery) ||
       product.description?.toLowerCase().includes(lowercaseQuery)
@@ -133,13 +69,12 @@ export class MemStorage implements IStorage {
   }
 
   async getProductsByCategory(category: string): Promise<Product[]> {
-    return Array.from(this.products.values()).filter(product => 
-      product.category === category
-    );
+    return await db.select().from(products).where(eq(products.category, category));
   }
 
   async getLowStockProducts(): Promise<Product[]> {
-    return Array.from(this.products.values()).filter(product =>
+    const allProducts = await db.select().from(products);
+    return allProducts.filter(product =>
       product.quantity <= product.lowStockThreshold
     );
   }
@@ -150,7 +85,7 @@ export class MemStorage implements IStorage {
     totalValue: number;
     categories: number;
   }> {
-    const allProducts = Array.from(this.products.values());
+    const allProducts = await db.select().from(products);
     const lowStockProducts = await this.getLowStockProducts();
     const totalValue = allProducts.reduce((sum, product) => 
       sum + (parseFloat(product.price) * product.quantity), 0
@@ -166,4 +101,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

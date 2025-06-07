@@ -112,17 +112,17 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>カテゴリー</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder="カテゴリーを選択" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {PRODUCT_CATEGORIES.map((category) => (
                           <SelectItem key={category} value={category}>
-                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                            {category}
                           </SelectItem>
                         ))}
                       </SelectContent>
