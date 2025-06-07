@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
 import StatsCards from "@/components/inventory/stats-cards";
 import ProductsTable from "@/components/inventory/products-table";
 import AddProductModal from "@/components/inventory/add-product-modal";
 import EditProductModal from "@/components/inventory/edit-product-modal";
 import ExcelImportModal from "@/components/inventory/excel-import-modal";
 import { type Product } from "@shared/schema";
-import { Box, Bell, User } from "lucide-react";
-
+import { Box, Bell, User, Building } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { Building } from "lucide-react";
 
 export default function InventoryPage() {
   const [location] = useLocation();
@@ -61,6 +60,20 @@ export default function InventoryPage() {
               <h1 className="text-xl font-semibold text-slate-900">在庫管理システム</h1>
             </div>
             <div className="flex items-center space-x-4">
+              <nav className="flex items-center space-x-2 mr-4">
+                <Link href="/inventory">
+                  <Button variant={location === "/" || location === "/inventory" ? "default" : "ghost"} size="sm">
+                    <Box className="h-4 w-4 mr-2" />
+                    在庫管理
+                  </Button>
+                </Link>
+                <Link href="/departments">
+                  <Button variant={location === "/departments" ? "default" : "ghost"} size="sm">
+                    <Building className="h-4 w-4 mr-2" />
+                    部門管理
+                  </Button>
+                </Link>
+              </nav>
               <button className="text-slate-600 hover:text-slate-900 transition-colors">
                 <Bell className="h-5 w-5" />
               </button>
