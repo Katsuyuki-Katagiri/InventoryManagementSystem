@@ -1,11 +1,12 @@
-import { pgTable, text, serial, integer, decimal, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, decimal, timestamp, varchar, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 import { relations } from "drizzle-orm";
 
-export const products = pgTable("products", {
+// 医療機器商品マスタ
+export const medicalProducts = pgTable("medical_products", {
   id: serial("id").primaryKey(),
-  productCode: text("product_code").notNull().unique(), // 10桁数字の商品コード
+  productCode: varchar("product_code", { length: 10 }).notNull().unique(), // 10桁数字の商品コード
   genericName: text("generic_name").notNull(), // メラ商品名
   commercialName: text("commercial_name").notNull(), // 販売名
   specification: text("specification"), // 規格
@@ -13,18 +14,22 @@ export const products = pgTable("products", {
   assetClassification: text("asset_classification"), // 資産分類
   price: decimal("price", { precision: 10, scale: 2 }).notNull(),
   lowStockThreshold: integer("low_stock_threshold").notNull().default(10),
-  isActive: integer("is_active").notNull().default(1), // 有効/無効フラグ
+  isActive: integer("is_active").notNull().default(1),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// 事業所テーブル
+// 事業所マスタ
 export const facilities = pgTable("facilities", {
   id: serial("id").primaryKey(),
   facilityCode: varchar("facility_code", { length: 4 }).notNull().unique(),
   facilityName: text("facility_name").notNull(),
+  address: text("address"),
+  phone: text("phone"),
   isActive: integer("is_active").notNull().default(1),
 });
 
-// 部門テーブル
+// 部門マスタ
 export const departments = pgTable("departments", {
   id: serial("id").primaryKey(),
   departmentCode: varchar("department_code", { length: 4 }).notNull().unique(),
@@ -33,32 +38,34 @@ export const departments = pgTable("departments", {
   isActive: integer("is_active").notNull().default(1),
 });
 
-// 在庫テーブル（ロット・有効期限管理）
+// ロット・在庫管理テーブル
 export const inventory = pgTable("inventory", {
   id: serial("id").primaryKey(),
-  productId: integer("product_id").notNull().references(() => products.id),
+  productId: integer("product_id").notNull().references(() => medicalProducts.id),
   departmentId: integer("department_id").notNull().references(() => departments.id),
   lotNumber: text("lot_number").notNull(),
-  expiryDate: timestamp("expiry_date"),
+  expiryDate: date("expiry_date"),
   quantity: integer("quantity").notNull().default(0),
   storageLocation: text("storage_location"),
+  receivedDate: date("received_date"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-// 入出庫履歴テーブル
+// 入出庫履歴
 export const stockMovements = pgTable("stock_movements", {
   id: serial("id").primaryKey(),
   inventoryId: integer("inventory_id").notNull().references(() => inventory.id),
-  movementType: text("movement_type").notNull(), // 'IN' | 'OUT' | 'TRANSFER' | 'ADJUSTMENT'
+  movementType: text("movement_type").notNull(), // 'IN', 'OUT', 'TRANSFER', 'ADJUSTMENT'
   quantity: integer("quantity").notNull(),
   referenceNumber: text("reference_number"),
+  destinationDepartment: text("destination_department"),
   notes: text("notes"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   createdBy: text("created_by").notNull(),
 });
 
-// 取引先テーブル
+// 取引先マスタ
 export const suppliers = pgTable("suppliers", {
   id: serial("id").primaryKey(),
   supplierName: text("supplier_name").notNull(),
@@ -82,14 +89,14 @@ export const departmentsRelations = relations(departments, ({ one, many }) => ({
   inventory: many(inventory),
 }));
 
-export const productsRelations = relations(products, ({ many }) => ({
+export const medicalProductsRelations = relations(medicalProducts, ({ many }) => ({
   inventory: many(inventory),
 }));
 
 export const inventoryRelations = relations(inventory, ({ one, many }) => ({
-  product: one(products, {
+  product: one(medicalProducts, {
     fields: [inventory.productId],
-    references: [products.id],
+    references: [medicalProducts.id],
   }),
   department: one(departments, {
     fields: [inventory.departmentId],
@@ -105,13 +112,17 @@ export const stockMovementsRelations = relations(stockMovements, ({ one }) => ({
   }),
 }));
 
-// スキーマ定義
-export const insertProductSchema = createInsertSchema(products).omit({
+// Zod スキーマ
+export const insertMedicalProductSchema = createInsertSchema(medicalProducts).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
-export const updateProductSchema = createInsertSchema(products).omit({
+export const updateMedicalProductSchema = createInsertSchema(medicalProducts).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
 }).partial();
 
 export const insertFacilitySchema = createInsertSchema(facilities).omit({
@@ -134,9 +145,9 @@ export const insertStockMovementSchema = createInsertSchema(stockMovements).omit
 });
 
 // 型定義
-export type Product = typeof products.$inferSelect;
-export type InsertProduct = z.infer<typeof insertProductSchema>;
-export type UpdateProduct = z.infer<typeof updateProductSchema>;
+export type MedicalProduct = typeof medicalProducts.$inferSelect;
+export type InsertMedicalProduct = z.infer<typeof insertMedicalProductSchema>;
+export type UpdateMedicalProduct = z.infer<typeof updateMedicalProductSchema>;
 
 export type Facility = typeof facilities.$inferSelect;
 export type InsertFacility = z.infer<typeof insertFacilitySchema>;
@@ -155,7 +166,7 @@ export type Supplier = typeof suppliers.$inferSelect;
 // 医療機器カテゴリー
 export const MEDICAL_DEVICE_CATEGORIES = [
   "人工心肺回路",
-  "酸素供給チューブ",
+  "酸素供給チューブ", 
   "輸液セット",
   "カテーテル",
   "縫合材料",
@@ -175,3 +186,22 @@ export const MOVEMENT_TYPES = [
   { value: "TRANSFER", label: "移動" },
   { value: "ADJUSTMENT", label: "調整" },
 ] as const;
+
+// 在庫統計用の型
+export interface InventoryStats {
+  totalProducts: number;
+  lowStockItems: number;
+  expiringSoonItems: number;
+  totalValue: number;
+  categories: number;
+}
+
+// 在庫アラート用の型
+export interface ExpiryAlert {
+  id: number;
+  productName: string;
+  lotNumber: string;
+  expiryDate: string;
+  quantity: number;
+  daysUntilExpiry: number;
+}

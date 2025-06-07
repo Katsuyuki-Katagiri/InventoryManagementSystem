@@ -1,24 +1,33 @@
-import { products, type Product, type InsertProduct, type UpdateProduct } from "@shared/schema";
+import { 
+  medicalProducts, 
+  inventory,
+  departments,
+  facilities,
+  type MedicalProduct, 
+  type InsertMedicalProduct, 
+  type UpdateMedicalProduct,
+  type Inventory,
+  type InventoryStats
+} from "@shared/medical-schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, like, ilike, or, sum, count, sql, desc } from "drizzle-orm";
 
 export interface IStorage {
-  // Product CRUD operations
-  getProducts(): Promise<Product[]>;
-  getProductById(id: number): Promise<Product | undefined>;
-  getProductBySku(sku: string): Promise<Product | undefined>;
-  createProduct(product: InsertProduct): Promise<Product>;
-  updateProduct(id: number, updates: UpdateProduct): Promise<Product | undefined>;
+  // Medical Product CRUD operations
+  getProducts(): Promise<MedicalProduct[]>;
+  getProductById(id: number): Promise<MedicalProduct | undefined>;
+  getProductByCode(code: string): Promise<MedicalProduct | undefined>;
+  createProduct(product: InsertMedicalProduct): Promise<MedicalProduct>;
+  updateProduct(id: number, updates: UpdateMedicalProduct): Promise<MedicalProduct | undefined>;
   deleteProduct(id: number): Promise<boolean>;
-  searchProducts(query: string): Promise<Product[]>;
-  getProductsByCategory(category: string): Promise<Product[]>;
-  getLowStockProducts(): Promise<Product[]>;
-  getInventoryStats(): Promise<{
-    totalProducts: number;
-    lowStockItems: number;
-    totalValue: number;
-    categories: number;
-  }>;
+  searchProducts(query: string): Promise<MedicalProduct[]>;
+  getProductsByCategory(category: string): Promise<MedicalProduct[]>;
+  
+  // Inventory operations  
+  getInventoryByProduct(productId: number): Promise<Inventory[]>;
+  getTotalInventoryStats(): Promise<InventoryStats>;
+  getExpiringProducts(days: number): Promise<any[]>;
+  getLowStockProducts(): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
