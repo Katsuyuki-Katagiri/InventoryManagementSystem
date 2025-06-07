@@ -46,7 +46,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
     onSuccess: (result: ImportResult) => {
       setImportResult(result);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       
       if (result.success > 0) {
         toast({
@@ -101,30 +101,42 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
   };
 
   const downloadTemplate = () => {
-    // Create a sample Excel template
+    // Create a medical device template with proper column headers
     const templateData = [
       {
-        '商品名': 'サンプル商品',
-        'SKU': 'SAMPLE-001',
-        'カテゴリー': '電子機器',
-        '在庫数': 100,
-        '価格': 1000,
-        '説明': 'サンプル商品の説明',
-        '最小在庫': 10
+        '商品コード': 'MD001',
+        '一般名': '静脈カテーテル',
+        '販売名': 'メディカテーテル Pro',
+        'カテゴリー': '血管系機器',
+        '規格': '20G x 32mm',
+        '資産分類': '消耗品',
+        '価格': '1500',
+        '最小在庫': '50'
+      },
+      {
+        '商品コード': 'MD002',
+        '一般名': 'IV セット',
+        '販売名': 'セーフIVライン',
+        'カテゴリー': '輸液・注射関連機器',
+        '規格': '標準型 150cm',
+        '資産分類': '消耗品',
+        '価格': '800',
+        '最小在庫': '100'
       }
     ];
     
-    // Convert to CSV for simplicity (users can save as Excel)
-    const csvContent = [
-      ['商品名', 'SKU', 'カテゴリー', '在庫数', '価格', '説明', '最小在庫'].join(','),
-      templateData.map(row => Object.values(row).join(',')).join('\n')
+    // Convert to CSV with BOM for proper Japanese character display
+    const csvContent = '\uFEFF' + [
+      ['商品コード', '一般名', '販売名', 'カテゴリー', '規格', '資産分類', '価格', '最小在庫'].join(','),
+      ...templateData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
     ].join('\n');
     
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'inventory_template.csv';
+    link.download = '医療機器インポートテンプレート.csv';
     link.click();
+    URL.revokeObjectURL(link.href);
   };
 
   return (

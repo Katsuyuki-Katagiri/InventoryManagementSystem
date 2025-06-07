@@ -176,11 +176,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Excelファイルが必要です" });
       }
 
-      // Parse Excel file
-      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(worksheet);
+      let data: any[] = [];
+      
+      try {
+        // Parse Excel file
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        if (!sheetName) {
+          return res.status(400).json({ message: "Excelファイルにシートが見つかりません" });
+        }
+        
+        const worksheet = workbook.Sheets[sheetName];
+        data = XLSX.utils.sheet_to_json(worksheet);
+        
+        if (data.length === 0) {
+          return res.status(400).json({ message: "Excelファイルにデータが見つかりません" });
+        }
+      } catch (parseError: any) {
+        console.error("Excel parsing error:", parseError);
+        return res.status(400).json({ 
+          message: "Excelファイルの解析に失敗しました",
+          error: parseError.message 
+        });
+      }
 
       const results = {
         success: 0,
@@ -192,22 +210,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (let i = 0; i < data.length; i++) {
         const row = data[i] as any;
         try {
-          // Map Excel columns to medical device schema
+          // Skip empty rows
+          if (!row || Object.keys(row).length === 0) {
+            continue;
+          }
+
+          // Map Excel columns to medical device schema with flexible column names
           const productData = {
-            productCode: row['商品コード'] || row['productCode'] || row['コード'] || row['SKU'],
-            genericName: row['一般名'] || row['genericName'] || row['商品名'] || row['name'],
-            commercialName: row['販売名'] || row['commercialName'] || row['商品名'] || row['name'],
-            specification: row['規格'] || row['specification'] || row['仕様'],
-            category: row['カテゴリー'] || row['category'] || row['Category'] || row['分類'],
-            assetClassification: row['資産分類'] || row['assetClassification'] || row['分類'],
-            price: String(row['価格'] || row['price'] || row['Price'] || row['単価'] || 0),
-            lowStockThreshold: parseInt(row['最小在庫'] || row['lowStockThreshold'] || row['最小数量']) || 10
+            productCode: String(row['商品コード'] || row['productCode'] || row['コード'] || row['SKU'] || row['Product Code'] || '').trim(),
+            genericName: String(row['一般名'] || row['genericName'] || row['商品名'] || row['name'] || row['Name'] || row['Generic Name'] || '').trim(),
+            commercialName: String(row['販売名'] || row['commercialName'] || row['Commercial Name'] || row['販売名称'] || '').trim(),
+            specification: String(row['規格'] || row['specification'] || row['仕様'] || row['Specification'] || row['specs'] || '').trim(),
+            category: String(row['カテゴリー'] || row['category'] || row['Category'] || row['分類'] || row['カテゴリ'] || '').trim(),
+            assetClassification: String(row['資産分類'] || row['assetClassification'] || row['Asset Classification'] || row['資産'] || '').trim(),
+            price: String(row['価格'] || row['price'] || row['Price'] || row['単価'] || row['Unit Price'] || '0').replace(/[^0-9.-]/g, '') || '0',
+            lowStockThreshold: parseInt(String(row['最小在庫'] || row['lowStockThreshold'] || row['最小数量'] || row['Low Stock'] || '10').replace(/[^0-9]/g, '')) || 10
           };
 
           // Validate required fields
-          if (!productData.genericName || !productData.productCode) {
-            results.errors.push(`行 ${i + 2}: 一般名と商品コードは必須です`);
+          if (!productData.genericName) {
+            results.errors.push(`行 ${i + 2}: 一般名は必須です (列: 一般名, genericName, 商品名, name のいずれか)`);
             continue;
+          }
+          
+          if (!productData.productCode) {
+            results.errors.push(`行 ${i + 2}: 商品コードは必須です (列: 商品コード, productCode, コード, SKU のいずれか)`);
+            continue;
+          }
+
+          if (!productData.category) {
+            results.errors.push(`行 ${i + 2}: カテゴリーは必須です (列: カテゴリー, category, Category, 分類 のいずれか)`);
+            continue;
+          }
+
+          // Set default commercial name if not provided
+          if (!productData.commercialName) {
+            productData.commercialName = productData.genericName;
           }
 
           // Check if product code already exists  
@@ -226,15 +264,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           results.imported.push(newProduct);
 
         } catch (error: any) {
-          results.errors.push(`行 ${i + 2}: ${error.message || 'データの処理中にエラーが発生しました'}`);
+          console.error(`Row ${i + 2} processing error:`, error);
+          if (error instanceof z.ZodError) {
+            const fieldErrors = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+            results.errors.push(`行 ${i + 2}: バリデーションエラー - ${fieldErrors}`);
+          } else {
+            results.errors.push(`行 ${i + 2}: ${error.message || 'データの処理中にエラーが発生しました'}`);
+          }
         }
       }
 
       res.json({
-        message: `${results.success}件の商品をインポートしました`,
+        message: `${results.success}件の医療機器をインポートしました`,
         success: results.success,
         errors: results.errors,
-        imported: results.imported
+        imported: results.imported,
+        total: data.length
       });
 
     } catch (error: any) {
