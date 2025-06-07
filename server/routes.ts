@@ -333,6 +333,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Department routes
+  app.get("/api/departments", async (req: Request, res: Response) => {
+    try {
+      const departments = await storage.getDepartments();
+      res.json(departments);
+    } catch (error) {
+      console.error("Error getting departments:", error);
+      res.status(500).json({ error: "部門の取得に失敗しました" });
+    }
+  });
+
+  app.get("/api/departments/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const department = await storage.getDepartmentById(id);
+      if (!department) {
+        return res.status(404).json({ error: "部門が見つかりません" });
+      }
+      res.json(department);
+    } catch (error) {
+      console.error("Error getting department:", error);
+      res.status(500).json({ error: "部門の取得に失敗しました" });
+    }
+  });
+
+  app.get("/api/facilities/:facilityId/departments", async (req: Request, res: Response) => {
+    try {
+      const facilityId = parseInt(req.params.facilityId);
+      const departments = await storage.getDepartmentsByFacility(facilityId);
+      res.json(departments);
+    } catch (error) {
+      console.error("Error getting departments by facility:", error);
+      res.status(500).json({ error: "施設の部門取得に失敗しました" });
+    }
+  });
+
+  // Facility routes
+  app.get("/api/facilities", async (req: Request, res: Response) => {
+    try {
+      const facilities = await storage.getFacilities();
+      res.json(facilities);
+    } catch (error) {
+      console.error("Error getting facilities:", error);
+      res.status(500).json({ error: "施設の取得に失敗しました" });
+    }
+  });
+
+  app.get("/api/facilities/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const facility = await storage.getFacilityById(id);
+      if (!facility) {
+        return res.status(404).json({ error: "施設が見つかりません" });
+      }
+      res.json(facility);
+    } catch (error) {
+      console.error("Error getting facility:", error);
+      res.status(500).json({ error: "施設の取得に失敗しました" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
