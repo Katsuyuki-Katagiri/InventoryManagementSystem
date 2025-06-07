@@ -6,7 +6,7 @@ import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
-import { products, inventory, departments, insertProductSchema } from '../shared/medical-schema';
+import { medicalProducts, inventory, departments, insertMedicalProductSchema } from '../shared/medical-schema';
 import { and, eq, sql } from 'drizzle-orm';
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -94,7 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new product
   app.post("/api/products", async (req, res) => {
     try {
-      const validatedData = insertProductSchema.parse(req.body);
+      const validatedData = insertMedicalProductSchema.parse(req.body);
 
       // Check if product code already exists
       const existingProduct = await storage.getProductByCode(validatedData.productCode);
@@ -124,7 +124,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid product ID" });
       }
 
-      const validatedData = updateProductSchema.parse(req.body);
+      const validatedData = insertMedicalProductSchema.partial().parse(req.body);
 
       // If updating product code, check if it's already taken by another product
       if (validatedData.productCode) {
@@ -357,7 +357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`Product ${productData.productCode} already exists, using existing product ID: ${existingProduct.id}`);
           } else {
             // Validate the data using schema
-            const validatedData = insertProductSchema.parse(productData);
+            const validatedData = insertMedicalProductSchema.parse(productData);
 
             // Create new product
             productToUse = await storage.createProduct(validatedData);
