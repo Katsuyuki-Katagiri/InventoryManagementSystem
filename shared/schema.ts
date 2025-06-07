@@ -11,7 +11,7 @@ export const products = pgTable("products", {
   specification: text("specification"), // 規格
   category: text("category").notNull(), // 品種区分
   assetClassification: text("asset_classification"), // 資産分類
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).default("0"),
   lowStockThreshold: integer("low_stock_threshold").notNull().default(10),
   isActive: integer("is_active").notNull().default(1), // 有効/無効フラグ
 });
@@ -132,6 +132,8 @@ export const stockMovementsRelations = relations(stockMovements, ({ one }) => ({
 // スキーマ定義
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
+}).extend({
+  price: z.string().default("0"),
 });
 
 export const updateProductSchema = createInsertSchema(products).omit({

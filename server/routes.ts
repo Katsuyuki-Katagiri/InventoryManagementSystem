@@ -260,14 +260,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           // Map Excel columns based on your template structure
           const productData = {
-            productCode: String(row['商品コード'] || row['コード'] || row['製品コード'] || row['product_code'] || '').trim(),
-            genericName: String(row['製品名'] || row['一般名'] || row['商品名'] || row['generic_name'] || row['name'] || '').trim(),
-            commercialName: String(row['販売名'] || row['商標名'] || row['commercial_name'] || '').trim(),
-            category: String(row['品種名'] || row['カテゴリー'] || row['category'] || row['分類'] || '医療機器').trim(),
-            manufacturer: String(row['製造元'] || row['メーカー'] || row['manufacturer'] || '').trim(),
-            model: String(row['型番'] || row['モデル'] || row['model'] || '').trim(),
-            standardPrice: parseFloat(String(row['標準価格'] || row['価格'] || row['standard_price'] || '0').replace(/[^0-9.-]/g, '')) || 0,
-            lowStockThreshold: parseInt(String(row['最低在庫数'] || row['安全在庫'] || row['low_stock_threshold'] || '10').replace(/[^0-9]/g, '')) || 10,
+            productCode: String(row['商品コード'] || '').trim(),
+            genericName: String(row['商品名'] || row['メラ商品名'] || '').trim(),
+            commercialName: String(row['販売名'] || '').trim(),
+            specification: String(row['規格'] || '').trim(),
+            category: String(row['品種名'] || '医療機器').trim(),
+            assetClassification: String(row['資産分類名'] || '').trim(),
+            price: "0", // Default price since not in Excel data
+            lowStockThreshold: 10,
             isActive: 1
           };
 
@@ -302,24 +302,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Create the product
           const newProduct = await storage.createProduct(validatedData);
           
-          // Create inventory record with monthly tracking
-          // Calculate month-end total inventory from all entries for this product
-          const monthEndQuantity = parseInt(row['在庫数'] || row['数量'] || row['quantity'] || '0');
+          // Create inventory record with month-end total from your Excel data
+          const monthEndQuantity = parseInt(String(row['当月末総在庫数'] || row['当月末在庫数合計'] || '0'));
           
           if (monthEndQuantity > 0) {
             const inventoryData = {
               productId: newProduct.id,
-              departmentId: 1, // Default department
-              quantity: monthEndQuantity,
-              lotNumber: row['LOT'] || row['ロット番号'] || '-',
-              expiryDate: row['UBD'] || row['有効期限'] ? new Date(row['UBD'] || row['有効期限']) : null,
-              storageLocation: row['保管場所'] || row['storage_location'] || null,
-              shipmentDate: row['出荷伝票日付'] || row['shipment_date'] ? new Date(row['出荷伝票日付'] || row['shipment_date']) : null,
-              shipmentNumber: row['出荷伝票№'] || row['shipment_number'] || null,
-              facilityName: row['施設名'] || row['facility_name'] || null,
-              responsiblePerson: row['担当者名'] || row['responsible_person'] || null,
-              remarks: row['備考'] || row['remarks'] || null,
-              inventoryMonth: "2025-04", // Default to April 2025
+              departmentId: 1, // Default department - will map from 部門コード later
+              quantity: monthEndQuantity, // Use month-end total inventory
+              lotNumber: String(row['ロット番号'] || '-'),
+              expiryDate: row['有効期限'] ? new Date(row['有効期限']) : null,
+              storageLocation: String(row['事業所名'] || ''), // Use facility as storage location
+              shipmentDate: null,
+              shipmentNumber: null,
+              facilityName: String(row['事業所名'] || ''),
+              responsiblePerson: String(row['部門名'] || ''),
+              remarks: null,
+              inventoryMonth: "2025-04", // April 2025 from your data
             };
             
             await db.insert(inventory).values(inventoryData);
