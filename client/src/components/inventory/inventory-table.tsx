@@ -27,6 +27,7 @@ import { format } from "date-fns";
 import { ja } from "date-fns/locale";
 
 interface InventoryTableProps {
+  selectedMonth: string;
   onAddProduct: () => void;
   onImportExcel: () => void;
 }

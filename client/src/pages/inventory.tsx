@@ -13,6 +13,7 @@ import { Link, useLocation } from "wouter";
 
 export default function InventoryPage() {
   const [location] = useLocation();
+  const [selectedMonth, setSelectedMonth] = useState("2025-04");
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -88,9 +89,20 @@ export default function InventoryPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <StatsCards stats={stats} />
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
+          <div className="lg:col-span-3">
+            <StatsCards stats={stats} />
+          </div>
+          <div>
+            <MonthlySelector
+              selectedMonth={selectedMonth}
+              onMonthChange={setSelectedMonth}
+            />
+          </div>
+        </div>
         
         <InventoryTable
+          selectedMonth={selectedMonth}
           onAddProduct={() => setIsAddModalOpen(true)}
           onImportExcel={() => setIsImportModalOpen(true)}
         />
