@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { insertProductSchema, MEDICAL_DEVICE_CATEGORIES, type InsertProduct } from "@shared/schema";
 import { Plus } from "lucide-react";
+import DepartmentSelector from "./department-selector";
 
 interface AddProductModalProps {
   isOpen: boolean;

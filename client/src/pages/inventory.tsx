@@ -8,7 +8,11 @@ import ExcelImportModal from "@/components/inventory/excel-import-modal";
 import { type Product } from "@shared/schema";
 import { Box, Bell, User } from "lucide-react";
 
+import { Link, useLocation } from "wouter";
+import { Building } from "lucide-react";
+
 export default function InventoryPage() {
+  const [location] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
