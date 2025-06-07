@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -135,6 +135,9 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
             <FileSpreadsheet className="mr-2 h-5 w-5" />
             Excelファイルインポート
           </DialogTitle>
+          <DialogDescription>
+            医療機器データをExcelファイルから一括でインポートできます。テンプレートをダウンロードして正しい形式で入力してください。
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6">

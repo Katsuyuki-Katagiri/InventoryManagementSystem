@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -95,6 +95,9 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
             <Save className="h-5 w-5" />
             医療機器を編集
           </DialogTitle>
+          <DialogDescription>
+            医療機器の情報を更新してください。必要な項目を変更して保存してください。
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>

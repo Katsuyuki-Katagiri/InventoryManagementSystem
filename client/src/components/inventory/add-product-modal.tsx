@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -80,6 +80,9 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
             <Plus className="h-5 w-5" />
             新しい医療機器を追加
           </DialogTitle>
+          <DialogDescription>
+            医療機器の詳細情報を入力して在庫管理システムに追加してください。
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
