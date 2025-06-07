@@ -1,31 +1,31 @@
 
 import { db } from "./db";
 import { 
-  products, 
+  medicalProducts, 
   inventory, 
   departments,
   facilities,
   stockMovements,
-  type Product, 
-  type InsertProduct,
+  type MedicalProduct, 
+  type InsertMedicalProduct,
   type Inventory,
   type Department,
   type InsertDepartment,
   type Facility,
   type InsertFacility
-} from "../shared/schema";
+} from "../shared/medical-schema";
 import { eq, like, ilike, or, sum, count, sql, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // Product CRUD operations
-  getProducts(): Promise<Product[]>;
-  getProductById(id: number): Promise<Product | undefined>;
-  getProductByCode(code: string): Promise<Product | undefined>;
-  createProduct(product: InsertProduct): Promise<Product>;
-  updateProduct(id: number, updates: Partial<Product>): Promise<Product | undefined>;
+  getProducts(): Promise<MedicalProduct[]>;
+  getProductById(id: number): Promise<MedicalProduct | undefined>;
+  getProductByCode(code: string): Promise<MedicalProduct | undefined>;
+  createProduct(product: InsertMedicalProduct): Promise<MedicalProduct>;
+  updateProduct(id: number, updates: Partial<MedicalProduct>): Promise<MedicalProduct | undefined>;
   deleteProduct(id: number): Promise<boolean>;
-  searchProducts(query: string): Promise<Product[]>;
-  getProductsByCategory(category: string): Promise<Product[]>;
+  searchProducts(query: string): Promise<MedicalProduct[]>;
+  getProductsByCategory(category: string): Promise<MedicalProduct[]>;
 
   // Inventory operations  
   getInventoryByProduct(productId: number): Promise<Inventory[]>;
@@ -57,64 +57,64 @@ export interface IStorage {
 
 class DatabaseStorage implements IStorage {
   // Product operations
-  async getProducts(): Promise<Product[]> {
-    return await db.select().from(products).where(eq(products.isActive, 1));
+  async getProducts(): Promise<MedicalProduct[]> {
+    return await db.select().from(medicalProducts).where(eq(medicalProducts.isActive, 1));
   }
 
-  async getProductById(id: number): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.id, id));
+  async getProductById(id: number): Promise<MedicalProduct | undefined> {
+    const [product] = await db.select().from(medicalProducts).where(eq(medicalProducts.id, id));
     return product || undefined;
   }
 
-  async getProductByCode(code: string): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.productCode, code));
+  async getProductByCode(code: string): Promise<MedicalProduct | undefined> {
+    const [product] = await db.select().from(medicalProducts).where(eq(medicalProducts.productCode, code));
     return product || undefined;
   }
 
-  async createProduct(product: InsertProduct): Promise<Product> {
-    const [newProduct] = await db.insert(products).values(product).returning();
+  async createProduct(product: InsertMedicalProduct): Promise<MedicalProduct> {
+    const [newProduct] = await db.insert(medicalProducts).values(product).returning();
     return newProduct;
   }
 
-  async updateProduct(id: number, updates: Partial<Product>): Promise<Product | undefined> {
-    const [updatedProduct] = await db.update(products)
+  async updateProduct(id: number, updates: Partial<MedicalProduct>): Promise<MedicalProduct | undefined> {
+    const [updatedProduct] = await db.update(medicalProducts)
       .set(updates)
-      .where(eq(products.id, id))
+      .where(eq(medicalProducts.id, id))
       .returning();
     return updatedProduct || undefined;
   }
 
   async deleteProduct(id: number): Promise<boolean> {
-    const result = await db.update(products)
+    const result = await db.update(medicalProducts)
       .set({ isActive: 0 })
-      .where(eq(products.id, id));
+      .where(eq(medicalProducts.id, id));
     return result.rowCount !== undefined && result.rowCount > 0;
   }
 
-  async searchProducts(query: string): Promise<Product[]> {
+  async searchProducts(query: string): Promise<MedicalProduct[]> {
     return await db
       .select()
-      .from(products)
+      .from(medicalProducts)
       .where(
         and(
-          eq(products.isActive, 1),
+          eq(medicalProducts.isActive, 1),
           or(
-            ilike(products.genericName, `%${query}%`),
-            ilike(products.commercialName, `%${query}%`),
-            ilike(products.productCode, `%${query}%`),
-            ilike(products.specification, `%${query}%`)
+            ilike(medicalProducts.genericName, `%${query}%`),
+            ilike(medicalProducts.commercialName, `%${query}%`),
+            ilike(medicalProducts.productCode, `%${query}%`),
+            ilike(medicalProducts.specification, `%${query}%`)
           )
         )
       );
   }
 
-  async getProductsByCategory(category: string): Promise<Product[]> {
+  async getProductsByCategory(category: string): Promise<MedicalProduct[]> {
     return await db
       .select()
-      .from(products)
+      .from(medicalProducts)
       .where(and(
-        eq(products.category, category),
-        eq(products.isActive, 1)
+        eq(medicalProducts.category, category),
+        eq(medicalProducts.isActive, 1)
       ));
   }
 
@@ -142,19 +142,19 @@ class DatabaseStorage implements IStorage {
       const [productStats] = await db
         .select({
           totalProducts: count(),
-          categories: count(sql`DISTINCT ${products.category}`)
+          categories: count(sql`DISTINCT ${medicalProducts.category}`)
         })
-        .from(products)
-        .where(eq(products.isActive, 1));
+        .from(medicalProducts)
+        .where(eq(medicalProducts.isActive, 1));
 
       const [inventoryStats] = await db
         .select({
-          totalValue: sql`COALESCE(SUM(${products.price}::numeric * ${inventory.quantity}), 0)`,
-          lowStockItems: count(sql`CASE WHEN ${inventory.quantity} <= ${products.lowStockThreshold} THEN 1 END`)
+          totalValue: sql`COALESCE(SUM(${medicalProducts.price}::numeric * ${inventory.quantity}), 0)`,
+          lowStockItems: count(sql`CASE WHEN ${inventory.quantity} <= ${medicalProducts.lowStockThreshold} THEN 1 END`)
         })
         .from(inventory)
-        .innerJoin(products, eq(inventory.productId, products.id))
-        .where(eq(products.isActive, 1));
+        .innerJoin(medicalProducts, eq(inventory.productId, medicalProducts.id))
+        .where(eq(medicalProducts.isActive, 1));
 
       // Count expiring products (within 30 days)
       const thirtyDaysFromNow = new Date();
@@ -165,9 +165,9 @@ class DatabaseStorage implements IStorage {
           expiringSoonItems: count()
         })
         .from(inventory)
-        .innerJoin(products, eq(inventory.productId, products.id))
+        .innerJoin(medicalProducts, eq(inventory.productId, medicalProducts.id))
         .where(and(
-          eq(products.isActive, 1),
+          eq(medicalProducts.isActive, 1),
           sql`${inventory.expiryDate} <= ${thirtyDaysFromNow}`,
           sql`${inventory.expiryDate} IS NOT NULL`
         ));
@@ -198,20 +198,20 @@ class DatabaseStorage implements IStorage {
     return await db
       .select({
         id: inventory.id,
-        productName: products.genericName,
-        productCode: products.productCode,
+        productName: medicalProducts.genericName,
+        productCode: medicalProducts.productCode,
         lotNumber: inventory.lotNumber,
         expiryDate: inventory.expiryDate,
         quantity: inventory.quantity,
         departmentName: departments.departmentName
       })
       .from(inventory)
-      .innerJoin(products, eq(inventory.productId, products.id))
+      .innerJoin(medicalProducts, eq(inventory.productId, medicalProducts.id))
       .innerJoin(departments, eq(inventory.departmentId, departments.id))
       .where(and(
         sql`${inventory.expiryDate} <= ${futureDate}`,
         sql`${inventory.expiryDate} IS NOT NULL`,
-        eq(products.isActive, 1)
+        eq(medicalProducts.isActive, 1)
       ))
       .orderBy(inventory.expiryDate);
   }
@@ -219,18 +219,18 @@ class DatabaseStorage implements IStorage {
   async getLowStockProducts(): Promise<any[]> {
     return await db
       .select({
-        id: products.id,
-        productName: products.genericName,
-        productCode: products.productCode,
-        category: products.category,
+        id: medicalProducts.id,
+        productName: medicalProducts.genericName,
+        productCode: medicalProducts.productCode,
+        category: medicalProducts.category,
         totalQuantity: sum(inventory.quantity),
-        lowStockThreshold: products.lowStockThreshold
+        lowStockThreshold: medicalProducts.lowStockThreshold
       })
-      .from(products)
-      .leftJoin(inventory, eq(inventory.productId, products.id))
-      .where(eq(products.isActive, 1))
-      .groupBy(products.id, products.genericName, products.productCode, products.category, products.lowStockThreshold)
-      .having(sql`COALESCE(SUM(${inventory.quantity}), 0) <= ${products.lowStockThreshold}`);
+      .from(medicalProducts)
+      .leftJoin(inventory, eq(inventory.productId, medicalProducts.id))
+      .where(eq(medicalProducts.isActive, 1))
+      .groupBy(medicalProducts.id, medicalProducts.genericName, medicalProducts.productCode, medicalProducts.category, medicalProducts.lowStockThreshold)
+      .having(sql`COALESCE(SUM(${inventory.quantity}), 0) <= ${medicalProducts.lowStockThreshold}`);
   }
 
   async getDetailedInventoryData(month?: string): Promise<any[]> {
@@ -238,30 +238,25 @@ class DatabaseStorage implements IStorage {
       let query = db
         .select({
           id: inventory.id,
-          productCode: products.productCode,
-          productName: products.genericName,
-          commercialName: products.commercialName,
-          specification: products.specification,
-          category: products.category,
+          productCode: medicalProducts.productCode,
+          productName: medicalProducts.genericName,
+          commercialName: medicalProducts.commercialName,
+          specification: medicalProducts.specification,
+          category: medicalProducts.category,
           lotNumber: inventory.lotNumber,
           expiryDate: inventory.expiryDate,
           quantity: inventory.quantity,
           departmentName: departments.departmentName,
           facilityName: facilities.facilityName,
-          storageLocation: inventory.storageLocation,
-          inventoryMonth: inventory.inventoryMonth
+          storageLocation: inventory.storageLocation
         })
         .from(inventory)
-        .innerJoin(products, eq(inventory.productId, products.id))
+        .innerJoin(medicalProducts, eq(inventory.productId, medicalProducts.id))
         .innerJoin(departments, eq(inventory.departmentId, departments.id))
         .innerJoin(facilities, eq(departments.facilityId, facilities.id))
-        .where(eq(products.isActive, 1));
+        .where(eq(medicalProducts.isActive, 1));
 
-      if (month) {
-        query = query.where(eq(inventory.inventoryMonth, month));
-      }
-
-      return await query.orderBy(products.productCode);
+      return await query.orderBy(medicalProducts.productCode);
     } catch (error) {
       console.error('Error getting detailed inventory data:', error);
       return [];

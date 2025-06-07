@@ -6,7 +6,7 @@ import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
-import { products, inventory, departments, facilities, insertProductSchema } from '../shared/schema';
+import { medicalProducts, inventory, departments, facilities, insertMedicalProductSchema } from '../shared/medical-schema';
 import { eq, and, sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -95,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new product
   app.post("/api/products", async (req, res) => {
     try {
-      const validatedData = insertProductSchema.parse(req.body);
+      const validatedData = insertMedicalProductSchema.parse(req.body);
 
       // Check if product code already exists
       const existingProduct = await storage.getProductByCode(validatedData.productCode);
@@ -125,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid product ID" });
       }
 
-      const validatedData = insertProductSchema.partial().parse(req.body);
+      const validatedData = insertMedicalProductSchema.partial().parse(req.body);
 
       // If updating product code, check if it's already taken by another product
       if (validatedData.productCode) {
@@ -318,7 +318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               '品目コード', 'アイテムコード', '商品番号'
             ),
             genericName: findColumnValue(row,
-              '商品名', 'メラ商品名', '製品名', '一般名', 'Product Name',
+              'メラ商品名', '商品名', '製品名', '一般名', 'Product Name',
               '品名', '商品', '医療機器名', '機器名', '名称'
             ),
             commercialName: findColumnValue(row,
@@ -370,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`Product ${productData.productCode} already exists, using existing product ID: ${existingProduct.id}`);
           } else {
             // Validate the data using schema
-            const validatedData = insertProductSchema.parse(productData);
+            const validatedData = insertMedicalProductSchema.parse(productData);
 
             // Create new product
             productToUse = await storage.createProduct(validatedData);
@@ -401,7 +401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             '期限', '満了日', '失効日'
           );
 
-          if (expiryValue) {
+          if (expiryValue && expiryValue !== '-') {
             try {
               if (expiryValue instanceof Date) {
                 expiryDate = expiryValue;
@@ -545,19 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 '事業所名', '保管場所', 'Storage Location', '場所',
                 '倉庫', '保管先', '施設名'
               ),
-              shipmentDate: null,
-              shipmentNumber: null,
-              facilityName: findColumnValue(row,
-                '事業所名', '施設名', 'Facility', '拠点名'
-              ),
-              responsiblePerson: findColumnValue(row,
-                '部門名', '担当者', 'Responsible Person', '責任者',
-                '管理者', '部署'
-              ),
-              remarks: findColumnValue(row,
-                '備考', 'メモ', 'Remarks', 'Notes', 'Comment'
-              ) || null,
-              inventoryMonth: "2025-04",
+              receivedDate: null
             };
 
             console.log(`Creating inventory record for ${productData.productCode}:`, {
