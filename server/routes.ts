@@ -169,6 +169,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Debug route to analyze Excel file structure
+  app.post("/api/products/analyze", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Excelファイルが必要です" });
+      }
+
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      res.json({
+        sheetNames: workbook.SheetNames,
+        totalRows: data.length,
+        headers: data[0] || [],
+        sampleRows: data.slice(1, 4),
+        sampleData: jsonData.slice(0, 3),
+        columnMapping: {
+          detected: Object.keys(jsonData[0] || {}),
+          supported: [
+            '商品コード', '一般名', '販売名', 'カテゴリー', '規格', '資産分類', '価格', '最小在庫',
+            'productCode', 'genericName', 'commercialName', 'category', 'specification', 'assetClassification', 'price', 'lowStockThreshold'
+          ]
+        }
+      });
+    } catch (error: any) {
+      console.error("Error analyzing Excel file:", error);
+      res.status(500).json({ message: "ファイル解析エラー", error: error.message });
+    }
+  });
+
   // Excel import endpoint
   app.post("/api/products/import", upload.single('file'), async (req, res) => {
     try {
@@ -215,16 +248,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
 
-          // Map Excel columns to medical device schema with flexible column names
+          // Map Excel columns to medical device schema with comprehensive column name support
           const productData = {
-            productCode: String(row['商品コード'] || row['productCode'] || row['コード'] || row['SKU'] || row['Product Code'] || '').trim(),
-            genericName: String(row['一般名'] || row['genericName'] || row['商品名'] || row['name'] || row['Name'] || row['Generic Name'] || '').trim(),
-            commercialName: String(row['販売名'] || row['commercialName'] || row['Commercial Name'] || row['販売名称'] || '').trim(),
-            specification: String(row['規格'] || row['specification'] || row['仕様'] || row['Specification'] || row['specs'] || '').trim(),
-            category: String(row['カテゴリー'] || row['category'] || row['Category'] || row['分類'] || row['カテゴリ'] || '').trim(),
-            assetClassification: String(row['資産分類'] || row['assetClassification'] || row['Asset Classification'] || row['資産'] || '').trim(),
-            price: String(row['価格'] || row['price'] || row['Price'] || row['単価'] || row['Unit Price'] || '0').replace(/[^0-9.-]/g, '') || '0',
-            lowStockThreshold: parseInt(String(row['最小在庫'] || row['lowStockThreshold'] || row['最小数量'] || row['Low Stock'] || '10').replace(/[^0-9]/g, '')) || 10
+            productCode: String(row['商品コード'] || row['productCode'] || row['コード'] || row['SKU'] || row['Product Code'] || 
+                               row['商品番号'] || row['品番'] || row['Item Code'] || row['製品コード'] || '').trim(),
+            genericName: String(row['一般名'] || row['genericName'] || row['商品名'] || row['name'] || row['Name'] || 
+                               row['Generic Name'] || row['品名'] || row['製品名'] || row['Product Name'] || 
+                               row['医療機器名'] || row['機器名'] || '').trim(),
+            commercialName: String(row['販売名'] || row['commercialName'] || row['Commercial Name'] || row['販売名称'] || 
+                                  row['商品名'] || row['Trade Name'] || '').trim(),
+            specification: String(row['規格'] || row['specification'] || row['仕様'] || row['Specification'] || row['specs'] || 
+                                 row['サイズ'] || row['Size'] || row['型番'] || row['Model'] || '').trim(),
+            category: String(row['カテゴリー'] || row['category'] || row['Category'] || row['分類'] || row['カテゴリ'] || 
+                           row['種別'] || row['Type'] || row['区分'] || row['Classification'] || '').trim(),
+            assetClassification: String(row['資産分類'] || row['assetClassification'] || row['Asset Classification'] || 
+                                       row['資産'] || row['Asset Type'] || row['管理区分'] || '').trim(),
+            price: String(row['価格'] || row['price'] || row['Price'] || row['単価'] || row['Unit Price'] || 
+                         row['金額'] || row['Amount'] || row['Cost'] || '0').replace(/[^0-9.-]/g, '') || '0',
+            lowStockThreshold: parseInt(String(row['最小在庫'] || row['lowStockThreshold'] || row['最小数量'] || 
+                                              row['Low Stock'] || row['安全在庫'] || row['最小値'] || '10').replace(/[^0-9]/g, '')) || 10
           };
 
           // Validate required fields

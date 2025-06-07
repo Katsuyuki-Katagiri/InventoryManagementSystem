@@ -18,13 +18,60 @@ interface ImportResult {
   success: number;
   errors: string[];
   imported: any[];
+  total?: number;
+}
+
+interface AnalysisResult {
+  sheetNames: string[];
+  totalRows: number;
+  headers: string[];
+  sampleRows: any[][];
+  sampleData: any[];
+  columnMapping: {
+    detected: string[];
+    supported: string[];
+  };
 }
 
 export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelImportModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const analysisMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/products/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'ファイル解析に失敗しました');
+      }
+      
+      return response.json();
+    },
+    onSuccess: (result: AnalysisResult) => {
+      setAnalysisResult(result);
+      toast({
+        title: "ファイル解析完了",
+        description: `${result.totalRows}行のデータを検出しました`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "解析エラー",
+        description: error.message || "ファイル解析中にエラーが発生しました",
+        variant: "destructive",
+      });
+    },
+  });
 
   const importMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -85,6 +132,10 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
       
       setSelectedFile(file);
       setImportResult(null);
+      setAnalysisResult(null);
+      
+      // Automatically analyze the file structure
+      analysisMutation.mutate(file);
     }
   };
 
@@ -97,6 +148,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
   const handleClose = () => {
     setSelectedFile(null);
     setImportResult(null);
+    setAnalysisResult(null);
     onClose();
   };
 
