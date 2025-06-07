@@ -6,7 +6,8 @@ import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
-import { eq, and, sql } from "drizzle-orm";
+import { products, inventory, departments, insertProductSchema } from '../shared/medical-schema';
+import { and, eq, sql } from 'drizzle-orm';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure multer for file uploads
@@ -31,7 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products", async (req, res) => {
     try {
       const { search, category } = req.query;
-      
+
       let products;
       if (search) {
         products = await storage.searchProducts(search as string);
@@ -40,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         products = await storage.getProducts();
       }
-      
+
       res.json(products);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -94,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/products", async (req, res) => {
     try {
       const validatedData = insertProductSchema.parse(req.body);
-      
+
       // Check if product code already exists
       const existingProduct = await storage.getProductByCode(validatedData.productCode);
       if (existingProduct) {
@@ -124,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const validatedData = updateProductSchema.parse(req.body);
-      
+
       // If updating product code, check if it's already taken by another product
       if (validatedData.productCode) {
         const existingProduct = await storage.getProductByCode(validatedData.productCode);
@@ -214,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('File received:', req.file.originalname, 'Size:', req.file.size);
 
       let data: any[] = [];
-      
+
       try {
         // Parse Excel file with comprehensive options
         const workbook = XLSX.read(req.file.buffer, { 
@@ -225,26 +226,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           raw: false,
           codepage: 65001 // UTF-8
         });
-        
+
         const sheetName = workbook.SheetNames[0];
         if (!sheetName) {
           return res.status(400).json({ message: "Excelファイルにシートが見つかりません" });
         }
-        
+
         console.log('Available sheets:', workbook.SheetNames);
         console.log('Processing sheet:', sheetName);
-        
+
         const worksheet = workbook.Sheets[sheetName];
-        
+
         // First try with JSON conversion to get column names
         const jsonData = XLSX.utils.sheet_to_json(worksheet, {
           defval: "",
           blankrows: false,
           raw: false
         });
-        
+
         console.log('Raw JSON data length:', jsonData.length);
-        
+
         if (jsonData.length === 0) {
           return res.status(400).json({ message: "Excelファイルにデータが見つかりません" });
         }
@@ -252,9 +253,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Log detected columns
         const detectedColumns = Object.keys(jsonData[0] || {});
         console.log('Detected columns:', detectedColumns);
-        
+
         data = jsonData;
-        
+
       } catch (parseError: any) {
         console.error("Excel parsing error:", parseError);
         return res.status(400).json({ 
@@ -335,7 +336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             results.errors.push(`行 ${i + 2}: 製品名は必須です (製品名列が空です)`);
             continue;
           }
-          
+
           if (!productData.productCode) {
             results.errors.push(`行 ${i + 2}: 商品コードは必須です (商品コード列が空です)`);
             continue;
@@ -349,7 +350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Check if product code already exists
           let existingProduct = await storage.getProductByCode(productData.productCode);
           let productToUse;
-          
+
           if (existingProduct) {
             // Product already exists, use the existing product
             productToUse = existingProduct;
@@ -357,36 +358,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else {
             // Validate the data using schema
             const validatedData = insertProductSchema.parse(productData);
-            
+
             // Create new product
             productToUse = await storage.createProduct(validatedData);
             console.log(`Created new product ${productData.productCode} with ID: ${productToUse.id}`);
           }
-          
+
           // Enhanced quantity extraction with more column variations
           const quantityStr = findColumnValue(row,
             '当月末総在庫数', '当月末在庫数合計', '在庫数', '在庫量', 'Quantity',
             '数量', '個数', '本数', '枚数', '総在庫', '現在庫'
           );
-          
+
           console.log(`Row ${i + 1} quantity extraction:`, {
             rawValue: quantityStr,
             availableColumns: Object.keys(row)
           });
-          
+
           const monthEndQuantity = parseInt(quantityStr.replace(/[^\d]/g, '')) || 0;
           const lotNumber = findColumnValue(row,
             'ロット番号', 'ロット', 'Lot Number', 'LOT', 
             'バッチ番号', 'Batch', 'ロット・番号'
           ) || '-';
-          
+
           // Enhanced expiry date extraction
           let expiryDate = null;
           const expiryValue = findColumnValue(row,
             '有効期限', '使用期限', 'Expiry Date', 'Expiration Date',
             '期限', '満了日', '失効日'
           );
-          
+
           if (expiryValue) {
             try {
               if (expiryValue instanceof Date) {
@@ -411,24 +412,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
               expiryDate = null;
             }
           }
-          
+
+          // Get or create department based on the Excel data
+          const departmentCode = String(row['部門コード'] || '0701');
+          const departmentName = String(row['部門名'] || 'デフォルト部門');
+
+          let department = await db
+            .select()
+            .from(departments)
+            .where(eq(departments.code, departmentCode))
+            .limit(1);
+
+          if (department.length === 0) {
+            // Create new department
+            const newDepartment = await db
+              .insert(departments)
+              .values({
+                name: departmentName,
+                code: departmentCode,
+                description: `${departmentName} - ${String(row['事業所名'] || '')}`,
+                isActive: true
+              })
+              .returning();
+            department = newDepartment;
+            console.log(`Created new department: ${departmentName} (${departmentCode})`);
+          }
+
+          const departmentId = department[0].id;
+
           // Check if this exact inventory record (product + lot + expiry) already exists
           let whereConditions = [
             eq(inventory.productId, productToUse.id),
             eq(inventory.lotNumber, lotNumber)
           ];
-          
+
           if (expiryDate) {
             whereConditions.push(eq(inventory.expiryDate, expiryDate));
           } else {
             whereConditions.push(sql`${inventory.expiryDate} IS NULL`);
           }
-          
+
           const existingInventory = await db
             .select()
             .from(inventory)
             .where(and(...whereConditions));
-          
+
           // Skip if quantity is 0 or negative
           if (monthEndQuantity <= 0) {
             console.log(`Skipping row ${i + 2}: quantity is ${monthEndQuantity}`);
@@ -439,7 +467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Update existing inventory quantity
             const currentQuantity = existingInventory[0].quantity || 0;
             const newQuantity = currentQuantity + monthEndQuantity;
-            
+
             await db
               .update(inventory)
               .set({ 
@@ -447,13 +475,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 updatedAt: new Date()
               })
               .where(eq(inventory.id, existingInventory[0].id));
-              
+
             console.log(`Updated inventory for product ${productData.productCode}, lot ${lotNumber}: ${currentQuantity} + ${monthEndQuantity} = ${newQuantity}`);
           } else {
             // Create new inventory record with enhanced field mapping
             const inventoryData = {
               productId: productToUse.id,
-              departmentId: 1, // Default department
+              departmentId: departmentId,
               quantity: monthEndQuantity,
               lotNumber: lotNumber,
               expiryDate: expiryDate,
@@ -475,14 +503,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ) || null,
               inventoryMonth: "2025-04",
             };
-            
+
             console.log(`Creating inventory record for ${productData.productCode}:`, {
               quantity: monthEndQuantity,
               lotNumber: lotNumber,
               expiryDate: expiryDate,
               storageLocation: inventoryData.storageLocation
             });
-            
+
             try {
               await db.insert(inventory).values(inventoryData);
               console.log(`Created new inventory record for product ${productData.productCode}, lot ${lotNumber}, quantity: ${monthEndQuantity}`);
@@ -492,7 +520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               continue;
             }
           }
-          
+
           results.success++;
           if (!existingProduct) {
             results.imported.push(productToUse);
