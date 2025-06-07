@@ -458,7 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               .where(and(
                 eq(inventory.productId, productToUse.id),
                 eq(inventory.lotNumber, lotNumber),
-                sql`${inventory.expiryDate} IS NULL`
+                eq(inventory.expiryDate, null)
               ));
           }
 
