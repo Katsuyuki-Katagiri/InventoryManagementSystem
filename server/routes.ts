@@ -6,7 +6,7 @@ import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
 import { medicalProducts, inventory, departments, insertMedicalProductSchema } from '../shared/medical-schema';
-import { eq, and, sql, isNull } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure multer for file uploads
@@ -415,46 +415,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Get or create department based on the Excel data
           const departmentCode = String(row['部門コード'] || '0701');
           const departmentName = String(row['部門名'] || 'デフォルト部門');
+          const facilityCode = String(row['事業所コード'] || '0700');
+          const facilityName = String(row['事業所名'] || 'デフォルト事業所');
 
-          let department = await db
+          // First, get or create facility
+          let facility = await db
             .select()
             .from(departments)
-            .where(eq(departments.code, departmentCode))
+            .where(eq(departments.departmentCode, departmentCode))
             .limit(1);
 
-          if (department.length === 0) {
-            // Create new department
+          if (facility.length === 0) {
+            // Create new department (simplified approach)
             const newDepartment = await db
               .insert(departments)
               .values({
-                name: departmentName,
-                code: departmentCode,
-                description: `${departmentName} - ${String(row['事業所名'] || '')}`,
-                isActive: true
+                departmentName: departmentName,
+                departmentCode: departmentCode,
+                facilityId: 1, // Default facility ID
+                isActive: 1
               })
               .returning();
-            department = newDepartment;
+            facility = newDepartment;
             console.log(`Created new department: ${departmentName} (${departmentCode})`);
           }
 
-          const departmentId = department[0].id;
+          const departmentId = facility[0].id;
 
           // Check if this exact inventory record (product + lot + expiry) already exists
-          const whereConditions = [
-            eq(inventory.productId, productToUse.id),
-            eq(inventory.lotNumber, lotNumber)
-          ];
-
+          let existingInventory;
+          
           if (expiryDate) {
-            whereConditions.push(eq(inventory.expiryDate, expiryDate));
+            existingInventory = await db
+              .select()
+              .from(inventory)
+              .where(and(
+                eq(inventory.productId, productToUse.id),
+                eq(inventory.lotNumber, lotNumber),
+                eq(inventory.expiryDate, expiryDate)
+              ));
           } else {
-            whereConditions.push(isNull(inventory.expiryDate));
+            existingInventory = await db
+              .select()
+              .from(inventory)
+              .where(and(
+                eq(inventory.productId, productToUse.id),
+                eq(inventory.lotNumber, lotNumber),
+                sql`${inventory.expiryDate} IS NULL`
+              ));
           }
-
-          const existingInventory = await db
-            .select()
-            .from(inventory)
-            .where(and(...whereConditions));
 
           // Skip if quantity is 0 or negative
           if (monthEndQuantity <= 0) {
