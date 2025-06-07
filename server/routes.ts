@@ -302,6 +302,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Create the product
           const newProduct = await storage.createProduct(validatedData);
+          
+          // Create inventory record with monthly tracking
+          if (row['在庫数'] || row['数量'] || row['quantity']) {
+            const inventoryData = {
+              productId: newProduct.id,
+              departmentId: 1, // Default department
+              quantity: parseInt(row['在庫数'] || row['数量'] || row['quantity'] || '0'),
+              lotNumber: row['LOT'] || row['ロット番号'] || '-',
+              expiryDate: row['UBD'] || row['有効期限'] ? new Date(row['UBD'] || row['有効期限']) : null,
+              storageLocation: row['保管場所'] || row['storage_location'] || null,
+              shipmentDate: row['出荷伝票日付'] || row['shipment_date'] ? new Date(row['出荷伝票日付'] || row['shipment_date']) : null,
+              shipmentNumber: row['出荷伝票№'] || row['shipment_number'] || null,
+              facilityName: row['施設名'] || row['facility_name'] || null,
+              responsiblePerson: row['担当者名'] || row['responsible_person'] || null,
+              remarks: row['備考'] || row['remarks'] || null,
+              inventoryMonth: "2025-04", // Default to April 2025
+            };
+            
+            await db.insert(inventory).values(inventoryData);
+          }
+          
           results.success++;
           results.imported.push(newProduct);
 
