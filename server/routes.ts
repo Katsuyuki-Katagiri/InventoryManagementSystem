@@ -240,49 +240,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         imported: [] as any[]
       };
 
+      console.log('Total rows:', data.length);
+      if (data.length > 0) {
+        console.log('Sample row data:', data[0]);
+        console.log('Available columns:', Object.keys(data[0] || {}));
+      }
+
       // Process each row
       for (let i = 0; i < data.length; i++) {
         const row = data[i] as any;
         try {
           // Skip empty rows
           if (!row || Object.keys(row).length === 0) {
+            console.log(`Skipping empty row ${i + 1}`);
             continue;
           }
 
-          // Map Excel columns to medical device schema with comprehensive column name support
+          console.log(`Processing row ${i + 1}:`, row);
+
+          // Map Excel columns based on your template structure
           const productData = {
-            productCode: String(row['商品コード'] || row['productCode'] || row['コード'] || row['SKU'] || row['Product Code'] || 
-                               row['商品番号'] || row['品番'] || row['Item Code'] || row['製品コード'] || '').trim(),
-            genericName: String(row['一般名'] || row['genericName'] || row['商品名'] || row['name'] || row['Name'] || 
-                               row['Generic Name'] || row['品名'] || row['製品名'] || row['Product Name'] || 
-                               row['医療機器名'] || row['機器名'] || '').trim(),
-            commercialName: String(row['販売名'] || row['commercialName'] || row['Commercial Name'] || row['販売名称'] || 
-                                  row['商品名'] || row['Trade Name'] || '').trim(),
-            specification: String(row['規格'] || row['specification'] || row['仕様'] || row['Specification'] || row['specs'] || 
-                                 row['サイズ'] || row['Size'] || row['型番'] || row['Model'] || '').trim(),
-            category: String(row['カテゴリー'] || row['category'] || row['Category'] || row['分類'] || row['カテゴリ'] || 
-                           row['種別'] || row['Type'] || row['区分'] || row['Classification'] || '').trim(),
-            assetClassification: String(row['資産分類'] || row['assetClassification'] || row['Asset Classification'] || 
-                                       row['資産'] || row['Asset Type'] || row['管理区分'] || '').trim(),
-            price: String(row['価格'] || row['price'] || row['Price'] || row['単価'] || row['Unit Price'] || 
-                         row['金額'] || row['Amount'] || row['Cost'] || '0').replace(/[^0-9.-]/g, '') || '0',
-            lowStockThreshold: parseInt(String(row['最小在庫'] || row['lowStockThreshold'] || row['最小数量'] || 
-                                              row['Low Stock'] || row['安全在庫'] || row['最小値'] || '10').replace(/[^0-9]/g, '')) || 10
+            productCode: String(row['商品コード'] || row['コード'] || row['製品コード'] || row['product_code'] || '').trim(),
+            genericName: String(row['製品名'] || row['一般名'] || row['商品名'] || row['generic_name'] || row['name'] || '').trim(),
+            commercialName: String(row['販売名'] || row['商標名'] || row['commercial_name'] || '').trim(),
+            category: String(row['品種名'] || row['カテゴリー'] || row['category'] || row['分類'] || '医療機器').trim(),
+            manufacturer: String(row['製造元'] || row['メーカー'] || row['manufacturer'] || '').trim(),
+            model: String(row['型番'] || row['モデル'] || row['model'] || '').trim(),
+            standardPrice: parseFloat(String(row['標準価格'] || row['価格'] || row['standard_price'] || '0').replace(/[^0-9.-]/g, '')) || 0,
+            lowStockThreshold: parseInt(String(row['最低在庫数'] || row['安全在庫'] || row['low_stock_threshold'] || '10').replace(/[^0-9]/g, '')) || 10,
+            isActive: 1
           };
+
+          console.log(`Mapped product data:`, productData);
 
           // Validate required fields
           if (!productData.genericName) {
-            results.errors.push(`行 ${i + 2}: 一般名は必須です (列: 一般名, genericName, 商品名, name のいずれか)`);
+            results.errors.push(`行 ${i + 2}: 製品名は必須です (製品名列が空です)`);
             continue;
           }
           
           if (!productData.productCode) {
-            results.errors.push(`行 ${i + 2}: 商品コードは必須です (列: 商品コード, productCode, コード, SKU のいずれか)`);
-            continue;
-          }
-
-          if (!productData.category) {
-            results.errors.push(`行 ${i + 2}: カテゴリーは必須です (列: カテゴリー, category, Category, 分類 のいずれか)`);
+            results.errors.push(`行 ${i + 2}: 商品コードは必須です (商品コード列が空です)`);
             continue;
           }
 
