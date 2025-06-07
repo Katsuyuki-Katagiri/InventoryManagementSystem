@@ -5,7 +5,7 @@ import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
-import { medicalProducts, inventory, departments, insertMedicalProductSchema } from '../shared/medical-schema';
+import { medicalProducts, inventory, departments, facilities, insertMedicalProductSchema } from '../shared/medical-schema';
 import { eq, and, sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -213,6 +213,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('File received:', req.file.originalname, 'Size:', req.file.size);
 
+      // Ensure default facility exists
+      const defaultFacilities = await db.select().from(facilities).limit(1);
+      if (defaultFacilities.length === 0) {
+        console.log('Creating default facility...');
+        await db.insert(facilities).values({
+          facilityCode: '0700',
+          facilityName: 'デフォルト事業所',
+          address: null,
+          phone: null,
+          isActive: 1
+        });
+        console.log('Default facility created');
+      }
+
       let data: any[] = [];
 
       try {
@@ -412,35 +426,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
 
-          // Get or create department based on the Excel data
+          // Get or create facility and department based on the Excel data
           const departmentCode = String(row['部門コード'] || '0701');
           const departmentName = String(row['部門名'] || 'デフォルト部門');
           const facilityCode = String(row['事業所コード'] || '0700');
           const facilityName = String(row['事業所名'] || 'デフォルト事業所');
 
+          console.log(`Processing facility: ${facilityName} (${facilityCode}), department: ${departmentName} (${departmentCode})`);
+
           // First, get or create facility
-          let facility = await db
+          let existingFacility = await db
             .select()
-            .from(departments)
-            .where(eq(departments.departmentCode, departmentCode))
+            .from(facilities)
+            .where(eq(facilities.facilityCode, facilityCode))
             .limit(1);
 
-          if (facility.length === 0) {
-            // Create new department (simplified approach)
-            const newDepartment = await db
-              .insert(departments)
+          let facilityId: number;
+          if (existingFacility.length === 0) {
+            // Create new facility
+            console.log(`Creating new facility: ${facilityName} (${facilityCode})`);
+            const newFacility = await db
+              .insert(facilities)
               .values({
-                departmentName: departmentName,
-                departmentCode: departmentCode,
-                facilityId: 1, // Default facility ID
+                facilityCode: facilityCode,
+                facilityName: facilityName,
+                address: null,
+                phone: null,
                 isActive: 1
               })
               .returning();
-            facility = newDepartment;
-            console.log(`Created new department: ${departmentName} (${departmentCode})`);
+            facilityId = newFacility[0].id;
+            console.log(`Created new facility with ID: ${facilityId}`);
+          } else {
+            facilityId = existingFacility[0].id;
+            console.log(`Using existing facility ID: ${facilityId}`);
           }
 
-          const departmentId = facility[0].id;
+          // Now get or create department
+          let existingDepartment = await db
+            .select()
+            .from(departments)
+            .where(and(
+              eq(departments.departmentCode, departmentCode),
+              eq(departments.facilityId, facilityId)
+            ))
+            .limit(1);
+
+          let departmentId: number;
+          if (existingDepartment.length === 0) {
+            // Create new department
+            console.log(`Creating new department: ${departmentName} (${departmentCode}) for facility ${facilityId}`);
+            const newDepartment = await db
+              .insert(departments)
+              .values({
+                departmentCode: departmentCode,
+                departmentName: departmentName,
+                facilityId: facilityId,
+                isActive: 1
+              })
+              .returning();
+            departmentId = newDepartment[0].id;
+            console.log(`Created new department with ID: ${departmentId}`);
+          } else {
+            departmentId = existingDepartment[0].id;
+            console.log(`Using existing department ID: ${departmentId}`);
+          }
 
           // Check if this exact inventory record (product + lot + expiry) already exists
           let existingInventory;
@@ -536,9 +586,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         } catch (error: any) {
           console.error(`Row ${i + 2} processing error:`, error);
+          console.error('Error details:', {
+            code: error.code,
+            detail: error.detail,
+            constraint: error.constraint,
+            table: error.table
+          });
+          
           if (error instanceof z.ZodError) {
             const fieldErrors = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
             results.errors.push(`行 ${i + 2}: バリデーションエラー - ${fieldErrors}`);
+          } else if (error.code === '23503') {
+            // Foreign key constraint violation
+            results.errors.push(`行 ${i + 2}: データベース制約エラー - 関連するマスターデータが見つかりません (${error.detail})`);
           } else {
             results.errors.push(`行 ${i + 2}: ${error.message || 'データの処理中にエラーが発生しました'}`);
           }

@@ -1,18 +1,18 @@
+import { db } from "./db";
 import { 
-  products, 
-  inventory,
+  medicalProducts as products, 
+  inventory, 
   departments,
   facilities,
-  type Product, 
-  type InsertProduct, 
-  type UpdateProduct,
+  stockMovements,
+  type MedicalProduct as Product, 
+  type InsertMedicalProduct as InsertProduct,
   type Inventory,
   type Department,
   type InsertDepartment,
   type Facility,
   type InsertFacility
-} from "@shared/schema";
-import { db } from "./db";
+} from "../shared/medical-schema";
 import { eq, like, ilike, or, sum, count, sql, desc, and } from "drizzle-orm";
 
 export interface IStorage {
@@ -25,7 +25,7 @@ export interface IStorage {
   deleteProduct(id: number): Promise<boolean>;
   searchProducts(query: string): Promise<Product[]>;
   getProductsByCategory(category: string): Promise<Product[]>;
-  
+
   // Inventory operations  
   getInventoryByProduct(productId: number): Promise<Inventory[]>;
   createInventory(inventory: any): Promise<Inventory>;
@@ -45,7 +45,7 @@ export interface IStorage {
   getDepartmentsByFacility(facilityId: number): Promise<Department[]>;
   createDepartment(department: InsertDepartment): Promise<Department>;
   updateDepartment(id: number, updates: Partial<Department>): Promise<Department | undefined>;
-  
+
   // Facility operations
   getFacilities(): Promise<Facility[]>;
   getFacilityById(id: number): Promise<Facility | undefined>;
@@ -164,11 +164,11 @@ export class DatabaseStorage implements IStorage {
 
     inventoryWithProducts.forEach(item => {
       totalValue += Number(item.price) * item.quantity;
-      
+
       // Sum quantities by product
       const currentTotal = productTotals.get(item.productId) || 0;
       productTotals.set(item.productId, currentTotal + item.quantity);
-      
+
       // Check for expiring items (within 30 days)
       if (item.expiryDate) {
         const thirtyDaysFromNow = new Date();
