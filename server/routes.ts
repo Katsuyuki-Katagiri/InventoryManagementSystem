@@ -324,7 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               inventoryMonth: "2025-04", // Default to April 2025
             };
             
-            await storage.createInventory(inventoryData);
+            await db.insert(inventory).values(inventoryData);
           }
           
           results.success++;

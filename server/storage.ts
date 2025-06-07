@@ -125,6 +125,11 @@ export class DatabaseStorage implements IStorage {
       .where(eq(inventory.productId, productId));
   }
 
+  async createInventory(inventoryData: any): Promise<Inventory> {
+    const [newInventory] = await db.insert(inventory).values(inventoryData).returning();
+    return newInventory;
+  }
+
   async getInventoryStats(): Promise<{
     totalProducts: number;
     lowStockItems: number;
