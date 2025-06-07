@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import StatsCards from "@/components/inventory/stats-cards";
 import InventoryTable from "@/components/inventory/inventory-table";
+import MonthlySelector from "@/components/inventory/monthly-selector";
 import AddProductModal from "@/components/inventory/add-product-modal";
 import EditProductModal from "@/components/inventory/edit-product-modal";
 import ExcelImportModal from "@/components/inventory/excel-import-modal";

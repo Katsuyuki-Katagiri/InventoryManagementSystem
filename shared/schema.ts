@@ -47,8 +47,27 @@ export const inventory = pgTable("inventory", {
   facilityName: text("facility_name"),
   responsiblePerson: text("responsible_person"),
   remarks: text("remarks"),
+  inventoryMonth: text("inventory_month").default("2025-04"), // YYYY-MM format for monthly tracking
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// 月次在庫履歴テーブル
+export const monthlyInventory = pgTable("monthly_inventory", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull().references(() => products.id),
+  departmentId: integer("department_id").notNull().references(() => departments.id),
+  inventoryMonth: text("inventory_month").notNull(), // YYYY-MM format
+  quantity: integer("quantity").notNull().default(0),
+  lotNumber: text("lot_number"),
+  expiryDate: timestamp("expiry_date"),
+  storageLocation: text("storage_location"),
+  shipmentDate: timestamp("shipment_date"),
+  shipmentNumber: text("shipment_number"),
+  facilityName: text("facility_name"),
+  responsiblePerson: text("responsible_person"),
+  remarks: text("remarks"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // 入出庫履歴テーブル
@@ -133,6 +152,11 @@ export const insertInventorySchema = createInsertSchema(inventory).omit({
   updatedAt: true,
 });
 
+export const insertMonthlyInventorySchema = createInsertSchema(monthlyInventory).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertStockMovementSchema = createInsertSchema(stockMovements).omit({
   id: true,
   createdAt: true,
@@ -151,6 +175,9 @@ export type InsertDepartment = z.infer<typeof insertDepartmentSchema>;
 
 export type Inventory = typeof inventory.$inferSelect;
 export type InsertInventory = z.infer<typeof insertInventorySchema>;
+
+export type MonthlyInventory = typeof monthlyInventory.$inferSelect;
+export type InsertMonthlyInventory = z.infer<typeof insertMonthlyInventorySchema>;
 
 export type StockMovement = typeof stockMovements.$inferSelect;
 export type InsertStockMovement = z.infer<typeof insertStockMovementSchema>;
