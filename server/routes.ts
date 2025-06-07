@@ -93,10 +93,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertProductSchema.parse(req.body);
       
-      // Check if SKU already exists
-      const existingProduct = await storage.getProductBySku(validatedData.sku);
+      // Check if product code already exists
+      const existingProduct = await storage.getProductByCode(validatedData.productCode);
       if (existingProduct) {
-        return res.status(409).json({ message: "Product with this SKU already exists" });
+        return res.status(409).json({ message: "Product with this code already exists" });
       }
 
       const product = await storage.createProduct(validatedData);
@@ -123,11 +123,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const validatedData = updateProductSchema.parse(req.body);
       
-      // If updating SKU, check if it's already taken by another product
-      if (validatedData.sku) {
-        const existingProduct = await storage.getProductBySku(validatedData.sku);
+      // If updating product code, check if it's already taken by another product
+      if (validatedData.productCode) {
+        const existingProduct = await storage.getProductByCode(validatedData.productCode);
         if (existingProduct && existingProduct.id !== id) {
-          return res.status(409).json({ message: "Product with this SKU already exists" });
+          return res.status(409).json({ message: "Product with this code already exists" });
         }
       }
 
@@ -192,27 +192,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       for (let i = 0; i < data.length; i++) {
         const row = data[i] as any;
         try {
-          // Map Excel columns to our schema (flexible column mapping)
+          // Map Excel columns to medical device schema
           const productData = {
-            name: row['商品名'] || row['name'] || row['Name'] || row['製品名'],
-            sku: row['SKU'] || row['sku'] || row['商品コード'] || row['コード'],
+            productCode: row['商品コード'] || row['productCode'] || row['コード'] || row['SKU'],
+            genericName: row['一般名'] || row['genericName'] || row['商品名'] || row['name'],
+            commercialName: row['販売名'] || row['commercialName'] || row['商品名'] || row['name'],
+            specification: row['規格'] || row['specification'] || row['仕様'],
             category: row['カテゴリー'] || row['category'] || row['Category'] || row['分類'],
-            quantity: parseInt(row['在庫数'] || row['quantity'] || row['Quantity'] || row['数量']) || 0,
+            assetClassification: row['資産分類'] || row['assetClassification'] || row['分類'],
             price: String(row['価格'] || row['price'] || row['Price'] || row['単価'] || 0),
-            description: row['説明'] || row['description'] || row['Description'] || row['備考'] || "",
             lowStockThreshold: parseInt(row['最小在庫'] || row['lowStockThreshold'] || row['最小数量']) || 10
           };
 
           // Validate required fields
-          if (!productData.name || !productData.sku) {
-            results.errors.push(`行 ${i + 2}: 商品名とSKUは必須です`);
+          if (!productData.genericName || !productData.productCode) {
+            results.errors.push(`行 ${i + 2}: 一般名と商品コードは必須です`);
             continue;
           }
 
-          // Check if SKU already exists
-          const existingProduct = await storage.getProductBySku(productData.sku);
+          // Check if product code already exists  
+          const existingProduct = await storage.getProductByCode(productData.productCode);
           if (existingProduct) {
-            results.errors.push(`行 ${i + 2}: SKU "${productData.sku}" は既に存在します`);
+            results.errors.push(`行 ${i + 2}: 商品コード "${productData.productCode}" は既に存在します`);
             continue;
           }
 

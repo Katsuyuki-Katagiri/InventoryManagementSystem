@@ -1,38 +1,43 @@
 import { 
-  medicalProducts, 
+  products, 
   inventory,
   departments,
   facilities,
-  type MedicalProduct, 
-  type InsertMedicalProduct, 
-  type UpdateMedicalProduct,
-  type Inventory,
-  type InventoryStats
-} from "@shared/medical-schema";
+  type Product, 
+  type InsertProduct, 
+  type UpdateProduct,
+  type Inventory
+} from "@shared/schema";
 import { db } from "./db";
 import { eq, like, ilike, or, sum, count, sql, desc } from "drizzle-orm";
 
 export interface IStorage {
   // Medical Product CRUD operations
-  getProducts(): Promise<MedicalProduct[]>;
-  getProductById(id: number): Promise<MedicalProduct | undefined>;
-  getProductByCode(code: string): Promise<MedicalProduct | undefined>;
-  createProduct(product: InsertMedicalProduct): Promise<MedicalProduct>;
-  updateProduct(id: number, updates: UpdateMedicalProduct): Promise<MedicalProduct | undefined>;
+  getProducts(): Promise<Product[]>;
+  getProductById(id: number): Promise<Product | undefined>;
+  getProductByCode(code: string): Promise<Product | undefined>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, updates: UpdateProduct): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
-  searchProducts(query: string): Promise<MedicalProduct[]>;
-  getProductsByCategory(category: string): Promise<MedicalProduct[]>;
+  searchProducts(query: string): Promise<Product[]>;
+  getProductsByCategory(category: string): Promise<Product[]>;
   
   // Inventory operations  
   getInventoryByProduct(productId: number): Promise<Inventory[]>;
-  getTotalInventoryStats(): Promise<InventoryStats>;
+  getInventoryStats(): Promise<{
+    totalProducts: number;
+    lowStockItems: number;
+    expiringSoonItems: number;
+    totalValue: number;
+    categories: number;
+  }>;
   getExpiringProducts(days: number): Promise<any[]>;
   getLowStockProducts(): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
   async getProducts(): Promise<Product[]> {
-    return await db.select().from(products);
+    return await db.select().from(products).where(eq(products.isActive, 1));
   }
 
   async getProductById(id: number): Promise<Product | undefined> {
@@ -40,8 +45,8 @@ export class DatabaseStorage implements IStorage {
     return product || undefined;
   }
 
-  async getProductBySku(sku: string): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.sku, sku));
+  async getProductByCode(code: string): Promise<Product | undefined> {
+    const [product] = await db.select().from(products).where(eq(products.productCode, code));
     return product || undefined;
   }
 
@@ -63,50 +68,139 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProduct(id: number): Promise<boolean> {
-    const result = await db.delete(products).where(eq(products.id, id));
+    // Soft delete by setting isActive to 0
+    const result = await db
+      .update(products)
+      .set({ isActive: 0 })
+      .where(eq(products.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
 
   async searchProducts(query: string): Promise<Product[]> {
-    const allProducts = await db.select().from(products);
-    const lowercaseQuery = query.toLowerCase();
-    return allProducts.filter(product =>
-      product.name.toLowerCase().includes(lowercaseQuery) ||
-      product.sku.toLowerCase().includes(lowercaseQuery) ||
-      product.description?.toLowerCase().includes(lowercaseQuery)
-    );
+    return await db
+      .select()
+      .from(products)
+      .where(
+        or(
+          ilike(products.genericName, `%${query}%`),
+          ilike(products.commercialName, `%${query}%`),
+          ilike(products.productCode, `%${query}%`),
+          ilike(products.specification, `%${query}%`)
+        )
+      );
   }
 
   async getProductsByCategory(category: string): Promise<Product[]> {
-    return await db.select().from(products).where(eq(products.category, category));
+    return await db
+      .select()
+      .from(products)
+      .where(eq(products.category, category));
   }
 
-  async getLowStockProducts(): Promise<Product[]> {
-    const allProducts = await db.select().from(products);
-    return allProducts.filter(product =>
-      product.quantity <= product.lowStockThreshold
-    );
+  async getInventoryByProduct(productId: number): Promise<Inventory[]> {
+    return await db
+      .select()
+      .from(inventory)
+      .where(eq(inventory.productId, productId));
   }
 
   async getInventoryStats(): Promise<{
     totalProducts: number;
     lowStockItems: number;
+    expiringSoonItems: number;
     totalValue: number;
     categories: number;
   }> {
-    const allProducts = await db.select().from(products);
-    const lowStockProducts = await this.getLowStockProducts();
-    const totalValue = allProducts.reduce((sum, product) => 
-      sum + (parseFloat(product.price) * product.quantity), 0
-    );
-    const categories = new Set(allProducts.map(product => product.category)).size;
+    const [productStats] = await db
+      .select({
+        totalProducts: count(),
+        categories: count(sql`DISTINCT ${products.category}`)
+      })
+      .from(products)
+      .where(eq(products.isActive, 1));
+
+    const inventoryWithProducts = await db
+      .select({
+        productId: inventory.productId,
+        quantity: inventory.quantity,
+        price: products.price,
+        lowStockThreshold: products.lowStockThreshold,
+        expiryDate: inventory.expiryDate
+      })
+      .from(inventory)
+      .innerJoin(products, eq(inventory.productId, products.id));
+
+    // Calculate total value and low stock items
+    let totalValue = 0;
+    let lowStockItems = 0;
+    let expiringSoonItems = 0;
+    const productTotals = new Map<number, number>();
+
+    inventoryWithProducts.forEach(item => {
+      totalValue += Number(item.price) * item.quantity;
+      
+      // Sum quantities by product
+      const currentTotal = productTotals.get(item.productId) || 0;
+      productTotals.set(item.productId, currentTotal + item.quantity);
+      
+      // Check for expiring items (within 30 days)
+      if (item.expiryDate) {
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+        if (new Date(item.expiryDate) <= thirtyDaysFromNow) {
+          expiringSoonItems++;
+        }
+      }
+    });
+
+    // Count low stock products
+    inventoryWithProducts.forEach(item => {
+      const totalQuantity = productTotals.get(item.productId) || 0;
+      if (totalQuantity <= item.lowStockThreshold) {
+        lowStockItems++;
+      }
+    });
 
     return {
-      totalProducts: allProducts.length,
-      lowStockItems: lowStockProducts.length,
+      totalProducts: productStats.totalProducts || 0,
+      lowStockItems,
+      expiringSoonItems,
       totalValue,
-      categories
+      categories: productStats.categories || 0,
     };
+  }
+
+  async getExpiringProducts(days: number): Promise<any[]> {
+    return await db
+      .select({
+        id: inventory.id,
+        productName: products.genericName,
+        lotNumber: inventory.lotNumber,
+        expiryDate: inventory.expiryDate,
+        quantity: inventory.quantity
+      })
+      .from(inventory)
+      .innerJoin(products, eq(inventory.productId, products.id))
+      .where(sql`${inventory.expiryDate} <= CURRENT_DATE + INTERVAL '${days} days' AND ${inventory.expiryDate} >= CURRENT_DATE`)
+      .orderBy(inventory.expiryDate);
+  }
+
+  async getLowStockProducts(): Promise<any[]> {
+    const inventoryTotals = await db
+      .select({
+        productId: inventory.productId,
+        totalQuantity: sum(inventory.quantity),
+        productName: products.genericName,
+        productCode: products.productCode,
+        category: products.category,
+        lowStockThreshold: products.lowStockThreshold
+      })
+      .from(inventory)
+      .innerJoin(products, eq(inventory.productId, products.id))
+      .groupBy(inventory.productId, products.genericName, products.productCode, products.category, products.lowStockThreshold)
+      .having(sql`SUM(${inventory.quantity}) <= ${products.lowStockThreshold}`);
+
+    return inventoryTotals;
   }
 }
 
