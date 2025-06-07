@@ -1,7 +1,6 @@
 import express, { type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProductSchema, updateProductSchema, inventory } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
@@ -441,21 +440,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const departmentId = department[0].id;
 
           // Check if this exact inventory record (product + lot + expiry) already exists
-          let whereConditions = [
-            eq(inventory.productId, productToUse.id),
-            eq(inventory.lotNumber, lotNumber)
-          ];
-
+          let existingInventory;
+          
           if (expiryDate) {
-            whereConditions.push(eq(inventory.expiryDate, expiryDate));
+            existingInventory = await db
+              .select()
+              .from(inventory)
+              .where(and(
+                eq(inventory.productId, productToUse.id),
+                eq(inventory.lotNumber, lotNumber),
+                eq(inventory.expiryDate, expiryDate)
+              ));
           } else {
-            whereConditions.push(sql`${inventory.expiryDate} IS NULL`);
+            existingInventory = await db
+              .select()
+              .from(inventory)
+              .where(and(
+                eq(inventory.productId, productToUse.id),
+                eq(inventory.lotNumber, lotNumber),
+                sql`${inventory.expiryDate} IS NULL`
+              ));
           }
-
-          const existingInventory = await db
-            .select()
-            .from(inventory)
-            .where(and(...whereConditions));
 
           // Skip if quantity is 0 or negative
           if (monthEndQuantity <= 0) {
