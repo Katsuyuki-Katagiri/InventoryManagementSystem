@@ -265,6 +265,66 @@ export class DatabaseStorage implements IStorage {
     const [newFacility] = await db.insert(facilities).values(facility).returning();
     return newFacility;
   }
+
+  // Detailed inventory operations
+  async getDetailedInventoryData(): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          id: products.id,
+          productCode: products.productCode,
+          genericName: products.genericName,
+          commercialName: products.commercialName,
+          category: products.category,
+          inventoryId: inventory.id,
+          quantity: inventory.quantity,
+          lotNumber: inventory.lotNumber,
+          expiryDate: inventory.expiryDate,
+          storageLocation: inventory.storageLocation,
+          shipmentDate: inventory.shipmentDate,
+          shipmentNumber: inventory.shipmentNumber,
+          facilityName: inventory.facilityName,
+          responsiblePerson: inventory.responsiblePerson,
+          remarks: inventory.remarks,
+        })
+        .from(products)
+        .leftJoin(inventory, eq(inventory.productId, products.id))
+        .where(eq(products.isActive, 1));
+
+      return result.map(item => ({
+        ...item,
+        quantity: item.quantity || 0,
+        lotNumber: item.lotNumber || "-",
+        expiryDate: item.expiryDate,
+        storageLocation: item.storageLocation,
+        shipmentDate: item.shipmentDate,
+        shipmentNumber: item.shipmentNumber,
+        facilityName: item.facilityName,
+        responsiblePerson: item.responsiblePerson,
+        remarks: item.remarks,
+      }));
+    } catch (error) {
+      console.error("Error getting detailed inventory data:", error);
+      return [];
+    }
+  }
+
+  async updateInventoryItem(id: number, updates: any): Promise<any> {
+    try {
+      const [updatedItem] = await db
+        .update(inventory)
+        .set({
+          ...updates,
+          updatedAt: new Date(),
+        })
+        .where(eq(inventory.id, id))
+        .returning();
+      return updatedItem;
+    } catch (error) {
+      console.error("Error updating inventory item:", error);
+      throw error;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

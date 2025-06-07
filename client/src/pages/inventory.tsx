@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import StatsCards from "@/components/inventory/stats-cards";
-import ProductsTable from "@/components/inventory/products-table";
+import InventoryTable from "@/components/inventory/inventory-table";
 import AddProductModal from "@/components/inventory/add-product-modal";
 import EditProductModal from "@/components/inventory/edit-product-modal";
 import ExcelImportModal from "@/components/inventory/excel-import-modal";
@@ -89,16 +89,8 @@ export default function InventoryPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <StatsCards stats={stats} />
         
-        <ProductsTable
-          products={products}
-          isLoading={isLoading}
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          categoryFilter={categoryFilter}
-          onCategoryChange={handleCategoryChange}
+        <InventoryTable
           onAddProduct={() => setIsAddModalOpen(true)}
-          onEditProduct={handleEditProduct}
-          onRefetch={handleRefetch}
           onImportExcel={() => setIsImportModalOpen(true)}
         />
       </main>

@@ -59,12 +59,15 @@ export default function InventoryTable({ onAddProduct, onImportExcel }: Inventor
   // Update inventory mutation
   const updateInventoryMutation = useMutation({
     mutationFn: async (data: { id: number; updates: Partial<InventoryItem> }) => {
-      const response = await apiRequest(`/api/inventory/${data.id}`, {
+      const response = await fetch(`/api/inventory/${data.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data.updates),
       });
-      return response;
+      if (!response.ok) {
+        throw new Error('Failed to update inventory');
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/inventory/detailed'] });
