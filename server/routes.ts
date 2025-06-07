@@ -289,30 +289,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
             productData.commercialName = productData.genericName;
           }
 
-          // Check if product code already exists  
-          const existingProduct = await storage.getProductByCode(productData.productCode);
+          // Check if product code already exists
+          let existingProduct = await storage.getProductByCode(productData.productCode);
+          let productToUse;
+          
           if (existingProduct) {
-            results.errors.push(`行 ${i + 2}: 商品コード "${productData.productCode}" は既に存在します`);
-            continue;
+            // Product already exists, use the existing product
+            productToUse = existingProduct;
+            console.log(`Product ${productData.productCode} already exists, using existing product ID: ${existingProduct.id}`);
+          } else {
+            // Validate the data using schema
+            const validatedData = insertProductSchema.parse(productData);
+            
+            // Create new product
+            productToUse = await storage.createProduct(validatedData);
+            console.log(`Created new product ${productData.productCode} with ID: ${productToUse.id}`);
           }
-
-          // Validate the data using schema
-          const validatedData = insertProductSchema.parse(productData);
           
-          // Create the product
-          const newProduct = await storage.createProduct(validatedData);
-          
-          // Create inventory record with month-end total from your Excel data
+          // Always create inventory record for each lot/expiry combination
           const monthEndQuantity = parseInt(String(row['当月末総在庫数'] || row['当月末在庫数合計'] || '0'));
+          const lotNumber = String(row['ロット番号'] || '-');
+          const expiryDate = row['有効期限'] ? new Date(row['有効期限']) : null;
           
-          if (monthEndQuantity > 0) {
+          // Check if this exact inventory record (product + lot + expiry) already exists
+          const existingInventory = await db
+            .select()
+            .from(inventory)
+            .where(
+              and(
+                eq(inventory.productId, productToUse.id),
+                eq(inventory.lotNumber, lotNumber),
+                expiryDate ? eq(inventory.expiryDate, expiryDate) : sql`${inventory.expiryDate} IS NULL`
+              )
+            );
+          
+          if (existingInventory.length > 0) {
+            // Update existing inventory quantity
+            const currentQuantity = existingInventory[0].quantity;
+            const newQuantity = currentQuantity + monthEndQuantity;
+            
+            await db
+              .update(inventory)
+              .set({ 
+                quantity: newQuantity,
+                updatedAt: new Date()
+              })
+              .where(eq(inventory.id, existingInventory[0].id));
+              
+            console.log(`Updated inventory for product ${productData.productCode}, lot ${lotNumber}: ${currentQuantity} + ${monthEndQuantity} = ${newQuantity}`);
+          } else {
+            // Create new inventory record
             const inventoryData = {
-              productId: newProduct.id,
+              productId: productToUse.id,
               departmentId: 1, // Default department - will map from 部門コード later
-              quantity: monthEndQuantity, // Use month-end total inventory
-              lotNumber: String(row['ロット番号'] || '-'),
-              expiryDate: row['有効期限'] ? new Date(row['有効期限']) : null,
-              storageLocation: String(row['事業所名'] || ''), // Use facility as storage location
+              quantity: monthEndQuantity,
+              lotNumber: lotNumber,
+              expiryDate: expiryDate,
+              storageLocation: String(row['事業所名'] || ''),
               shipmentDate: null,
               shipmentNumber: null,
               facilityName: String(row['事業所名'] || ''),
@@ -322,10 +355,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
             
             await db.insert(inventory).values(inventoryData);
+            console.log(`Created new inventory record for product ${productData.productCode}, lot ${lotNumber}, quantity: ${monthEndQuantity}`);
           }
           
           results.success++;
-          results.imported.push(newProduct);
+          if (!existingProduct) {
+            results.imported.push(productToUse);
+          }
 
         } catch (error: any) {
           console.error(`Row ${i + 2} processing error:`, error);
