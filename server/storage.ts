@@ -72,7 +72,13 @@ export class MemStorage implements IStorage {
 
     sampleProducts.forEach(product => {
       const id = this.currentId++;
-      const newProduct: Product = { ...product, id };
+      const newProduct: Product = { 
+        ...product, 
+        id,
+        quantity: product.quantity ?? 0,
+        lowStockThreshold: product.lowStockThreshold ?? 10,
+        description: product.description ?? null
+      };
       this.products.set(id, newProduct);
     });
   }
@@ -91,7 +97,13 @@ export class MemStorage implements IStorage {
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const id = this.currentId++;
-    const product: Product = { ...insertProduct, id };
+    const product: Product = { 
+      ...insertProduct, 
+      id,
+      quantity: insertProduct.quantity ?? 0,
+      lowStockThreshold: insertProduct.lowStockThreshold ?? 10,
+      description: insertProduct.description ?? null
+    };
     this.products.set(id, product);
     return product;
   }

@@ -14,7 +14,7 @@ export default function InventoryPage() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const { data: products = [], isLoading, refetch } = useQuery({
-    queryKey: ["/api/products", { search: searchQuery, category: categoryFilter }],
+    queryKey: ["/api/products", { search: searchQuery, category: categoryFilter === "all" ? "" : categoryFilter }],
     enabled: true,
   });
 
@@ -33,6 +33,10 @@ export default function InventoryPage() {
 
   const handleRefetch = () => {
     refetch();
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setCategoryFilter(category === "all" ? "" : category);
   };
 
   return (
@@ -67,7 +71,7 @@ export default function InventoryPage() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           categoryFilter={categoryFilter}
-          onCategoryChange={setCategoryFilter}
+          onCategoryChange={handleCategoryChange}
           onAddProduct={() => setIsAddModalOpen(true)}
           onEditProduct={handleEditProduct}
           onRefetch={handleRefetch}

@@ -108,12 +108,12 @@ export default function ProductsTable({
             </div>
             
             {/* Filter Dropdown */}
-            <Select value={categoryFilter} onValueChange={onCategoryChange}>
+            <Select value={categoryFilter || undefined} onValueChange={onCategoryChange}>
               <SelectTrigger className="w-full sm:w-40">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {PRODUCT_CATEGORIES.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1)}

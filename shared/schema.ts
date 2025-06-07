@@ -15,6 +15,9 @@ export const products = pgTable("products", {
 
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
+}).required({
+  quantity: true,
+  lowStockThreshold: true,
 });
 
 export const updateProductSchema = createInsertSchema(products).omit({
