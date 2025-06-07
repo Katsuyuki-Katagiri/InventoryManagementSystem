@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, FileSpreadsheet, AlertCircle, CheckCircle } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { FileSpreadsheet, Upload, Download, Search, Loader2 } from "lucide-react";
 
 interface ExcelImportModalProps {
   isOpen: boolean;
@@ -44,17 +50,17 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const response = await fetch('/api/products/analyze', {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'ファイル解析に失敗しました');
       }
-      
+
       return response.json();
     },
     onSuccess: (result: AnalysisResult) => {
@@ -77,24 +83,24 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const response = await fetch('/api/products/import', {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'インポートに失敗しました');
       }
-      
+
       return response.json();
     },
     onSuccess: (result: ImportResult) => {
       setImportResult(result);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
-      
+
       if (result.success > 0) {
         toast({
           title: "インポート完了",
@@ -120,7 +126,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/vnd.ms-excel'
       ];
-      
+
       if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
         toast({
           title: "ファイル形式エラー",
@@ -129,11 +135,11 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
         });
         return;
       }
-      
+
       setSelectedFile(file);
       setImportResult(null);
       setAnalysisResult(null);
-      
+
       // Automatically analyze the file structure
       analysisMutation.mutate(file);
     }
@@ -176,13 +182,13 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
         '最小在庫': '100'
       }
     ];
-    
+
     // Convert to CSV with BOM for proper Japanese character display
     const csvContent = '\uFEFF' + [
       ['商品コード', '一般名', '販売名', 'カテゴリー', '規格', '資産分類', '価格', '最小在庫'].join(','),
       ...templateData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
     ].join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -203,7 +209,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
             医療機器データをExcelファイルから一括でインポートできます。テンプレートをダウンロードして正しい形式で入力してください。
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Template Download */}
           <div className="border rounded-lg p-4 bg-blue-50">
@@ -252,7 +258,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
                   </AlertDescription>
                 </Alert>
               )}
-              
+
               {importResult.errors.length > 0 && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
