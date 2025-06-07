@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { FileSpreadsheet, Upload, Download, Search, Loader2 } from "lucide-react";
+import { FileSpreadsheet, Upload, Download, Search, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ExcelImportModalProps {
   isOpen: boolean;
@@ -159,7 +160,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
   };
 
   const downloadTemplate = () => {
-    // Create a medical device template with proper column headers
+    // Create template matching the required Excel format
     const templateData = [
       {
         '商品コード': 'MD001',
@@ -169,7 +170,14 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
         '規格': '20G x 32mm',
         '資産分類': '消耗品',
         '価格': '1500',
-        '最小在庫': '50'
+        '最小在庫': '50',
+        'ロット番号': 'LOT20250101',
+        '有効期限': '2027-12-31',
+        '当月末総在庫数': '100',
+        '保管場所': '中央材料室',
+        '事業所名': '第一病院',
+        '部門名': '手術室',
+        '備考': 'サンプル商品'
       },
       {
         '商品コード': 'MD002',
@@ -179,14 +187,27 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
         '規格': '標準型 150cm',
         '資産分類': '消耗品',
         '価格': '800',
-        '最小在庫': '100'
+        '最小在庫': '100',
+        'ロット番号': 'LOT20250115',
+        '有効期限': '2026-12-31',
+        '当月末総在庫数': '200',
+        '保管場所': '病棟倉庫',
+        '事業所名': '第一病院',
+        '部門名': 'ICU',
+        '備考': 'サンプル商品'
       }
     ];
 
     // Convert to CSV with BOM for proper Japanese character display
+    const headers = [
+      '商品コード', '一般名', '販売名', 'カテゴリー', '規格', '資産分類', 
+      '価格', '最小在庫', 'ロット番号', '有効期限', '当月末総在庫数', 
+      '保管場所', '事業所名', '部門名', '備考'
+    ];
+    
     const csvContent = '\uFEFF' + [
-      ['商品コード', '一般名', '販売名', 'カテゴリー', '規格', '資産分類', '価格', '最小在庫'].join(','),
-      ...templateData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
+      headers.join(','),
+      ...templateData.map(row => headers.map(header => `"${row[header] || ''}"`).join(','))
     ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -306,9 +327,9 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
           <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
             <strong>対応する列名:</strong>
             <br />
-            商品名, SKU, カテゴリー, 在庫数, 価格, 説明, 最小在庫
+            商品コード, 一般名, 販売名, カテゴリー, 規格, 資産分類, 価格, 最小在庫, ロット番号, 有効期限, 当月末総在庫数, 保管場所, 事業所名, 部門名, 備考
             <br />
-            <strong>注意:</strong> 商品名とSKUは必須項目です。
+            <strong>注意:</strong> 商品コード、一般名、販売名、当月末総在庫数は必須項目です。
           </div>
         </div>
       </DialogContent>
