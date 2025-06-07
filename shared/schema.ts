@@ -48,6 +48,7 @@ export const inventory = pgTable("inventory", {
   responsiblePerson: text("responsible_person"),
   remarks: text("remarks"),
   inventoryMonth: text("inventory_month").default("2025-04"), // YYYY-MM format for monthly tracking
+  receivedDate: timestamp("received_date"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -225,7 +225,7 @@ class DatabaseStorage implements IStorage {
   }
 
   async getDetailedInventoryData(month?: string): Promise<any[]> {
-    let query = db
+    const baseQuery = db
       .select({
         id: inventory.id,
         productId: inventory.productId,
@@ -246,20 +246,16 @@ class DatabaseStorage implements IStorage {
         responsiblePerson: inventory.responsiblePerson,
         remarks: inventory.remarks,
         inventoryMonth: inventory.inventoryMonth,
-        receivedDate: inventory.receivedDate,
         departmentId: inventory.departmentId,
-        departmentName: departments.departmentName,
-        facilityId: departments.facilityId
       })
       .from(inventory)
-      .innerJoin(products, eq(inventory.productId, products.id))
-      .leftJoin(departments, eq(inventory.departmentId, departments.id));
+      .innerJoin(products, eq(inventory.productId, products.id));
 
     if (month) {
-      query = query.where(eq(inventory.inventoryMonth, month));
+      return await baseQuery.where(eq(inventory.inventoryMonth, month)).orderBy(desc(inventory.createdAt));
     }
 
-    return await query.orderBy(desc(inventory.receivedDate));
+    return await baseQuery.orderBy(desc(inventory.createdAt));
   }
 
   async updateInventoryItem(id: number, updates: any): Promise<any> {

@@ -23,8 +23,15 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const form = useForm<InsertProduct>({
-    resolver: zodResolver(insertProductSchema),
+  const form = useForm<InsertProduct & { 
+    quantity: number;
+    lotNumber: string;
+    expiryDate: string;
+    storageLocation: string;
+    facilityName: string;
+    responsiblePerson: string;
+    remarks: string;
+  }>({
     defaultValues: {
       productCode: "",
       genericName: "",
@@ -34,6 +41,13 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
       assetClassification: "",
       price: "0",
       lowStockThreshold: 10,
+      quantity: 0,
+      lotNumber: "",
+      expiryDate: "",
+      storageLocation: "",
+      facilityName: "",
+      responsiblePerson: "",
+      remarks: "",
     },
   });
 
