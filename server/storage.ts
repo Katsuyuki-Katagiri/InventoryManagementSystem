@@ -1,31 +1,31 @@
 
 import { db } from "./db";
 import { 
-  medicalProducts, 
+  products, 
   inventory, 
   departments,
   facilities,
   stockMovements,
-  type MedicalProduct, 
-  type InsertMedicalProduct,
+  type Product, 
+  type InsertProduct,
   type Inventory,
   type Department,
   type InsertDepartment,
   type Facility,
   type InsertFacility
-} from "../shared/medical-schema";
+} from "../shared/schema";
 import { eq, like, ilike, or, sum, count, sql, desc, and } from "drizzle-orm";
 
 export interface IStorage {
   // Product CRUD operations
-  getProducts(): Promise<MedicalProduct[]>;
-  getProductById(id: number): Promise<MedicalProduct | undefined>;
-  getProductByCode(code: string): Promise<MedicalProduct | undefined>;
-  createProduct(product: InsertMedicalProduct): Promise<MedicalProduct>;
-  updateProduct(id: number, updates: Partial<MedicalProduct>): Promise<MedicalProduct | undefined>;
+  getProducts(): Promise<Product[]>;
+  getProductById(id: number): Promise<Product | undefined>;
+  getProductByCode(code: string): Promise<Product | undefined>;
+  createProduct(product: InsertProduct): Promise<Product>;
+  updateProduct(id: number, updates: Partial<Product>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
-  searchProducts(query: string): Promise<MedicalProduct[]>;
-  getProductsByCategory(category: string): Promise<MedicalProduct[]>;
+  searchProducts(query: string): Promise<Product[]>;
+  getProductsByCategory(category: string): Promise<Product[]>;
 
   // Inventory operations  
   getInventoryByProduct(productId: number): Promise<Inventory[]>;
