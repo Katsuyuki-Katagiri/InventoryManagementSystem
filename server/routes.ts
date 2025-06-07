@@ -1,3 +1,4 @@
+
 import express, { type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
@@ -5,7 +6,7 @@ import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
-import { medicalProducts, inventory, departments, facilities, insertMedicalProductSchema } from '../shared/medical-schema';
+import { products, inventory, departments, facilities, insertProductSchema } from '../shared/schema';
 import { eq, and, sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -27,21 +28,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       fileSize: 5 * 1024 * 1024 // 5MB limit
     }
   });
+
   // Get all products
   app.get("/api/products", async (req, res) => {
     try {
       const { search, category } = req.query;
 
-      let products;
+      let productsData;
       if (search) {
-        products = await storage.searchProducts(search as string);
+        productsData = await storage.searchProducts(search as string);
       } else if (category) {
-        products = await storage.getProductsByCategory(category as string);
+        productsData = await storage.getProductsByCategory(category as string);
       } else {
-        products = await storage.getProducts();
+        productsData = await storage.getProducts();
       }
 
-      res.json(products);
+      res.json(productsData);
     } catch (error) {
       console.error("Error fetching products:", error);
       res.status(500).json({ message: "Failed to fetch products" });
@@ -93,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new product
   app.post("/api/products", async (req, res) => {
     try {
-      const validatedData = insertMedicalProductSchema.parse(req.body);
+      const validatedData = insertProductSchema.parse(req.body);
 
       // Check if product code already exists
       const existingProduct = await storage.getProductByCode(validatedData.productCode);
@@ -123,7 +125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid product ID" });
       }
 
-      const validatedData = insertMedicalProductSchema.partial().parse(req.body);
+      const validatedData = insertProductSchema.partial().parse(req.body);
 
       // If updating product code, check if it's already taken by another product
       if (validatedData.productCode) {
@@ -220,8 +222,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await db.insert(facilities).values({
           facilityCode: '0700',
           facilityName: 'デフォルト事業所',
-          address: null,
-          phone: null,
           isActive: 1
         });
         console.log('Default facility created');
@@ -370,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`Product ${productData.productCode} already exists, using existing product ID: ${existingProduct.id}`);
           } else {
             // Validate the data using schema
-            const validatedData = insertMedicalProductSchema.parse(productData);
+            const validatedData = insertProductSchema.parse(productData);
 
             // Create new product
             productToUse = await storage.createProduct(validatedData);
@@ -450,8 +450,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               .values({
                 facilityCode: facilityCode,
                 facilityName: facilityName,
-                address: null,
-                phone: null,
                 isActive: 1
               })
               .returning();
