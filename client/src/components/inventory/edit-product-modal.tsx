@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { updateProductSchema, PRODUCT_CATEGORIES, type UpdateProduct, type Product } from "@shared/schema";
+import { updateProductSchema, MEDICAL_DEVICE_CATEGORIES, type UpdateProduct, type Product } from "@shared/schema";
 import { Save } from "lucide-react";
 import { useEffect } from "react";
 
@@ -27,48 +26,58 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
   const form = useForm<UpdateProduct>({
     resolver: zodResolver(updateProductSchema),
     defaultValues: {
-      name: product.name,
-      sku: product.sku,
+      productCode: product.productCode,
+      genericName: product.genericName,
+      commercialName: product.commercialName,
       category: product.category,
-      quantity: product.quantity,
+      specification: product.specification || "",
+      assetClassification: product.assetClassification || "",
       price: product.price,
-      description: product.description || "",
       lowStockThreshold: product.lowStockThreshold,
     },
   });
 
-  // Reset form when product changes
   useEffect(() => {
-    form.reset({
-      name: product.name,
-      sku: product.sku,
-      category: product.category,
-      quantity: product.quantity,
-      price: product.price,
-      description: product.description || "",
-      lowStockThreshold: product.lowStockThreshold,
-    });
+    if (product) {
+      form.reset({
+        productCode: product.productCode,
+        genericName: product.genericName,
+        commercialName: product.commercialName,
+        category: product.category,
+        specification: product.specification || "",
+        assetClassification: product.assetClassification || "",
+        price: product.price,
+        lowStockThreshold: product.lowStockThreshold,
+      });
+    }
   }, [product, form]);
 
   const updateProductMutation = useMutation({
     mutationFn: async (data: UpdateProduct) => {
-      const response = await apiRequest("PUT", `/api/products/${product.id}`, data);
+      const response = await fetch(`/api/products/${product.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to update product");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory/stats"] });
       toast({
-        title: "Success",
-        description: "Product updated successfully",
+        title: "成功",
+        description: "医療機器が正常に更新されました。",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       onSuccess();
       onClose();
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update product",
+        title: "エラー",
+        description: error.message || "医療機器の更新に失敗しました。",
         variant: "destructive",
       });
     },
@@ -80,58 +89,79 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>Edit Product</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Save className="h-5 w-5" />
+            医療機器を編集
+          </DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Product Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter product name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Product Code */}
               <FormField
                 control={form.control}
-                name="sku"
+                name="productCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>SKU</FormLabel>
+                    <FormLabel>商品コード *</FormLabel>
                     <FormControl>
-                      <Input placeholder="SKU-001" {...field} />
+                      <Input placeholder="例: MD001" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
+              {/* Generic Name */}
+              <FormField
+                control={form.control}
+                name="genericName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>一般名 *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="例: 静脈カテーテル" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Commercial Name */}
+              <FormField
+                control={form.control}
+                name="commercialName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>販売名</FormLabel>
+                    <FormControl>
+                      <Input placeholder="例: メディカテーテル Pro" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Category */}
               <FormField
                 control={form.control}
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
+                    <FormLabel>カテゴリー *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder="カテゴリーを選択" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {PRODUCT_CATEGORIES.map((category) => (
+                        {MEDICAL_DEVICE_CATEGORIES.map((category) => (
                           <SelectItem key={category} value={category}>
-                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                            {category}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -140,42 +170,65 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
                   </FormItem>
                 )}
               />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+
+              {/* Asset Classification */}
               <FormField
                 control={form.control}
-                name="quantity"
+                name="assetClassification"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Quantity</FormLabel>
+                    <FormLabel>資産分類</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="資産分類を選択" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="消耗品">消耗品</SelectItem>
+                        <SelectItem value="固定資産">固定資産</SelectItem>
+                        <SelectItem value="レンタル">レンタル</SelectItem>
+                        <SelectItem value="リース">リース</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Price */}
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>価格 *</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
-                        min="0" 
-                        placeholder="0"
+                        placeholder="0" 
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        onChange={(e) => field.onChange(e.target.value)}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
+              {/* Low Stock Threshold */}
               <FormField
                 control={form.control}
-                name="price"
+                name="lowStockThreshold"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>最小在庫数</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
-                        min="0" 
-                        step="0.01" 
-                        placeholder="0.00"
+                        placeholder="10" 
                         {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -184,64 +237,39 @@ export default function EditProductModal({ product, isOpen, onClose, onSuccess }
               />
             </div>
 
+            {/* Specification */}
             <FormField
               control={form.control}
-              name="lowStockThreshold"
+              name="specification"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Low Stock Threshold</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      min="0" 
-                      placeholder="10"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>規格・仕様</FormLabel>
                   <FormControl>
                     <Textarea 
+                      placeholder="医療機器の詳細な規格や仕様を入力してください"
                       rows={3}
-                      placeholder="Product description..."
-                      {...field}
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
+
+            <div className="flex justify-end gap-3 pt-4">
               <Button type="button" variant="outline" onClick={onClose}>
-                Cancel
+                キャンセル
               </Button>
               <Button 
                 type="submit" 
                 disabled={updateProductMutation.isPending}
-                className="flex items-center"
+                className="bg-primary hover:bg-primary/90"
               >
-                {updateProductMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Updating...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Update Product
-                  </>
-                )}
+                {updateProductMutation.isPending ? "更新中..." : "医療機器を更新"}
               </Button>
             </div>
           </form>

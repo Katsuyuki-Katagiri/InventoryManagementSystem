@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { insertProductSchema, PRODUCT_CATEGORIES, type InsertProduct } from "@shared/schema";
+import { insertProductSchema, MEDICAL_DEVICE_CATEGORIES, type InsertProduct } from "@shared/schema";
 import { Plus } from "lucide-react";
 
 interface AddProductModalProps {
@@ -25,36 +25,44 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
   const form = useForm<InsertProduct>({
     resolver: zodResolver(insertProductSchema),
     defaultValues: {
-      name: "",
-      sku: "",
+      productCode: "",
+      genericName: "",
+      commercialName: "",
       category: "",
-      quantity: 0,
-      price: "0.00",
-      description: "",
+      specification: "",
+      assetClassification: "",
+      price: "0",
       lowStockThreshold: 10,
     },
   });
 
   const createProductMutation = useMutation({
     mutationFn: async (data: InsertProduct) => {
-      const response = await apiRequest("POST", "/api/products", data);
+      const response = await fetch("/api/products", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Failed to create product");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/inventory/stats"] });
       toast({
-        title: "Success",
-        description: "Product added successfully",
+        title: "成功",
+        description: "医療機器が正常に追加されました。",
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
       form.reset();
       onSuccess();
       onClose();
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add product",
+        title: "エラー",
+        description: error.message || "医療機器の追加に失敗しました。",
         variant: "destructive",
       });
     },
@@ -64,55 +72,71 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
     createProductMutation.mutate(data);
   };
 
-  const handleClose = () => {
-    form.reset();
-    onClose();
-  };
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md w-full">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>新商品追加</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            新しい医療機器を追加
+          </DialogTitle>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>商品名</FormLabel>
-                  <FormControl>
-                    <Input placeholder="商品名を入力" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Product Code */}
               <FormField
                 control={form.control}
-                name="sku"
+                name="productCode"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>SKU</FormLabel>
+                    <FormLabel>商品コード *</FormLabel>
                     <FormControl>
-                      <Input placeholder="SKU-001" {...field} />
+                      <Input placeholder="例: MD001" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
+              {/* Generic Name */}
+              <FormField
+                control={form.control}
+                name="genericName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>一般名 *</FormLabel>
+                    <FormControl>
+                      <Input placeholder="例: 静脈カテーテル" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Commercial Name */}
+              <FormField
+                control={form.control}
+                name="commercialName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>販売名</FormLabel>
+                    <FormControl>
+                      <Input placeholder="例: メディカテーテル Pro" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Category */}
               <FormField
                 control={form.control}
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>カテゴリー</FormLabel>
+                    <FormLabel>カテゴリー *</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -120,7 +144,7 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {PRODUCT_CATEGORIES.map((category) => (
+                        {MEDICAL_DEVICE_CATEGORIES.map((category) => (
                           <SelectItem key={category} value={category}>
                             {category}
                           </SelectItem>
@@ -131,42 +155,65 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
                   </FormItem>
                 )}
               />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
+
+              {/* Asset Classification */}
               <FormField
                 control={form.control}
-                name="quantity"
+                name="assetClassification"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Quantity</FormLabel>
+                    <FormLabel>資産分類</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="資産分類を選択" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="消耗品">消耗品</SelectItem>
+                        <SelectItem value="固定資産">固定資産</SelectItem>
+                        <SelectItem value="レンタル">レンタル</SelectItem>
+                        <SelectItem value="リース">リース</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Price */}
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>価格 *</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
-                        min="0" 
-                        placeholder="0"
+                        placeholder="0" 
                         {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        onChange={(e) => field.onChange(e.target.value)}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
+
+              {/* Low Stock Threshold */}
               <FormField
                 control={form.control}
-                name="price"
+                name="lowStockThreshold"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>最小在庫数</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
-                        min="0" 
-                        step="0.01" 
-                        placeholder="0.00"
+                        placeholder="10" 
                         {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -175,64 +222,39 @@ export default function AddProductModal({ isOpen, onClose, onSuccess }: AddProdu
               />
             </div>
 
+            {/* Specification */}
             <FormField
               control={form.control}
-              name="lowStockThreshold"
+              name="specification"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Low Stock Threshold</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number" 
-                      min="0" 
-                      placeholder="10"
-                      {...field}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>規格・仕様</FormLabel>
                   <FormControl>
                     <Textarea 
+                      placeholder="医療機器の詳細な規格や仕様を入力してください"
                       rows={3}
-                      placeholder="Product description..."
-                      {...field}
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      name={field.name}
+                      ref={field.ref}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
-            <div className="flex justify-end space-x-3 pt-4 border-t border-slate-200">
-              <Button type="button" variant="outline" onClick={handleClose}>
-                Cancel
+
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" onClick={onClose}>
+                キャンセル
               </Button>
               <Button 
                 type="submit" 
                 disabled={createProductMutation.isPending}
-                className="flex items-center"
+                className="bg-primary hover:bg-primary/90"
               >
-                {createProductMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Product
-                  </>
-                )}
+                {createProductMutation.isPending ? "追加中..." : "医療機器を追加"}
               </Button>
             </div>
           </form>

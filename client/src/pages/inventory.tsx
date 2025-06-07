@@ -15,13 +15,18 @@ export default function InventoryPage() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  const { data: products = [], isLoading, refetch } = useQuery({
+  const { data: products = [], isLoading, refetch } = useQuery<Product[]>({
     queryKey: ["/api/products", { search: searchQuery, category: categoryFilter === "all" ? "" : categoryFilter }],
     enabled: true,
   });
 
-  const { data: stats } = useQuery({
-    queryKey: ["/api/inventory/stats"],
+  const { data: stats } = useQuery<{
+    totalProducts: number;
+    lowStockItems: number;
+    totalValue: number;
+    categories: number;
+  }>({
+    queryKey: ["/api/stats"],
     enabled: true,
   });
 
