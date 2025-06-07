@@ -45,16 +45,16 @@ interface InventoryItem extends Product {
   remarks: string | null;
 }
 
-export default function InventoryTable({ onAddProduct, onImportExcel }: InventoryTableProps) {
+export default function InventoryTable({ selectedMonth, onAddProduct, onImportExcel }: InventoryTableProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editData, setEditData] = useState<Partial<InventoryItem>>({});
 
-  // Fetch inventory data with product details
+  // Fetch inventory data with product details filtered by month
   const { data: inventoryItems = [], isLoading } = useQuery<InventoryItem[]>({
-    queryKey: ['/api/inventory/detailed'],
+    queryKey: ['/api/inventory/detailed', selectedMonth],
   });
 
   // Update inventory mutation

@@ -51,7 +51,7 @@ export interface IStorage {
   createFacility(facility: InsertFacility): Promise<Facility>;
 
   // Detailed inventory operations
-  getDetailedInventoryData(): Promise<any[]>;
+  getDetailedInventoryData(month?: string): Promise<any[]>;
   updateInventoryItem(id: number, updates: any): Promise<any>;
 }
 
@@ -267,9 +267,9 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Detailed inventory operations
-  async getDetailedInventoryData(): Promise<any[]> {
+  async getDetailedInventoryData(month?: string): Promise<any[]> {
     try {
-      const result = await db
+      let query = db
         .select({
           id: products.id,
           productCode: products.productCode,
@@ -286,10 +286,21 @@ export class DatabaseStorage implements IStorage {
           facilityName: inventory.facilityName,
           responsiblePerson: inventory.responsiblePerson,
           remarks: inventory.remarks,
+          inventoryMonth: inventory.inventoryMonth,
         })
         .from(products)
         .leftJoin(inventory, eq(inventory.productId, products.id))
         .where(eq(products.isActive, 1));
+
+      // Add month filter if provided
+      if (month) {
+        query = query.where(and(
+          eq(products.isActive, 1),
+          eq(inventory.inventoryMonth, month)
+        ));
+      }
+
+      const result = await query;
 
       return result.map(item => ({
         ...item,
@@ -302,6 +313,7 @@ export class DatabaseStorage implements IStorage {
         facilityName: item.facilityName,
         responsiblePerson: item.responsiblePerson,
         remarks: item.remarks,
+        inventoryMonth: item.inventoryMonth,
       }));
     } catch (error) {
       console.error("Error getting detailed inventory data:", error);
