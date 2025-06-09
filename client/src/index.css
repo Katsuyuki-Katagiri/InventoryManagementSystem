@@ -62,27 +62,9 @@
   }
 }
 
-/* Fixed table column styles */
+/* Fixed table header styles */
 .inventory-table {
   position: relative;
-}
-
-.inventory-table .sticky-col-1 {
-  position: sticky;
-  left: 0;
-  background: white;
-  z-index: 15;
-  border-right: 1px solid #e5e7eb;
-  min-width: 120px;
-}
-
-.inventory-table .sticky-col-2 {
-  position: sticky;
-  left: 120px;
-  background: white;
-  z-index: 15;
-  border-right: 1px solid #e5e7eb;
-  min-width: 200px;
 }
 
 .inventory-table .sticky-header {
@@ -91,11 +73,6 @@
   background: white;
   z-index: 20;
   border-bottom: 1px solid #e5e7eb;
-}
-
-.inventory-table .sticky-header.sticky-col-1,
-.inventory-table .sticky-header.sticky-col-2 {
-  z-index: 30;
 }
 
 .text-primary {

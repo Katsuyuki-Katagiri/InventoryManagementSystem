@@ -142,16 +142,16 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
 
   const getCategoryBadgeColor = (category: string) => {
     const colorMap: { [key: string]: string } = {
-      "人工心肺回路": "bg-red-100 text-red-800 border-red-300",
-      "補助循環回路": "bg-blue-100 text-blue-800 border-blue-300", 
-      "IVセット": "bg-green-100 text-green-800 border-green-300",
-      "輸液ポンプ": "bg-purple-100 text-purple-800 border-purple-300",
-      "シリンジポンプ": "bg-yellow-100 text-yellow-800 border-yellow-300",
-      "人工呼吸器": "bg-orange-100 text-orange-800 border-orange-300",
-      "モニター": "bg-pink-100 text-pink-800 border-pink-300",
-      "その他": "bg-gray-100 text-gray-800 border-gray-300"
+      "人工心肺回路": "bg-red-500 text-white border-red-600",
+      "補助循環回路": "bg-blue-500 text-white border-blue-600", 
+      "IVセット": "bg-green-500 text-white border-green-600",
+      "輸液ポンプ": "bg-purple-500 text-white border-purple-600",
+      "シリンジポンプ": "bg-yellow-500 text-black border-yellow-600",
+      "人工呼吸器": "bg-orange-500 text-white border-orange-600",
+      "モニター": "bg-pink-500 text-white border-pink-600",
+      "その他": "bg-indigo-500 text-white border-indigo-600"
     };
-    return colorMap[category] || "bg-gray-100 text-gray-800 border-gray-300";
+    return colorMap[category] || "bg-gray-500 text-white border-gray-600";
   };
 
   return (
@@ -219,19 +219,19 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
         <div className="h-[calc(100vh-400px)] overflow-auto relative">
           <Table className="inventory-table">
             <TableHeader>
-              <TableRow>
-                <TableHead className="sticky-header sticky-col-1">商品コード</TableHead>
-                <TableHead className="sticky-header sticky-col-2">製品名</TableHead>
-                <TableHead className="sticky-header min-w-[80px]">在庫数</TableHead>
-                <TableHead className="sticky-header min-w-[120px]">出荷伝票日付</TableHead>
-                <TableHead className="sticky-header min-w-[100px]">出荷伝票№</TableHead>
-                <TableHead className="sticky-header min-w-[100px]">LOT</TableHead>
-                <TableHead className="sticky-header min-w-[100px]">UBD</TableHead>
-                <TableHead className="sticky-header min-w-[120px]">保管場所</TableHead>
-                <TableHead className="sticky-header min-w-[120px]">施設名</TableHead>
-                <TableHead className="sticky-header min-w-[100px]">担当者名</TableHead>
-                <TableHead className="sticky-header min-w-[120px]">備考</TableHead>
-                <TableHead className="sticky-header min-w-[80px]">操作</TableHead>
+              <TableRow className="sticky-header">
+                <TableHead className="bg-white min-w-[120px]">商品コード</TableHead>
+                <TableHead className="bg-white min-w-[200px]">製品名</TableHead>
+                <TableHead className="bg-white min-w-[80px]">在庫数</TableHead>
+                <TableHead className="bg-white min-w-[120px]">出荷伝票日付</TableHead>
+                <TableHead className="bg-white min-w-[100px]">出荷伝票№</TableHead>
+                <TableHead className="bg-white min-w-[100px]">LOT</TableHead>
+                <TableHead className="bg-white min-w-[100px]">UBD</TableHead>
+                <TableHead className="bg-white min-w-[120px]">保管場所</TableHead>
+                <TableHead className="bg-white min-w-[120px]">施設名</TableHead>
+                <TableHead className="bg-white min-w-[100px]">担当者名</TableHead>
+                <TableHead className="bg-white min-w-[120px]">備考</TableHead>
+                <TableHead className="bg-white min-w-[80px]">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -254,8 +254,8 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                   
                   return (
                     <TableRow key={`${item.id}-${item.inventoryId || 0}`} className="hover:bg-gray-50">
-                      <TableCell className="font-mono text-sm sticky-col-1">{item.productCode}</TableCell>
-                      <TableCell className="sticky-col-2">
+                      <TableCell className="font-mono text-sm">{item.productCode}</TableCell>
+                      <TableCell>
                         <div>
                           <div className="font-medium">{item.genericName}</div>
                           {item.commercialName && (
