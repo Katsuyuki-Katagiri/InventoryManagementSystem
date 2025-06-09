@@ -760,6 +760,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       const updates = req.body;
+      
+      // Convert date strings to Date objects for database compatibility
+      if (updates.shipmentDate && typeof updates.shipmentDate === 'string') {
+        updates.shipmentDate = new Date(updates.shipmentDate);
+      }
+      if (updates.expiryDate && typeof updates.expiryDate === 'string') {
+        updates.expiryDate = new Date(updates.expiryDate);
+      }
+      
       const updatedItem = await storage.updateInventoryItem(id, updates);
       if (!updatedItem) {
         return res.status(404).json({ error: "在庫アイテムが見つかりません" });

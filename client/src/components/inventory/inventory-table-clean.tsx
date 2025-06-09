@@ -227,7 +227,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                         <Input
                           type="number"
                           value={editData.quantity || item.quantity}
-                          onChange={(e) => setEditData(prev => ({
+                          onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
                             quantity: parseInt(e.target.value) || 0
                           }))}
@@ -241,10 +241,10 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                       {isEditing ? (
                         <Input
                           type="date"
-                          value={editData.shipmentDate ? format(new Date(editData.shipmentDate), "yyyy-MM-dd") : ""}
-                          onChange={(e) => setEditData(prev => ({
+                          value={editData.shipmentDate ? format(new Date(editData.shipmentDate), "yyyy-MM-dd") : (item.shipmentDate ? format(new Date(item.shipmentDate), "yyyy-MM-dd") : "")}
+                          onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
-                            shipmentDate: e.target.value ? new Date(e.target.value) : null
+                            shipmentDate: e.target.value || null
                           }))}
                           className="w-20 text-xs"
                         />
@@ -256,7 +256,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                       {isEditing ? (
                         <Input
                           value={editData.shipmentNumber || ""}
-                          onChange={(e) => setEditData(prev => ({
+                          onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
                             shipmentNumber: e.target.value
                           }))}
@@ -285,9 +285,9 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                         <Input
                           type="date"
                           value={editData.expiryDate ? format(new Date(editData.expiryDate), "yyyy-MM-dd") : ""}
-                          onChange={(e) => setEditData(prev => ({
+                          onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
-                            expiryDate: e.target.value ? new Date(e.target.value) : null
+                            expiryDate: e.target.value || null
                           }))}
                           className="w-16 text-xs"
                         />
