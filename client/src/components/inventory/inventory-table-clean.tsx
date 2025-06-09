@@ -168,9 +168,9 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="relative overflow-x-auto">
+        <div className="relative">
           {/* 固定ヘッダー */}
-          <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
+          <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm overflow-x-auto">
             <div className="flex bg-white text-xs font-medium text-gray-700 py-3 px-2" style={{ minWidth: '1200px' }}>
               <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">商品コード</div>
               <div className="w-40 px-1 text-left border-r border-gray-200 flex-shrink-0">製品名</div>
