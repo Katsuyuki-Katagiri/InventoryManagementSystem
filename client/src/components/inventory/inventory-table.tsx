@@ -255,7 +255,7 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                       <TableCell className="text-center font-medium">
                         {item.quantity}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={!item.shipmentDate ? "bg-yellow-100" : ""}>
                         {isEditing ? (
                           <Input
                             type="date"
@@ -270,7 +270,7 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                           formatDate(item.shipmentDate)
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={!item.shipmentNumber ? "bg-yellow-100" : ""}>
                         {isEditing ? (
                           <Input
                             value={editData.shipmentNumber || ""}
@@ -290,7 +290,7 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                       <TableCell>
                         {formatDate(item.expiryDate)}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={!item.storageLocation ? "bg-yellow-100" : ""}>
                         {isEditing ? (
                           <Input
                             value={editData.storageLocation || ""}
@@ -304,7 +304,7 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                           item.storageLocation || "-"
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={!item.facilityName ? "bg-yellow-100" : ""}>
                         {isEditing ? (
                           <Input
                             value={editData.facilityName || ""}
@@ -318,7 +318,7 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                           item.facilityName || "-"
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={!item.responsiblePerson ? "bg-yellow-100" : ""}>
                         {isEditing ? (
                           <Input
                             value={editData.responsiblePerson || ""}
@@ -332,7 +332,7 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                           item.responsiblePerson || "-"
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className={!item.remarks ? "bg-yellow-100" : ""}>
                         {isEditing ? (
                           <Input
                             value={editData.remarks || ""}

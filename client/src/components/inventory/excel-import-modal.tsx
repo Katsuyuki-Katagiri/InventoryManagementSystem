@@ -44,6 +44,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
+  const [importType, setImportType] = useState<"inventory" | "loan">("inventory");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -84,8 +85,10 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('type', importType);
 
-      const response = await fetch('/api/products/import', {
+      const endpoint = importType === "loan" ? '/api/products/import-loan' : '/api/products/import';
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
       });
@@ -319,8 +322,38 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
             </Button>
           </div>
 
-          {/* File Selection */}
+          {/* Import Type Selection */}
           <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                インポートタイプ
+              </label>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="importType"
+                    value="inventory"
+                    checked={importType === "inventory"}
+                    onChange={(e) => setImportType(e.target.value as "inventory" | "loan")}
+                    className="mr-2"
+                  />
+                  在庫一覧
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="importType"
+                    value="loan"
+                    checked={importType === "loan"}
+                    onChange={(e) => setImportType(e.target.value as "inventory" | "loan")}
+                    className="mr-2"
+                  />
+                  貸出一覧
+                </label>
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium mb-2">
                 Excelファイルを選択
