@@ -87,9 +87,14 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
   const handleEdit = (item: InventoryItem) => {
     setEditingRow(item.inventoryId || item.id);
     setEditData({
+      quantity: item.quantity,
       shipmentDate: item.shipmentDate,
       shipmentNumber: item.shipmentNumber,
+      lotNumber: item.lotNumber,
+      expiryDate: item.expiryDate,
       storageLocation: item.storageLocation,
+      facilityName: item.facilityName,
+      responsiblePerson: item.responsiblePerson,
       remarks: item.remarks,
     });
   };
@@ -183,7 +188,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
               <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">施設名</div>
               <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">担当者名</div>
               <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">備考</div>
-              <div className="w-16 px-1 text-center flex-shrink-0">操作</div>
+              <div className="w-16 px-1 text-center flex-shrink-0">修正</div>
             </div>
           </div>
           
@@ -217,26 +222,134 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                         {item.category}
                       </Badge>
                     </div>
-                    <div className="w-16 px-1 text-center font-medium border-r border-gray-200 flex-shrink-0">{item.quantity}</div>
+                    <div className="w-16 px-1 text-center font-medium border-r border-gray-200 flex-shrink-0">
+                      {isEditing ? (
+                        <Input
+                          type="number"
+                          value={editData.quantity || item.quantity}
+                          onChange={(e) => setEditData(prev => ({
+                            ...prev,
+                            quantity: parseInt(e.target.value) || 0
+                          }))}
+                          className="w-12 text-xs text-center"
+                        />
+                      ) : (
+                        item.quantity
+                      )}
+                    </div>
                     <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
-                      {formatDate(item.shipmentDate)}
+                      {isEditing ? (
+                        <Input
+                          type="date"
+                          value={editData.shipmentDate ? format(new Date(editData.shipmentDate), "yyyy-MM-dd") : ""}
+                          onChange={(e) => setEditData(prev => ({
+                            ...prev,
+                            shipmentDate: e.target.value ? new Date(e.target.value) : null
+                          }))}
+                          className="w-20 text-xs"
+                        />
+                      ) : (
+                        formatDate(item.shipmentDate)
+                      )}
                     </div>
                     <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
-                      {item.shipmentNumber || "-"}
+                      {isEditing ? (
+                        <Input
+                          value={editData.shipmentNumber || ""}
+                          onChange={(e) => setEditData(prev => ({
+                            ...prev,
+                            shipmentNumber: e.target.value
+                          }))}
+                          className="w-16 text-xs"
+                        />
+                      ) : (
+                        item.shipmentNumber || "-"
+                      )}
                     </div>
-                    <div className="w-20 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.lotNumber}</div>
-                    <div className="w-20 px-1 border-r border-gray-200 flex-shrink-0">{formatDate(item.expiryDate)}</div>
+                    <div className="w-20 px-1 font-mono border-r border-gray-200 flex-shrink-0">
+                      {isEditing ? (
+                        <Input
+                          value={editData.lotNumber || item.lotNumber}
+                          onChange={(e) => setEditData(prev => ({
+                            ...prev,
+                            lotNumber: e.target.value
+                          }))}
+                          className="w-16 text-xs"
+                        />
+                      ) : (
+                        item.lotNumber
+                      )}
+                    </div>
+                    <div className="w-20 px-1 border-r border-gray-200 flex-shrink-0">
+                      {isEditing ? (
+                        <Input
+                          type="date"
+                          value={editData.expiryDate ? format(new Date(editData.expiryDate), "yyyy-MM-dd") : ""}
+                          onChange={(e) => setEditData(prev => ({
+                            ...prev,
+                            expiryDate: e.target.value ? new Date(e.target.value) : null
+                          }))}
+                          className="w-16 text-xs"
+                        />
+                      ) : (
+                        formatDate(item.expiryDate)
+                      )}
+                    </div>
                     <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.storageLocation ? "bg-yellow-100" : ""}`}>
-                      {item.storageLocation || "-"}
+                      {isEditing ? (
+                        <Input
+                          value={editData.storageLocation || ""}
+                          onChange={(e) => setEditData(prev => ({
+                            ...prev,
+                            storageLocation: e.target.value
+                          }))}
+                          className="w-20 text-xs"
+                        />
+                      ) : (
+                        item.storageLocation || "-"
+                      )}
                     </div>
                     <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
-                      {item.facilityName || "-"}
+                      {isEditing ? (
+                        <Input
+                          value={editData.facilityName || item.facilityName || ""}
+                          onChange={(e) => setEditData(prev => ({
+                            ...prev,
+                            facilityName: e.target.value
+                          }))}
+                          className="w-20 text-xs"
+                        />
+                      ) : (
+                        item.facilityName || "-"
+                      )}
                     </div>
                     <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
-                      {item.responsiblePerson || "-"}
+                      {isEditing ? (
+                        <Input
+                          value={editData.responsiblePerson || ""}
+                          onChange={(e) => setEditData(prev => ({
+                            ...prev,
+                            responsiblePerson: e.target.value
+                          }))}
+                          className="w-16 text-xs"
+                        />
+                      ) : (
+                        item.responsiblePerson || "-"
+                      )}
                     </div>
                     <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.remarks ? "bg-yellow-100" : ""}`}>
-                      {item.remarks || "-"}
+                      {isEditing ? (
+                        <Input
+                          value={editData.remarks || ""}
+                          onChange={(e) => setEditData(prev => ({
+                            ...prev,
+                            remarks: e.target.value
+                          }))}
+                          className="w-20 text-xs"
+                        />
+                      ) : (
+                        item.remarks || "-"
+                      )}
                     </div>
                     <div className="w-16 px-1 text-center flex-shrink-0">
                       {isEditing ? (
