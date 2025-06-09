@@ -185,13 +185,13 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             </div>
             
-            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+            <Select value={departmentFilter || "all"} onValueChange={setDepartmentFilter}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="部門で絞り込み" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">すべての部門</SelectItem>
-                {uniqueDepartments.map((dept) => (
+                {uniqueDepartments.filter(dept => dept && dept.trim() !== "").map((dept) => (
                   <SelectItem key={dept} value={dept}>
                     {dept}
                   </SelectItem>
@@ -199,13 +199,13 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
               </SelectContent>
             </Select>
             
-            <Select value={responsiblePersonFilter} onValueChange={setResponsiblePersonFilter}>
+            <Select value={responsiblePersonFilter || "all"} onValueChange={setResponsiblePersonFilter}>
               <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="担当者で絞り込み" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">すべての担当者</SelectItem>
-                {uniqueResponsiblePersons.map((person) => (
+                {uniqueResponsiblePersons.filter(person => person && person.trim() !== "").map((person) => (
                   <SelectItem key={person} value={person}>
                     {person}
                   </SelectItem>
@@ -217,21 +217,21 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
       </CardHeader>
       <CardContent className="p-0">
         <div className="h-[calc(100vh-400px)] overflow-y-auto relative border">
-          <Table className="inventory-table w-full">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="min-w-[120px]">商品コード</TableHead>
-                <TableHead className="min-w-[200px]">製品名</TableHead>
-                <TableHead className="min-w-[80px]">在庫数</TableHead>
-                <TableHead className="min-w-[120px]">出荷伝票日付</TableHead>
-                <TableHead className="min-w-[100px]">出荷伝票№</TableHead>
-                <TableHead className="min-w-[100px]">LOT</TableHead>
-                <TableHead className="min-w-[100px]">UBD</TableHead>
-                <TableHead className="min-w-[120px]">保管場所</TableHead>
-                <TableHead className="min-w-[120px]">施設名</TableHead>
-                <TableHead className="min-w-[100px]">担当者名</TableHead>
-                <TableHead className="min-w-[120px]">備考</TableHead>
-                <TableHead className="min-w-[80px]">操作</TableHead>
+          <Table className="w-full">
+            <TableHeader className="sticky top-0 z-10 bg-white border-b-2 border-gray-300">
+              <TableRow className="bg-white">
+                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">商品コード</TableHead>
+                <TableHead className="min-w-[200px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">製品名</TableHead>
+                <TableHead className="min-w-[80px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">在庫数</TableHead>
+                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">出荷伝票日付</TableHead>
+                <TableHead className="min-w-[100px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">出荷伝票№</TableHead>
+                <TableHead className="min-w-[100px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">LOT</TableHead>
+                <TableHead className="min-w-[100px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">UBD</TableHead>
+                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">保管場所</TableHead>
+                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">施設名</TableHead>
+                <TableHead className="min-w-[100px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">担当者名</TableHead>
+                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">備考</TableHead>
+                <TableHead className="min-w-[80px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
