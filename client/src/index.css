@@ -63,30 +63,19 @@
 }
 
 /* Fixed table header styles */
-.inventory-table {
-  position: relative;
-  border-collapse: separate;
-  border-spacing: 0;
-}
-
 .inventory-table thead {
   position: sticky;
   top: 0;
   z-index: 100;
-}
-
-.inventory-table thead tr {
   background: white;
-  border-bottom: 2px solid #e5e7eb;
 }
 
 .inventory-table thead th {
-  background: white !important;
   position: sticky;
   top: 0;
+  background: white !important;
   z-index: 100;
-  border-bottom: 2px solid #e5e7eb;
-  padding: 12px 8px;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
 /* Additional sticky header support */
