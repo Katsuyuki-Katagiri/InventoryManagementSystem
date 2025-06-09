@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import StatsCards from "@/components/inventory/stats-cards";
-import InventoryTable from "@/components/inventory/inventory-table";
+import InventoryTableClean from "@/components/inventory/inventory-table-clean";
 import MonthlySelector from "@/components/inventory/monthly-selector";
 import AddProductModal from "@/components/inventory/add-product-modal";
 import EditProductModal from "@/components/inventory/edit-product-modal";
@@ -101,7 +101,7 @@ export default function InventoryPage() {
           </div>
         </div>
         
-        <InventoryTable
+        <InventoryTableClean
           selectedMonth={selectedMonth}
           onAddProduct={() => setIsAddModalOpen(true)}
           onImportExcel={() => setIsImportModalOpen(true)}

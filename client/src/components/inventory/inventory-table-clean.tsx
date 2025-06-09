@@ -1,0 +1,268 @@
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { ja } from "date-fns/locale";
+import { Edit } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { apiRequest, getQueryFn } from "@/lib/queryClient";
+import type { Product, Department, Facility } from "@shared/schema";
+
+interface InventoryTableProps {
+  selectedMonth: string;
+  onAddProduct: () => void;
+  onImportExcel: () => void;
+}
+
+interface InventoryItem extends Product {
+  inventoryId?: number;
+  quantity: number;
+  lotNumber: string;
+  expiryDate: Date | null;
+  storageLocation: string | null;
+  shipmentDate: Date | null;
+  shipmentNumber: string | null;
+  facilityName: string | null;
+  responsiblePerson: string | null;
+  remarks: string | null;
+}
+
+export default function InventoryTableClean({ selectedMonth, onAddProduct, onImportExcel }: InventoryTableProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedPerson, setSelectedPerson] = useState("");
+  const [editingRow, setEditingRow] = useState<number | null>(null);
+  const [editData, setEditData] = useState<any>({});
+
+  const queryClient = useQueryClient();
+
+  const { data: inventoryData = [], isLoading } = useQuery({
+    queryKey: ["/api/inventory/detailed", selectedMonth],
+    queryFn: getQueryFn({ on401: "throw" }),
+  });
+
+  const { data: departments = [] } = useQuery({
+    queryKey: ["/api/departments"],
+    queryFn: getQueryFn({ on401: "throw" }),
+  });
+
+  const { data: facilities = [] } = useQuery({
+    queryKey: ["/api/facilities"],
+    queryFn: getQueryFn({ on401: "throw" }),
+  });
+
+  const updateInventoryMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: number; data: any }) => {
+      return apiRequest(`/api/inventory/${id}`, "PATCH", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/detailed"] });
+      setEditingRow(null);
+      setEditData({});
+    },
+  });
+
+  const formatDate = (date: Date | null) => {
+    if (!date) return "-";
+    return format(new Date(date), "yyyy/MM/dd", { locale: ja });
+  };
+
+  const getCategoryBadgeColor = (category: string) => {
+    const colorMap: { [key: string]: string } = {
+      "人工心肺回路": "bg-red-500 text-white border-red-600",
+      "補助循環回路": "bg-blue-500 text-white border-blue-600", 
+      "IVセット": "bg-green-500 text-white border-green-600",
+      "輸液ポンプ": "bg-purple-500 text-white border-purple-600",
+      "シリンジポンプ": "bg-yellow-500 text-black border-yellow-600",
+      "人工呼吸器": "bg-orange-500 text-white border-orange-600",
+      "モニター": "bg-pink-500 text-white border-pink-600",
+      "その他": "bg-indigo-500 text-white border-indigo-600"
+    };
+    return colorMap[category] || "bg-gray-500 text-white border-gray-600";
+  };
+
+  const handleEdit = (item: InventoryItem) => {
+    setEditingRow(item.inventoryId || item.id);
+    setEditData({
+      shipmentDate: item.shipmentDate,
+      shipmentNumber: item.shipmentNumber,
+      storageLocation: item.storageLocation,
+      remarks: item.remarks,
+    });
+  };
+
+  const handleSave = () => {
+    if (editingRow) {
+      updateInventoryMutation.mutate({
+        id: editingRow,
+        data: editData,
+      });
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingRow(null);
+    setEditData({});
+  };
+
+  const filteredItems = (inventoryData as InventoryItem[]).filter((item: InventoryItem) => {
+    const matchesSearch = !searchQuery || 
+      item.genericName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.productCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.commercialName?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesDepartment = !selectedDepartment || item.facilityName === selectedDepartment;
+    const matchesPerson = !selectedPerson || item.responsiblePerson === selectedPerson;
+    
+    return matchesSearch && matchesDepartment && matchesPerson;
+  });
+
+  const uniquePersons = Array.from(new Set((inventoryData as InventoryItem[]).map((item: InventoryItem) => item.responsiblePerson).filter(Boolean)));
+
+  return (
+    <Card className="w-full">
+      <CardHeader className="sticky top-0 bg-white z-10 border-b">
+        <div className="flex items-center justify-between">
+          <CardTitle>在庫管理リスト ({selectedMonth})</CardTitle>
+          <div className="flex gap-2">
+            <Button onClick={onAddProduct}>商品追加</Button>
+            <Button variant="outline" onClick={onImportExcel}>Excelインポート</Button>
+          </div>
+        </div>
+        <div className="flex gap-4 items-center">
+          <Input
+            placeholder="商品名・商品コードで検索..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-sm"
+          />
+          <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="部門で絞り込み" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">すべての部門</SelectItem>
+              {departments.map((dept: Department) => (
+                <SelectItem key={dept.id} value={dept.name}>
+                  {dept.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={selectedPerson} onValueChange={setSelectedPerson}>
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="担当者で絞り込み" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">すべての担当者</SelectItem>
+              {uniquePersons.map((person) => (
+                <SelectItem key={person} value={person}>
+                  {person}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="relative">
+          {/* 固定ヘッダー */}
+          <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
+            <div className="grid grid-cols-12 gap-1 px-2 py-3 text-xs font-medium text-gray-700 bg-white">
+              <div className="col-span-1">商品コード</div>
+              <div className="col-span-2">製品名</div>
+              <div className="col-span-1 text-center">在庫数</div>
+              <div className="col-span-1">出荷伝票日付</div>
+              <div className="col-span-1">出荷伝票№</div>
+              <div className="col-span-1">LOT</div>
+              <div className="col-span-1">UBD</div>
+              <div className="col-span-1">保管場所</div>
+              <div className="col-span-1">施設名</div>
+              <div className="col-span-1">担当者名</div>
+              <div className="col-span-1">備考</div>
+              <div className="col-span-1 text-center">操作</div>
+            </div>
+          </div>
+          
+          {/* スクロール可能なコンテンツ */}
+          <div className="h-[calc(100vh-450px)] overflow-auto">
+            <div className="space-y-1 p-2">
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">読み込み中...</p>
+                </div>
+              ) : filteredItems.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  {searchQuery ? "検索条件に一致する商品が見つかりません" : "在庫データがありません"}
+                </div>
+              ) : (
+                filteredItems.map((item: InventoryItem) => {
+                  const isEditing = editingRow === (item.inventoryId || item.id);
+                  
+                  return (
+                    <div key={`${item.id}-${item.inventoryId || 0}`} className="grid grid-cols-12 gap-1 px-1 py-2 border-b hover:bg-gray-50 text-xs">
+                      <div className="col-span-1 font-mono">{item.productCode}</div>
+                      <div className="col-span-2">
+                        <div className="font-medium text-sm">{item.genericName}</div>
+                        {item.commercialName && (
+                          <div className="text-xs text-gray-500">{item.commercialName}</div>
+                        )}
+                        <Badge 
+                          variant="outline" 
+                          className={`mt-1 text-xs ${getCategoryBadgeColor(item.category)}`}
+                        >
+                          {item.category}
+                        </Badge>
+                      </div>
+                      <div className="col-span-1 text-center font-medium">{item.quantity}</div>
+                      <div className={`col-span-1 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
+                        {formatDate(item.shipmentDate)}
+                      </div>
+                      <div className={`col-span-1 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
+                        {item.shipmentNumber || "-"}
+                      </div>
+                      <div className="col-span-1 font-mono">{item.lotNumber}</div>
+                      <div className="col-span-1">{formatDate(item.expiryDate)}</div>
+                      <div className={`col-span-1 ${!item.storageLocation ? "bg-yellow-100" : ""}`}>
+                        {item.storageLocation || "-"}
+                      </div>
+                      <div className={`col-span-1 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
+                        {item.facilityName || "-"}
+                      </div>
+                      <div className={`col-span-1 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
+                        {item.responsiblePerson || "-"}
+                      </div>
+                      <div className={`col-span-1 ${!item.remarks ? "bg-yellow-100" : ""}`}>
+                        {item.remarks || "-"}
+                      </div>
+                      <div className="col-span-1 text-center">
+                        {isEditing ? (
+                          <div className="flex gap-1">
+                            <Button size="sm" onClick={handleSave} disabled={updateInventoryMutation.isPending}>
+                              保存
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={handleCancel}>
+                              キャンセル
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

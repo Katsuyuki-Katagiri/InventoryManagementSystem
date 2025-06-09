@@ -216,25 +216,100 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[calc(100vh-400px)] overflow-auto border">
-          <Table className="w-full table-fixed sticky-header-table">
-            <TableHeader className="sticky top-0 bg-white z-50 border-b-2 border-gray-300 shadow-sm">
-              <TableRow className="bg-white">
-                <TableHead className="w-[100px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">商品コード</TableHead>
-                <TableHead className="w-[160px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">製品名</TableHead>
-                <TableHead className="w-[60px] px-1 py-2 text-xs font-medium text-center bg-white border-r border-gray-200">在庫数</TableHead>
-                <TableHead className="w-[100px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">出荷伝票日付</TableHead>
-                <TableHead className="w-[80px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">出荷伝票№</TableHead>
-                <TableHead className="w-[80px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">LOT</TableHead>
-                <TableHead className="w-[80px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">UBD</TableHead>
-                <TableHead className="w-[100px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">保管場所</TableHead>
-                <TableHead className="w-[100px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">施設名</TableHead>
-                <TableHead className="w-[80px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">担当者名</TableHead>
-                <TableHead className="w-[100px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">備考</TableHead>
-                <TableHead className="w-[60px] px-1 py-2 text-xs font-medium text-center bg-white">操作</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+        <div className="relative">
+          {/* 固定ヘッダー */}
+          <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
+            <div className="grid grid-cols-12 gap-1 px-2 py-3 text-xs font-medium text-gray-700 border-b bg-white">
+              <div className="col-span-1 text-left">商品コード</div>
+              <div className="col-span-2 text-left">製品名</div>
+              <div className="col-span-1 text-center">在庫数</div>
+              <div className="col-span-1 text-left">出荷伝票日付</div>
+              <div className="col-span-1 text-left">出荷伝票№</div>
+              <div className="col-span-1 text-left">LOT</div>
+              <div className="col-span-1 text-left">UBD</div>
+              <div className="col-span-1 text-left">保管場所</div>
+              <div className="col-span-1 text-left">施設名</div>
+              <div className="col-span-1 text-left">担当者名</div>
+              <div className="col-span-1 text-left">備考</div>
+              <div className="col-span-1 text-center">操作</div>
+            </div>
+          </div>
+          
+          {/* スクロール可能なコンテンツ */}
+          <div className="h-[calc(100vh-450px)] overflow-auto">
+            <div className="space-y-1 p-2">
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="text-gray-500 mt-2">読み込み中...</p>
+                </div>
+              ) : filteredItems.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  {searchQuery ? "検索条件に一致する商品が見つかりません" : "在庫データがありません"}
+                </div>
+              ) : (
+                filteredItems.map((item) => {
+                  const isEditing = editingRow === (item.inventoryId || item.id);
+                  
+                  return (
+                    <div key={`${item.id}-${item.inventoryId || 0}`} className="grid grid-cols-12 gap-1 px-1 py-2 border-b hover:bg-gray-50 text-xs">
+                      <div className="col-span-1 font-mono">{item.productCode}</div>
+                      <div className="col-span-2">
+                        <div className="font-medium text-sm">{item.genericName}</div>
+                        {item.commercialName && (
+                          <div className="text-xs text-gray-500">{item.commercialName}</div>
+                        )}
+                        <Badge 
+                          variant="outline" 
+                          className={`mt-1 text-xs ${getCategoryBadgeColor(item.category)}`}
+                        >
+                          {item.category}
+                        </Badge>
+                      </div>
+                      <div className="col-span-1 text-center font-medium">{item.quantity}</div>
+                      <div className={`col-span-1 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
+                        {formatDate(item.shipmentDate)}
+                      </div>
+                      <div className={`col-span-1 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
+                        {item.shipmentNumber || "-"}
+                      </div>
+                      <div className="col-span-1 font-mono">{item.lotNumber}</div>
+                      <div className="col-span-1">{formatDate(item.expiryDate)}</div>
+                      <div className={`col-span-1 ${!item.storageLocation ? "bg-yellow-100" : ""}`}>
+                        {item.storageLocation || "-"}
+                      </div>
+                      <div className={`col-span-1 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
+                        {item.facilityName || "-"}
+                      </div>
+                      <div className={`col-span-1 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
+                        {item.responsiblePerson || "-"}
+                      </div>
+                      <div className={`col-span-1 ${!item.remarks ? "bg-yellow-100" : ""}`}>
+                        {item.remarks || "-"}
+                      </div>
+                      <div className="col-span-1 text-center">
+                        {isEditing ? (
+                          <div className="flex gap-1">
+                            <Button size="sm" onClick={handleSave} disabled={saveInventoryMutation.isPending}>
+                              保存
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={handleCancel}>
+                              キャンセル
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={12} className="text-center py-8">
