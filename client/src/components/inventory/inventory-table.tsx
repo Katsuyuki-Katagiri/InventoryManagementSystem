@@ -216,22 +216,41 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[calc(100vh-400px)] overflow-y-auto relative border">
+        {/* Fixed Header Row */}
+        <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
+          <div className="flex items-center py-3 px-4 text-sm font-medium text-gray-700 min-w-max">
+            <div className="w-[120px] flex-shrink-0 px-2">商品コード</div>
+            <div className="w-[200px] flex-shrink-0 px-2">製品名</div>
+            <div className="w-[80px] flex-shrink-0 px-2 text-center">在庫数</div>
+            <div className="w-[120px] flex-shrink-0 px-2">出荷伝票日付</div>
+            <div className="w-[100px] flex-shrink-0 px-2">出荷伝票№</div>
+            <div className="w-[100px] flex-shrink-0 px-2">LOT</div>
+            <div className="w-[100px] flex-shrink-0 px-2">UBD</div>
+            <div className="w-[120px] flex-shrink-0 px-2">保管場所</div>
+            <div className="w-[120px] flex-shrink-0 px-2">施設名</div>
+            <div className="w-[100px] flex-shrink-0 px-2">担当者名</div>
+            <div className="w-[120px] flex-shrink-0 px-2">備考</div>
+            <div className="w-[80px] flex-shrink-0 px-2">操作</div>
+          </div>
+        </div>
+
+        {/* Scrollable Table Content */}
+        <div className="h-[calc(100vh-450px)] overflow-auto">
           <Table className="w-full">
-            <TableHeader className="sticky top-0 z-10 bg-white border-b-2 border-gray-300">
-              <TableRow className="bg-white">
-                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">商品コード</TableHead>
-                <TableHead className="min-w-[200px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">製品名</TableHead>
-                <TableHead className="min-w-[80px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">在庫数</TableHead>
-                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">出荷伝票日付</TableHead>
-                <TableHead className="min-w-[100px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">出荷伝票№</TableHead>
-                <TableHead className="min-w-[100px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">LOT</TableHead>
-                <TableHead className="min-w-[100px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">UBD</TableHead>
-                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">保管場所</TableHead>
-                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">施設名</TableHead>
-                <TableHead className="min-w-[100px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">担当者名</TableHead>
-                <TableHead className="min-w-[120px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">備考</TableHead>
-                <TableHead className="min-w-[80px] sticky top-0 bg-white z-10 border-b-2 border-gray-300">操作</TableHead>
+            <TableHeader className="sr-only">
+              <TableRow>
+                <TableHead>商品コード</TableHead>
+                <TableHead>製品名</TableHead>
+                <TableHead>在庫数</TableHead>
+                <TableHead>出荷伝票日付</TableHead>
+                <TableHead>出荷伝票№</TableHead>
+                <TableHead>LOT</TableHead>
+                <TableHead>UBD</TableHead>
+                <TableHead>保管場所</TableHead>
+                <TableHead>施設名</TableHead>
+                <TableHead>担当者名</TableHead>
+                <TableHead>備考</TableHead>
+                <TableHead>操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -254,8 +273,10 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                   
                   return (
                     <TableRow key={`${item.id}-${item.inventoryId || 0}`} className="hover:bg-gray-50">
-                      <TableCell className="font-mono text-sm">{item.productCode}</TableCell>
-                      <TableCell>
+                      <TableCell className="w-[120px] px-2">
+                        <div className="font-mono text-sm">{item.productCode}</div>
+                      </TableCell>
+                      <TableCell className="w-[200px] px-2">
                         <div>
                           <div className="font-medium">{item.genericName}</div>
                           {item.commercialName && (
@@ -269,10 +290,10 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center font-medium">
+                      <TableCell className="w-[80px] px-2 text-center font-medium">
                         {item.quantity}
                       </TableCell>
-                      <TableCell className={!item.shipmentDate ? "bg-yellow-100" : ""}>
+                      <TableCell className={`w-[120px] px-2 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
                         {isEditing ? (
                           <Input
                             type="date"
@@ -287,7 +308,7 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                           formatDate(item.shipmentDate)
                         )}
                       </TableCell>
-                      <TableCell className={!item.shipmentNumber ? "bg-yellow-100" : ""}>
+                      <TableCell className={`w-[100px] px-2 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
                         {isEditing ? (
                           <Input
                             value={editData.shipmentNumber || ""}
@@ -301,10 +322,10 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                           item.shipmentNumber || "-"
                         )}
                       </TableCell>
-                      <TableCell className="font-mono text-sm">
+                      <TableCell className="w-[100px] px-2 font-mono text-sm">
                         {item.lotNumber}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="w-[100px] px-2">
                         {formatDate(item.expiryDate)}
                       </TableCell>
                       <TableCell className={!item.storageLocation ? "bg-yellow-100" : ""}>
