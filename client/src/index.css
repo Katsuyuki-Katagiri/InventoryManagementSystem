@@ -63,33 +63,25 @@
 }
 
 /* Fixed table header styles */
-.inventory-table thead {
+.sticky-header-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.sticky-header-table thead tr {
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 999;
   background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.inventory-table thead th {
+.sticky-header-table thead th {
   position: sticky;
   top: 0;
   background: white !important;
-  z-index: 100;
-  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-}
-
-/* Additional sticky header support */
-table thead {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-}
-
-table thead th {
-  background: white !important;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  z-index: 999;
+  border-bottom: 2px solid #d1d5db;
 }
 
 .text-primary {

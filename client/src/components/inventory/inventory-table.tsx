@@ -217,7 +217,7 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
       </CardHeader>
       <CardContent className="p-0">
         <div className="h-[calc(100vh-400px)] overflow-auto border">
-          <Table className="w-full table-fixed inventory-table">
+          <Table className="w-full table-fixed sticky-header-table">
             <TableHeader className="sticky top-0 bg-white z-50 border-b-2 border-gray-300 shadow-sm">
               <TableRow className="bg-white">
                 <TableHead className="w-[100px] px-1 py-2 text-xs font-medium bg-white border-r border-gray-200">商品コード</TableHead>
