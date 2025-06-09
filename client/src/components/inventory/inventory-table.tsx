@@ -202,22 +202,22 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="overflow-x-auto">
+        <div className="h-[calc(100vh-400px)] overflow-auto">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 bg-white z-10 border-b">
               <TableRow>
-                <TableHead>商品コード</TableHead>
-                <TableHead>製品名</TableHead>
-                <TableHead>在庫数</TableHead>
-                <TableHead>出荷伝票日付</TableHead>
-                <TableHead>出荷伝票№</TableHead>
-                <TableHead>LOT</TableHead>
-                <TableHead>UBD</TableHead>
-                <TableHead>保管場所</TableHead>
-                <TableHead>施設名</TableHead>
-                <TableHead>担当者名</TableHead>
-                <TableHead>備考</TableHead>
-                <TableHead>操作</TableHead>
+                <TableHead className="bg-white">商品コード</TableHead>
+                <TableHead className="bg-white">製品名</TableHead>
+                <TableHead className="bg-white">在庫数</TableHead>
+                <TableHead className="bg-white">出荷伝票日付</TableHead>
+                <TableHead className="bg-white">出荷伝票№</TableHead>
+                <TableHead className="bg-white">LOT</TableHead>
+                <TableHead className="bg-white">UBD</TableHead>
+                <TableHead className="bg-white">保管場所</TableHead>
+                <TableHead className="bg-white">施設名</TableHead>
+                <TableHead className="bg-white">担当者名</TableHead>
+                <TableHead className="bg-white">備考</TableHead>
+                <TableHead className="bg-white">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

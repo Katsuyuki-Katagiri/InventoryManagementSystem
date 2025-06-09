@@ -260,6 +260,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Loan data import endpoint
+  app.post("/api/products/import-loan", upload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Excelファイルが必要です" });
+      }
+
+      console.log('Loan file received:', req.file.originalname, 'Size:', req.file.size);
+
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet);
+
+      let updated = 0;
+      let errors: string[] = [];
+
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i] as any;
+        
+        try {
+          const productCode = row['商品コード'] || '';
+          const lotNumber = row['LOT'] || row['ロット番号'] || '';
+          const expiryDate = row['UBD'] || row['有効期限'] || '';
+          const shipmentDate = row['貸出日'] || row['出荷日'] || row['出荷伝票日付'] || '';
+          const shipmentNumber = row['貸出番号'] || row['出荷番号'] || row['出荷伝票№'] || '';
+          const facilityName = row['施設名'] || '';
+          const responsiblePerson = row['担当者'] || row['担当者名'] || '';
+
+          if (!productCode) continue;
+
+          // Find matching inventory items by product code and lot number
+          const matchingInventory = await db
+            .select()
+            .from(inventory)
+            .innerJoin(medicalProducts, eq(inventory.productId, medicalProducts.id))
+            .where(
+              and(
+                eq(medicalProducts.productCode, productCode),
+                eq(inventory.lotNumber, lotNumber)
+              )
+            );
+
+          if (matchingInventory.length > 0) {
+            const inventoryRecord = matchingInventory[0];
+            
+            // Update inventory item with loan information
+            await db
+              .update(inventory)
+              .set({
+                shipmentDate: shipmentDate ? shipmentDate : null,
+                shipmentNumber: shipmentNumber || null,
+                facilityName: facilityName || null,
+                responsiblePerson: responsiblePerson || null,
+              })
+              .where(eq(inventory.id, inventoryRecord.inventory.id));
+
+            updated++;
+            console.log(`Updated inventory for ${productCode}, lot ${lotNumber}`);
+          } else {
+            console.log(`No matching inventory found for ${productCode}, lot ${lotNumber}`);
+          }
+        } catch (error: any) {
+          console.error(`Row ${i + 2} processing error:`, error);
+          errors.push(`行 ${i + 2}: ${error.message}`);
+        }
+      }
+
+      res.json({
+        success: updated,
+        errors,
+        message: `${updated}件の貸出情報を更新しました`,
+        total: data.length
+      });
+
+    } catch (error: any) {
+      console.error('貸出データインポートエラー:', error);
+      res.status(500).json({ message: '貸出データのインポートに失敗しました' });
+    }
+  });
+
   // Excel import endpoint
   app.post("/api/products/import", upload.single('file'), async (req, res) => {
     try {
