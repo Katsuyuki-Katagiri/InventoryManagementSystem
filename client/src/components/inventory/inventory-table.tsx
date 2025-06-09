@@ -219,19 +219,19 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
         <div className="h-[calc(100vh-400px)] overflow-auto relative">
           <Table className="inventory-table">
             <TableHeader>
-              <TableRow className="sticky-header">
-                <TableHead className="bg-white min-w-[120px]">商品コード</TableHead>
-                <TableHead className="bg-white min-w-[200px]">製品名</TableHead>
-                <TableHead className="bg-white min-w-[80px]">在庫数</TableHead>
-                <TableHead className="bg-white min-w-[120px]">出荷伝票日付</TableHead>
-                <TableHead className="bg-white min-w-[100px]">出荷伝票№</TableHead>
-                <TableHead className="bg-white min-w-[100px]">LOT</TableHead>
-                <TableHead className="bg-white min-w-[100px]">UBD</TableHead>
-                <TableHead className="bg-white min-w-[120px]">保管場所</TableHead>
-                <TableHead className="bg-white min-w-[120px]">施設名</TableHead>
-                <TableHead className="bg-white min-w-[100px]">担当者名</TableHead>
-                <TableHead className="bg-white min-w-[120px]">備考</TableHead>
-                <TableHead className="bg-white min-w-[80px]">操作</TableHead>
+              <TableRow>
+                <TableHead className="min-w-[120px]">商品コード</TableHead>
+                <TableHead className="min-w-[200px]">製品名</TableHead>
+                <TableHead className="min-w-[80px]">在庫数</TableHead>
+                <TableHead className="min-w-[120px]">出荷伝票日付</TableHead>
+                <TableHead className="min-w-[100px]">出荷伝票№</TableHead>
+                <TableHead className="min-w-[100px]">LOT</TableHead>
+                <TableHead className="min-w-[100px]">UBD</TableHead>
+                <TableHead className="min-w-[120px]">保管場所</TableHead>
+                <TableHead className="min-w-[120px]">施設名</TableHead>
+                <TableHead className="min-w-[100px]">担当者名</TableHead>
+                <TableHead className="min-w-[120px]">備考</TableHead>
+                <TableHead className="min-w-[80px]">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

@@ -67,12 +67,17 @@
   position: relative;
 }
 
-.inventory-table .sticky-header {
+.inventory-table thead tr {
   position: sticky;
   top: 0;
   background: white;
   z-index: 20;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.inventory-table thead th {
+  background: white;
+  border-bottom: 2px solid #e5e7eb;
 }
 
 .text-primary {
