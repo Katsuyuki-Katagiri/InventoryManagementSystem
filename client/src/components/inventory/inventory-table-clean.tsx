@@ -168,9 +168,9 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="relative">
+        <div className="h-[calc(100vh-450px)] overflow-auto">
           {/* 固定ヘッダー */}
-          <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm overflow-x-auto">
+          <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
             <div className="flex bg-white text-xs font-medium text-gray-700 py-3 px-2" style={{ minWidth: '1200px' }}>
               <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">商品コード</div>
               <div className="w-40 px-1 text-left border-r border-gray-200 flex-shrink-0">製品名</div>
@@ -188,78 +188,76 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
           </div>
           
           {/* スクロール可能なコンテンツ */}
-          <div className="h-[calc(100vh-450px)] overflow-y-auto overflow-x-auto">
-            <div className="px-2">
-              {isLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="text-gray-500 mt-2">読み込み中...</p>
-                </div>
-              ) : filteredItems.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  {searchQuery ? "検索条件に一致する商品が見つかりません" : "在庫データがありません"}
-                </div>
-              ) : (
-                filteredItems.map((item: InventoryItem) => {
-                  const isEditing = editingRow === (item.inventoryId || item.id);
-                  
-                  return (
-                    <div key={`${item.id}-${item.inventoryId || 0}`} className="flex py-2 border-b hover:bg-gray-50 text-xs" style={{ minWidth: '1200px' }}>
-                      <div className="w-24 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.productCode}</div>
-                      <div className="w-40 px-1 border-r border-gray-200 flex-shrink-0">
-                        <div className="font-medium text-sm truncate">{item.genericName}</div>
-                        {item.commercialName && (
-                          <div className="text-xs text-gray-500 truncate">{item.commercialName}</div>
-                        )}
-                        <Badge 
-                          variant="outline" 
-                          className={`mt-1 text-xs ${getCategoryBadgeColor(item.category)}`}
-                        >
-                          {item.category}
-                        </Badge>
-                      </div>
-                      <div className="w-16 px-1 text-center font-medium border-r border-gray-200 flex-shrink-0">{item.quantity}</div>
-                      <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
-                        {formatDate(item.shipmentDate)}
-                      </div>
-                      <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
-                        {item.shipmentNumber || "-"}
-                      </div>
-                      <div className="w-20 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.lotNumber}</div>
-                      <div className="w-20 px-1 border-r border-gray-200 flex-shrink-0">{formatDate(item.expiryDate)}</div>
-                      <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.storageLocation ? "bg-yellow-100" : ""}`}>
-                        {item.storageLocation || "-"}
-                      </div>
-                      <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
-                        {item.facilityName || "-"}
-                      </div>
-                      <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
-                        {item.responsiblePerson || "-"}
-                      </div>
-                      <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.remarks ? "bg-yellow-100" : ""}`}>
-                        {item.remarks || "-"}
-                      </div>
-                      <div className="w-16 px-1 text-center flex-shrink-0">
-                        {isEditing ? (
-                          <div className="flex flex-col gap-1">
-                            <Button size="sm" onClick={handleSave} disabled={updateInventoryMutation.isPending}>
-                              保存
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={handleCancel}>
-                              キャンセル
-                            </Button>
-                          </div>
-                        ) : (
-                          <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
+          <div className="px-2">
+            {isLoading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-gray-500 mt-2">読み込み中...</p>
+              </div>
+            ) : filteredItems.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                {searchQuery ? "検索条件に一致する商品が見つかりません" : "在庫データがありません"}
+              </div>
+            ) : (
+              filteredItems.map((item: InventoryItem) => {
+                const isEditing = editingRow === (item.inventoryId || item.id);
+                
+                return (
+                  <div key={`${item.id}-${item.inventoryId || 0}`} className="flex py-2 border-b hover:bg-gray-50 text-xs" style={{ minWidth: '1200px' }}>
+                    <div className="w-24 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.productCode}</div>
+                    <div className="w-40 px-1 border-r border-gray-200 flex-shrink-0">
+                      <div className="font-medium text-sm truncate">{item.genericName}</div>
+                      {item.commercialName && (
+                        <div className="text-xs text-gray-500 truncate">{item.commercialName}</div>
+                      )}
+                      <Badge 
+                        variant="outline" 
+                        className={`mt-1 text-xs ${getCategoryBadgeColor(item.category)}`}
+                      >
+                        {item.category}
+                      </Badge>
                     </div>
-                  );
-                })
-              )}
-            </div>
+                    <div className="w-16 px-1 text-center font-medium border-r border-gray-200 flex-shrink-0">{item.quantity}</div>
+                    <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
+                      {formatDate(item.shipmentDate)}
+                    </div>
+                    <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
+                      {item.shipmentNumber || "-"}
+                    </div>
+                    <div className="w-20 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.lotNumber}</div>
+                    <div className="w-20 px-1 border-r border-gray-200 flex-shrink-0">{formatDate(item.expiryDate)}</div>
+                    <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.storageLocation ? "bg-yellow-100" : ""}`}>
+                      {item.storageLocation || "-"}
+                    </div>
+                    <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
+                      {item.facilityName || "-"}
+                    </div>
+                    <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
+                      {item.responsiblePerson || "-"}
+                    </div>
+                    <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.remarks ? "bg-yellow-100" : ""}`}>
+                      {item.remarks || "-"}
+                    </div>
+                    <div className="w-16 px-1 text-center flex-shrink-0">
+                      {isEditing ? (
+                        <div className="flex flex-col gap-1">
+                          <Button size="sm" onClick={handleSave} disabled={updateInventoryMutation.isPending}>
+                            保存
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={handleCancel}>
+                            キャンセル
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button variant="outline" size="sm" onClick={() => handleEdit(item)}>
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </CardContent>
