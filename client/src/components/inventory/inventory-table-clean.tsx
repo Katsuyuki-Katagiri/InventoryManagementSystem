@@ -270,7 +270,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                       {isEditing ? (
                         <Input
                           value={editData.lotNumber || item.lotNumber}
-                          onChange={(e) => setEditData(prev => ({
+                          onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
                             lotNumber: e.target.value
                           }))}
@@ -299,7 +299,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                       {isEditing ? (
                         <Input
                           value={editData.storageLocation || ""}
-                          onChange={(e) => setEditData(prev => ({
+                          onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
                             storageLocation: e.target.value
                           }))}
@@ -313,7 +313,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                       {isEditing ? (
                         <Input
                           value={editData.facilityName || item.facilityName || ""}
-                          onChange={(e) => setEditData(prev => ({
+                          onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
                             facilityName: e.target.value
                           }))}
@@ -327,7 +327,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                       {isEditing ? (
                         <Input
                           value={editData.responsiblePerson || ""}
-                          onChange={(e) => setEditData(prev => ({
+                          onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
                             responsiblePerson: e.target.value
                           }))}
@@ -341,7 +341,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                       {isEditing ? (
                         <Input
                           value={editData.remarks || ""}
-                          onChange={(e) => setEditData(prev => ({
+                          onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
                             remarks: e.target.value
                           }))}
