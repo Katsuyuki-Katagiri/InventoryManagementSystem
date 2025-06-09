@@ -216,8 +216,8 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[calc(100vh-400px)] overflow-auto relative">
-          <Table className="inventory-table">
+        <div className="h-[calc(100vh-400px)] overflow-y-auto relative border">
+          <Table className="inventory-table w-full">
             <TableHeader>
               <TableRow>
                 <TableHead className="min-w-[120px]">商品コード</TableHead>
