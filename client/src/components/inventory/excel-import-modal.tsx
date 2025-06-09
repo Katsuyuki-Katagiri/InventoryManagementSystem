@@ -104,11 +104,13 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
       setImportResult(result);
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/inventory/detailed"] });
 
       if (result.success > 0) {
+        const typeText = importType === "inventory" ? "在庫一覧" : "貸出一覧";
         toast({
-          title: "インポート完了",
-          description: result.message,
+          title: `${typeText}インポート完了`,
+          description: `${result.success}件のデータをインポートしました。在庫管理リストが更新されました。`,
         });
         onSuccess();
       }
@@ -305,7 +307,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
             Excelファイルインポート
           </DialogTitle>
           <DialogDescription>
-            医療機器データをExcelファイルから一括でインポートできます。テンプレートをダウンロードして正しい形式で入力してください。
+            在庫一覧と貸出一覧の両方のExcelファイルをインポートして、統合された在庫管理リストを作成できます。テンプレートをダウンロードして正しい形式で入力してください。
           </DialogDescription>
         </DialogHeader>
 
@@ -324,9 +326,20 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
 
           {/* Import Type Selection */}
           <div className="space-y-4">
+            <div className="border rounded-lg p-4 bg-yellow-50">
+              <h3 className="font-medium text-sm mb-2">データ統合について</h3>
+              <p className="text-xs text-gray-600 mb-2">
+                在庫管理リストを作成するには、在庫一覧と貸出一覧の両方のデータが必要です。
+              </p>
+              <p className="text-xs text-gray-600">
+                1. まず「在庫一覧」を選択してインポート<br/>
+                2. 次に「貸出一覧」を選択してインポート<br/>
+                3. システムが自動的に統合された在庫管理リストを生成
+              </p>
+            </div>
             <div>
               <label className="block text-sm font-medium mb-2">
-                インポートタイプ
+                インポートタイプを選択
               </label>
               <div className="flex gap-4">
                 <label className="flex items-center">
@@ -338,7 +351,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
                     onChange={(e) => setImportType(e.target.value as "inventory" | "loan")}
                     className="mr-2"
                   />
-                  在庫一覧
+                  在庫一覧（通常在庫データ）
                 </label>
                 <label className="flex items-center">
                   <input
@@ -349,7 +362,7 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
                     onChange={(e) => setImportType(e.target.value as "inventory" | "loan")}
                     className="mr-2"
                   />
-                  貸出一覧
+                  貸出一覧（貸出在庫データ）
                 </label>
               </div>
             </div>
@@ -383,7 +396,17 @@ export default function ExcelImportModal({ isOpen, onClose, onSuccess }: ExcelIm
                 <Alert className="bg-green-50 border-green-200">
                   <CheckCircle className="h-4 w-4 text-green-600" />
                   <AlertDescription className="text-green-800">
-                    {importResult.success}件の商品が正常にインポートされました
+                    <div className="font-medium mb-1">
+                      {importType === "inventory" ? "在庫一覧" : "貸出一覧"}インポート完了
+                    </div>
+                    <div className="text-sm">
+                      {importResult.success}件のデータが処理され、在庫管理リストに統合されました
+                    </div>
+                    {importType === "loan" && (
+                      <div className="text-xs mt-1 text-green-700">
+                        既存の在庫データに貸出情報（出荷日、施設名、担当者等）が追加されました
+                      </div>
+                    )}
                   </AlertDescription>
                 </Alert>
               )}
