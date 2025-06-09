@@ -72,16 +72,46 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
 
   const getCategoryBadgeColor = (category: string) => {
     const colorMap: { [key: string]: string } = {
-      "人工心肺回路": "bg-red-500 text-white border-red-600",
-      "補助循環回路": "bg-blue-500 text-white border-blue-600", 
-      "IVセット": "bg-green-500 text-white border-green-600",
-      "輸液ポンプ": "bg-purple-500 text-white border-purple-600",
-      "シリンジポンプ": "bg-yellow-500 text-black border-yellow-600",
-      "人工呼吸器": "bg-orange-500 text-white border-orange-600",
-      "モニター": "bg-pink-500 text-white border-pink-600",
-      "その他": "bg-indigo-500 text-white border-indigo-600"
+      "その他": "bg-gray-500 text-white border-gray-600",
+      "エステック": "bg-red-500 text-white border-red-600",
+      "カテーテル": "bg-blue-500 text-white border-blue-600",
+      "ガーゼ・包帯": "bg-green-500 text-white border-green-600",
+      "サキューム": "bg-yellow-500 text-black border-yellow-600",
+      "セレス": "bg-purple-500 text-white border-purple-600",
+      "ソフィットベント": "bg-orange-500 text-white border-orange-600",
+      "ソフィット気管切開チューブ": "bg-pink-500 text-white border-pink-600",
+      "ソルターラブ社製品": "bg-indigo-500 text-white border-indigo-600",
+      "ヘモネティクス社製品": "bg-teal-500 text-white border-teal-600",
+      "メラその他ディスポ": "bg-cyan-500 text-white border-cyan-600",
+      "メラ人工心肺回路": "bg-red-600 text-white border-red-700",
+      "メラ人工心肺装置": "bg-blue-600 text-white border-blue-700",
+      "人工弁": "bg-green-600 text-white border-green-700",
+      "人工心肺回路": "bg-yellow-600 text-black border-yellow-700",
+      "人工肺・リザーバ": "bg-purple-600 text-white border-purple-700",
+      "他社製ディスポ": "bg-orange-600 text-white border-orange-700",
+      "他社製装置": "bg-pink-600 text-white border-pink-700",
+      "体外循環用カニューレ": "bg-indigo-600 text-white border-indigo-700",
+      "外科一般器械": "bg-teal-600 text-white border-teal-700",
+      "心臓手術器械": "bg-cyan-600 text-white border-cyan-700",
+      "手術器具": "bg-red-400 text-white border-red-500",
+      "手術室器械": "bg-blue-400 text-white border-blue-500",
+      "推奨商品": "bg-green-400 text-white border-green-500",
+      "注射器・針": "bg-yellow-400 text-black border-yellow-500",
+      "縫合材料": "bg-purple-400 text-white border-purple-500",
+      "輸液セット": "bg-orange-400 text-white border-orange-500",
+      "酸素供給チューブ": "bg-pink-400 text-white border-pink-500",
+      "電気メス関連ディスポ": "bg-indigo-400 text-white border-indigo-500",
+      "電気メス関連装置": "bg-teal-400 text-white border-teal-500",
+      "麻酔器関連装置": "bg-cyan-400 text-white border-cyan-500",
+      "麻酔用呼吸回路": "bg-red-300 text-black border-red-400",
+      "麻酔関連製品ディスポ": "bg-blue-300 text-black border-blue-400",
+      "ＡＳＡＮＵＳ社製品": "bg-green-300 text-black border-green-400",
+      "ＢＯＳＳ社製品": "bg-yellow-300 text-black border-yellow-400",
+      "ＩＡＢＰ関連ディスポ": "bg-purple-300 text-black border-purple-400",
+      "ＩＡＢＰ関連装置": "bg-orange-300 text-black border-orange-400",
+      "ＯｐＩｎｓｔｒｕｍｅｎｔｓ社製品": "bg-pink-300 text-black border-pink-400"
     };
-    return colorMap[category] || "bg-gray-500 text-white border-gray-600";
+    return colorMap[category] || "bg-slate-500 text-white border-slate-600";
   };
 
   const handleEdit = (item: InventoryItem) => {
