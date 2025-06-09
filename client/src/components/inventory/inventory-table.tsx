@@ -218,19 +218,19 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
       <CardContent className="p-0">
         {/* Fixed Header Row */}
         <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
-          <div className="flex items-center py-3 px-4 text-sm font-medium text-gray-700 min-w-max">
-            <div className="w-[120px] flex-shrink-0 px-2">商品コード</div>
-            <div className="w-[200px] flex-shrink-0 px-2">製品名</div>
-            <div className="w-[80px] flex-shrink-0 px-2 text-center">在庫数</div>
-            <div className="w-[120px] flex-shrink-0 px-2">出荷伝票日付</div>
-            <div className="w-[100px] flex-shrink-0 px-2">出荷伝票№</div>
-            <div className="w-[100px] flex-shrink-0 px-2">LOT</div>
-            <div className="w-[100px] flex-shrink-0 px-2">UBD</div>
-            <div className="w-[120px] flex-shrink-0 px-2">保管場所</div>
-            <div className="w-[120px] flex-shrink-0 px-2">施設名</div>
-            <div className="w-[100px] flex-shrink-0 px-2">担当者名</div>
-            <div className="w-[120px] flex-shrink-0 px-2">備考</div>
-            <div className="w-[80px] flex-shrink-0 px-2">操作</div>
+          <div className="flex items-center py-3 px-2 text-sm font-medium text-gray-700 overflow-x-auto">
+            <div className="w-[100px] flex-shrink-0 px-1 text-xs">商品コード</div>
+            <div className="w-[160px] flex-shrink-0 px-1 text-xs">製品名</div>
+            <div className="w-[60px] flex-shrink-0 px-1 text-xs text-center">在庫数</div>
+            <div className="w-[100px] flex-shrink-0 px-1 text-xs">出荷伝票日付</div>
+            <div className="w-[80px] flex-shrink-0 px-1 text-xs">出荷伝票№</div>
+            <div className="w-[80px] flex-shrink-0 px-1 text-xs">LOT</div>
+            <div className="w-[80px] flex-shrink-0 px-1 text-xs">UBD</div>
+            <div className="w-[100px] flex-shrink-0 px-1 text-xs">保管場所</div>
+            <div className="w-[100px] flex-shrink-0 px-1 text-xs">施設名</div>
+            <div className="w-[80px] flex-shrink-0 px-1 text-xs">担当者名</div>
+            <div className="w-[100px] flex-shrink-0 px-1 text-xs">備考</div>
+            <div className="w-[60px] flex-shrink-0 px-1 text-xs">操作</div>
           </div>
         </div>
 
@@ -273,14 +273,14 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                   
                   return (
                     <TableRow key={`${item.id}-${item.inventoryId || 0}`} className="hover:bg-gray-50">
-                      <TableCell className="w-[120px] px-2">
-                        <div className="font-mono text-sm">{item.productCode}</div>
+                      <TableCell className="w-[100px] px-1">
+                        <div className="font-mono text-xs">{item.productCode}</div>
                       </TableCell>
-                      <TableCell className="w-[200px] px-2">
+                      <TableCell className="w-[160px] px-1">
                         <div>
-                          <div className="font-medium">{item.genericName}</div>
+                          <div className="font-medium text-sm">{item.genericName}</div>
                           {item.commercialName && (
-                            <div className="text-sm text-gray-500">{item.commercialName}</div>
+                            <div className="text-xs text-gray-500">{item.commercialName}</div>
                           )}
                           <Badge 
                             variant="outline" 
@@ -290,10 +290,10 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell className="w-[80px] px-2 text-center font-medium">
+                      <TableCell className="w-[60px] px-1 text-center font-medium text-sm">
                         {item.quantity}
                       </TableCell>
-                      <TableCell className={`w-[120px] px-2 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
+                      <TableCell className={`w-[100px] px-1 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
                         {isEditing ? (
                           <Input
                             type="date"
@@ -302,13 +302,13 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                               ...prev,
                               shipmentDate: e.target.value ? new Date(e.target.value) : null
                             }))}
-                            className="w-32"
+                            className="w-24 text-xs"
                           />
                         ) : (
-                          formatDate(item.shipmentDate)
+                          <div className="text-xs">{formatDate(item.shipmentDate)}</div>
                         )}
                       </TableCell>
-                      <TableCell className={`w-[100px] px-2 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
+                      <TableCell className={`w-[80px] px-1 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
                         {isEditing ? (
                           <Input
                             value={editData.shipmentNumber || ""}
@@ -316,19 +316,19 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                               ...prev,
                               shipmentNumber: e.target.value
                             }))}
-                            className="w-24"
+                            className="w-20 text-xs"
                           />
                         ) : (
-                          item.shipmentNumber || "-"
+                          <div className="text-xs">{item.shipmentNumber || "-"}</div>
                         )}
                       </TableCell>
-                      <TableCell className="w-[100px] px-2 font-mono text-sm">
+                      <TableCell className="w-[80px] px-1 font-mono text-xs">
                         {item.lotNumber}
                       </TableCell>
-                      <TableCell className="w-[100px] px-2">
+                      <TableCell className="w-[80px] px-1 text-xs">
                         {formatDate(item.expiryDate)}
                       </TableCell>
-                      <TableCell className={!item.storageLocation ? "bg-yellow-100" : ""}>
+                      <TableCell className={`w-[100px] px-1 ${!item.storageLocation ? "bg-yellow-100" : ""}`}>
                         {isEditing ? (
                           <Input
                             value={editData.storageLocation || ""}
@@ -336,41 +336,19 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                               ...prev,
                               storageLocation: e.target.value
                             }))}
-                            className="w-32"
+                            className="w-24 text-xs"
                           />
                         ) : (
-                          item.storageLocation || "-"
+                          <div className="text-xs">{item.storageLocation || "-"}</div>
                         )}
                       </TableCell>
-                      <TableCell className={!item.facilityName ? "bg-yellow-100" : ""}>
-                        {isEditing ? (
-                          <Input
-                            value={editData.facilityName || ""}
-                            onChange={(e) => setEditData(prev => ({
-                              ...prev,
-                              facilityName: e.target.value
-                            }))}
-                            className="w-32"
-                          />
-                        ) : (
-                          item.facilityName || "-"
-                        )}
+                      <TableCell className={`w-[100px] px-1 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
+                        <div className="text-xs">{item.facilityName || "-"}</div>
                       </TableCell>
-                      <TableCell className={!item.responsiblePerson ? "bg-yellow-100" : ""}>
-                        {isEditing ? (
-                          <Input
-                            value={editData.responsiblePerson || ""}
-                            onChange={(e) => setEditData(prev => ({
-                              ...prev,
-                              responsiblePerson: e.target.value
-                            }))}
-                            className="w-32"
-                          />
-                        ) : (
-                          item.responsiblePerson || "-"
-                        )}
+                      <TableCell className={`w-[80px] px-1 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
+                        <div className="text-xs">{item.responsiblePerson || "-"}</div>
                       </TableCell>
-                      <TableCell className={!item.remarks ? "bg-yellow-100" : ""}>
+                      <TableCell className={`w-[100px] px-1 ${!item.remarks ? "bg-yellow-100" : ""}`}>
                         {isEditing ? (
                           <Input
                             value={editData.remarks || ""}
@@ -378,14 +356,14 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                               ...prev,
                               remarks: e.target.value
                             }))}
-                            className="w-32"
+                            className="w-24 text-xs"
                           />
                         ) : (
-                          item.remarks || "-"
+                          <div className="text-xs">{item.remarks || "-"}</div>
                         )}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
+                      <TableCell className="w-[60px] px-1">
+                        <div className="flex items-center justify-center">
                           {isEditing ? (
                             <>
                               <Button
