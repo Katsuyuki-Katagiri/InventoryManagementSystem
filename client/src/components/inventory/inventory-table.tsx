@@ -216,41 +216,22 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {/* Fixed Header Row */}
-        <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
-          <div className="flex items-center py-3 px-2 text-sm font-medium text-gray-700 overflow-x-auto">
-            <div className="w-[100px] flex-shrink-0 px-1 text-xs">商品コード</div>
-            <div className="w-[160px] flex-shrink-0 px-1 text-xs">製品名</div>
-            <div className="w-[60px] flex-shrink-0 px-1 text-xs text-center">在庫数</div>
-            <div className="w-[100px] flex-shrink-0 px-1 text-xs">出荷伝票日付</div>
-            <div className="w-[80px] flex-shrink-0 px-1 text-xs">出荷伝票№</div>
-            <div className="w-[80px] flex-shrink-0 px-1 text-xs">LOT</div>
-            <div className="w-[80px] flex-shrink-0 px-1 text-xs">UBD</div>
-            <div className="w-[100px] flex-shrink-0 px-1 text-xs">保管場所</div>
-            <div className="w-[100px] flex-shrink-0 px-1 text-xs">施設名</div>
-            <div className="w-[80px] flex-shrink-0 px-1 text-xs">担当者名</div>
-            <div className="w-[100px] flex-shrink-0 px-1 text-xs">備考</div>
-            <div className="w-[60px] flex-shrink-0 px-1 text-xs">操作</div>
-          </div>
-        </div>
-
-        {/* Scrollable Table Content */}
-        <div className="h-[calc(100vh-450px)] overflow-auto">
-          <Table className="w-full">
-            <TableHeader className="sr-only">
+        <div className="h-[calc(100vh-400px)] overflow-auto border">
+          <Table className="w-full table-fixed">
+            <TableHeader className="sticky top-0 bg-white z-10 border-b-2 border-gray-300">
               <TableRow>
-                <TableHead>商品コード</TableHead>
-                <TableHead>製品名</TableHead>
-                <TableHead>在庫数</TableHead>
-                <TableHead>出荷伝票日付</TableHead>
-                <TableHead>出荷伝票№</TableHead>
-                <TableHead>LOT</TableHead>
-                <TableHead>UBD</TableHead>
-                <TableHead>保管場所</TableHead>
-                <TableHead>施設名</TableHead>
-                <TableHead>担当者名</TableHead>
-                <TableHead>備考</TableHead>
-                <TableHead>操作</TableHead>
+                <TableHead className="w-[100px] px-1 text-xs font-medium bg-white sticky top-0">商品コード</TableHead>
+                <TableHead className="w-[160px] px-1 text-xs font-medium bg-white sticky top-0">製品名</TableHead>
+                <TableHead className="w-[60px] px-1 text-xs font-medium text-center bg-white sticky top-0">在庫数</TableHead>
+                <TableHead className="w-[100px] px-1 text-xs font-medium bg-white sticky top-0">出荷伝票日付</TableHead>
+                <TableHead className="w-[80px] px-1 text-xs font-medium bg-white sticky top-0">出荷伝票№</TableHead>
+                <TableHead className="w-[80px] px-1 text-xs font-medium bg-white sticky top-0">LOT</TableHead>
+                <TableHead className="w-[80px] px-1 text-xs font-medium bg-white sticky top-0">UBD</TableHead>
+                <TableHead className="w-[100px] px-1 text-xs font-medium bg-white sticky top-0">保管場所</TableHead>
+                <TableHead className="w-[100px] px-1 text-xs font-medium bg-white sticky top-0">施設名</TableHead>
+                <TableHead className="w-[80px] px-1 text-xs font-medium bg-white sticky top-0">担当者名</TableHead>
+                <TableHead className="w-[100px] px-1 text-xs font-medium bg-white sticky top-0">備考</TableHead>
+                <TableHead className="w-[60px] px-1 text-xs font-medium text-center bg-white sticky top-0">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
