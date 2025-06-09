@@ -505,7 +505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`Product ${productData.productCode} already exists, using existing product ID: ${existingProduct.id}`);
           } else {
             // Validate the data using schema
-            const validatedData = insertMedicalProductSchema.parse(productData);
+            const validatedData = insertProductSchema.parse(productData);
 
             // Create new product
             productToUse = await storage.createProduct(validatedData);
