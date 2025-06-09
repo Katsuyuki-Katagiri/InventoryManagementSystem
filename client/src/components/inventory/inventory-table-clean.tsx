@@ -177,6 +177,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
           {/* 固定ヘッダー */}
           <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
             <div className="flex bg-white text-xs font-medium text-gray-700 py-3 px-2" style={{ minWidth: '1200px' }}>
+              <div className="w-12 px-1 text-center border-r border-gray-200 flex-shrink-0">行No</div>
               <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">商品コード</div>
               <div className="w-40 px-1 text-left border-r border-gray-200 flex-shrink-0">製品名</div>
               <div className="w-16 px-1 text-center border-r border-gray-200 flex-shrink-0">在庫数</div>
@@ -204,11 +205,12 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                 {searchQuery ? "検索条件に一致する商品が見つかりません" : "在庫データがありません"}
               </div>
             ) : (
-              filteredItems.map((item: InventoryItem) => {
+              filteredItems.map((item: InventoryItem, index: number) => {
                 const isEditing = editingRow === (item.inventoryId || item.id);
                 
                 return (
                   <div key={`${item.id}-${item.inventoryId || 0}`} className="flex py-2 border-b hover:bg-gray-50 text-xs" style={{ minWidth: '1200px' }}>
+                    <div className="w-12 px-1 text-center border-r border-gray-200 flex-shrink-0 text-gray-500">{index + 1}</div>
                     <div className="w-24 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.productCode}</div>
                     <div className="w-40 px-1 border-r border-gray-200 flex-shrink-0">
                       <div className="font-medium text-sm truncate">{item.genericName}</div>
