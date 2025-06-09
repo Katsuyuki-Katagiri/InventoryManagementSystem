@@ -140,6 +140,20 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
     return format(new Date(date), "yyyy/MM/dd", { locale: ja });
   };
 
+  const getCategoryBadgeColor = (category: string) => {
+    const colorMap: { [key: string]: string } = {
+      "人工心肺回路": "bg-red-100 text-red-800 border-red-300",
+      "補助循環回路": "bg-blue-100 text-blue-800 border-blue-300", 
+      "IVセット": "bg-green-100 text-green-800 border-green-300",
+      "輸液ポンプ": "bg-purple-100 text-purple-800 border-purple-300",
+      "シリンジポンプ": "bg-yellow-100 text-yellow-800 border-yellow-300",
+      "人工呼吸器": "bg-orange-100 text-orange-800 border-orange-300",
+      "モニター": "bg-pink-100 text-pink-800 border-pink-300",
+      "その他": "bg-gray-100 text-gray-800 border-gray-300"
+    };
+    return colorMap[category] || "bg-gray-100 text-gray-800 border-gray-300";
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="sticky top-0 bg-white z-10 border-b">
@@ -202,22 +216,22 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[calc(100vh-400px)] overflow-auto">
-          <Table>
-            <TableHeader className="sticky top-0 bg-white z-10 border-b">
+        <div className="h-[calc(100vh-400px)] overflow-auto relative">
+          <Table className="inventory-table">
+            <TableHeader>
               <TableRow>
-                <TableHead className="bg-white">商品コード</TableHead>
-                <TableHead className="bg-white">製品名</TableHead>
-                <TableHead className="bg-white">在庫数</TableHead>
-                <TableHead className="bg-white">出荷伝票日付</TableHead>
-                <TableHead className="bg-white">出荷伝票№</TableHead>
-                <TableHead className="bg-white">LOT</TableHead>
-                <TableHead className="bg-white">UBD</TableHead>
-                <TableHead className="bg-white">保管場所</TableHead>
-                <TableHead className="bg-white">施設名</TableHead>
-                <TableHead className="bg-white">担当者名</TableHead>
-                <TableHead className="bg-white">備考</TableHead>
-                <TableHead className="bg-white">操作</TableHead>
+                <TableHead className="sticky-header sticky-col-1">商品コード</TableHead>
+                <TableHead className="sticky-header sticky-col-2">製品名</TableHead>
+                <TableHead className="sticky-header min-w-[80px]">在庫数</TableHead>
+                <TableHead className="sticky-header min-w-[120px]">出荷伝票日付</TableHead>
+                <TableHead className="sticky-header min-w-[100px]">出荷伝票№</TableHead>
+                <TableHead className="sticky-header min-w-[100px]">LOT</TableHead>
+                <TableHead className="sticky-header min-w-[100px]">UBD</TableHead>
+                <TableHead className="sticky-header min-w-[120px]">保管場所</TableHead>
+                <TableHead className="sticky-header min-w-[120px]">施設名</TableHead>
+                <TableHead className="sticky-header min-w-[100px]">担当者名</TableHead>
+                <TableHead className="sticky-header min-w-[120px]">備考</TableHead>
+                <TableHead className="sticky-header min-w-[80px]">操作</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -240,14 +254,17 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
                   
                   return (
                     <TableRow key={`${item.id}-${item.inventoryId || 0}`} className="hover:bg-gray-50">
-                      <TableCell className="font-mono text-sm">{item.productCode}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-mono text-sm sticky-col-1">{item.productCode}</TableCell>
+                      <TableCell className="sticky-col-2">
                         <div>
                           <div className="font-medium">{item.genericName}</div>
                           {item.commercialName && (
                             <div className="text-sm text-gray-500">{item.commercialName}</div>
                           )}
-                          <Badge variant="outline" className="mt-1 text-xs">
+                          <Badge 
+                            variant="outline" 
+                            className={`mt-1 text-xs ${getCategoryBadgeColor(item.category)}`}
+                          >
                             {item.category}
                           </Badge>
                         </div>
