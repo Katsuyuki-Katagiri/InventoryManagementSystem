@@ -51,6 +51,8 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
   const [searchQuery, setSearchQuery] = useState("");
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editData, setEditData] = useState<Partial<InventoryItem>>({});
+  const [departmentFilter, setDepartmentFilter] = useState("");
+  const [responsiblePersonFilter, setResponsiblePersonFilter] = useState("");
 
   // Fetch inventory data with product details filtered by month
   const { data: inventoryItems = [], isLoading } = useQuery<InventoryItem[]>({
@@ -88,11 +90,24 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
     },
   });
 
-  const filteredItems = inventoryItems.filter(item =>
-    item.productCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.genericName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.commercialName?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter items only with stock quantity > 0 and apply filters
+  const filteredItems = inventoryItems.filter(item => {
+    // Only show items with stock
+    if (item.quantity <= 0) return false;
+    
+    const matchesSearch = item.productCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.genericName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.commercialName?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesDepartment = !departmentFilter || departmentFilter === "all" || (item as any).departmentName === departmentFilter;
+    const matchesResponsiblePerson = !responsiblePersonFilter || responsiblePersonFilter === "all" || item.responsiblePerson === responsiblePersonFilter;
+    
+    return matchesSearch && matchesDepartment && matchesResponsiblePerson;
+  });
+
+  // Get unique departments and responsible persons for filters
+  const uniqueDepartments = Array.from(new Set(inventoryItems.map((item: any) => item.departmentName).filter(Boolean)));
+  const uniqueResponsiblePersons = Array.from(new Set(inventoryItems.map(item => item.responsiblePerson).filter(Boolean))).filter(person => person !== null) as string[];
 
   const handleEdit = (item: InventoryItem) => {
     setEditingRow(item.inventoryId || item.id);
@@ -127,28 +142,62 @@ export default function InventoryTable({ selectedMonth, onAddProduct, onImportEx
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="text-lg font-semibold">在庫管理リスト</CardTitle>
-          <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
-            <div className="relative">
+      <CardHeader className="sticky top-0 bg-white z-10 border-b">
+        <div className="flex flex-col space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <CardTitle className="text-lg font-semibold">在庫管理リスト</CardTitle>
+            <div className="flex flex-col sm:flex-row gap-2 mt-4 sm:mt-0">
+              <Button variant="outline" onClick={onImportExcel}>
+                <Upload className="mr-2 h-4 w-4" />
+                Excelインポート
+              </Button>
+              <Button onClick={onAddProduct}>
+                <Plus className="mr-2 h-4 w-4" />
+                商品追加
+              </Button>
+            </div>
+          </div>
+          
+          {/* Filter Controls */}
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
               <Input
                 type="text"
                 placeholder="商品を検索..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 w-full sm:w-64"
+                className="pl-10"
               />
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             </div>
-            <Button variant="outline" onClick={onImportExcel}>
-              <Upload className="mr-2 h-4 w-4" />
-              Excelインポート
-            </Button>
-            <Button onClick={onAddProduct}>
-              <Plus className="mr-2 h-4 w-4" />
-              商品追加
-            </Button>
+            
+            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="部門で絞り込み" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">すべての部門</SelectItem>
+                {uniqueDepartments.map((dept) => (
+                  <SelectItem key={dept} value={dept}>
+                    {dept}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            <Select value={responsiblePersonFilter} onValueChange={setResponsiblePersonFilter}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="担当者で絞り込み" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">すべての担当者</SelectItem>
+                {uniqueResponsiblePersons.map((person) => (
+                  <SelectItem key={person} value={person}>
+                    {person}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </CardHeader>
