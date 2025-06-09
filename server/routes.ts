@@ -6,7 +6,7 @@ import { z } from "zod";
 import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
-import { medicalProducts, inventory, departments, facilities, insertMedicalProductSchema } from '../shared/medical-schema';
+import { products, inventory, departments, facilities, insertProductSchema } from '../shared/schema';
 import { eq, and, sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -95,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create new product
   app.post("/api/products", async (req, res) => {
     try {
-      const validatedData = insertMedicalProductSchema.parse(req.body);
+      const validatedData = insertProductSchema.parse(req.body);
 
       // Check if product code already exists
       const existingProduct = await storage.getProductByCode(validatedData.productCode);
@@ -179,7 +179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid product ID" });
       }
 
-      const validatedData = insertMedicalProductSchema.partial().parse(req.body);
+      const validatedData = insertProductSchema.partial().parse(req.body);
 
       // If updating product code, check if it's already taken by another product
       if (validatedData.productCode) {
@@ -295,10 +295,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const matchingInventory = await db
             .select()
             .from(inventory)
-            .innerJoin(medicalProducts, eq(inventory.productId, medicalProducts.id))
+            .innerJoin(products, eq(inventory.productId, products.id))
             .where(
               and(
-                eq(medicalProducts.productCode, productCode),
+                eq(products.productCode, productCode),
                 eq(inventory.lotNumber, lotNumber)
               )
             );
@@ -310,7 +310,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await db
               .update(inventory)
               .set({
-                shipmentDate: shipmentDate ? shipmentDate : null,
+                shipmentDate: shipmentDate ? new Date(shipmentDate) : null,
                 shipmentNumber: shipmentNumber || null,
                 facilityName: facilityName || null,
                 responsiblePerson: responsiblePerson || null,
