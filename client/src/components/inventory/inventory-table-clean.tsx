@@ -114,13 +114,13 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
       item.productCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.commercialName?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesDepartment = !selectedDepartment || item.facilityName === selectedDepartment;
-    const matchesPerson = !selectedPerson || item.responsiblePerson === selectedPerson;
+    const matchesDepartment = !selectedDepartment || selectedDepartment === "all" || item.facilityName === selectedDepartment;
+    const matchesPerson = !selectedPerson || selectedPerson === "all" || item.responsiblePerson === selectedPerson;
     
     return matchesSearch && matchesDepartment && matchesPerson;
   });
 
-  const uniquePersons = Array.from(new Set((inventoryData as InventoryItem[]).map((item: InventoryItem) => item.responsiblePerson).filter(Boolean)));
+  const uniquePersons = Array.from(new Set((inventoryData as InventoryItem[]).map((item: InventoryItem) => item.responsiblePerson).filter(Boolean))) as string[];
 
   return (
     <Card className="w-full">
@@ -144,10 +144,10 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
               <SelectValue placeholder="部門で絞り込み" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">すべての部門</SelectItem>
-              {departments.map((dept: Department) => (
-                <SelectItem key={dept.id} value={dept.name}>
-                  {dept.name}
+              <SelectItem value="all">すべての部門</SelectItem>
+              {(departments as Department[]).map((dept: Department) => (
+                <SelectItem key={dept.id} value={dept.departmentName}>
+                  {dept.departmentName}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -157,7 +157,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
               <SelectValue placeholder="担当者で絞り込み" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">すべての担当者</SelectItem>
+              <SelectItem value="all">すべての担当者</SelectItem>
               {uniquePersons.map((person) => (
                 <SelectItem key={person} value={person}>
                   {person}
