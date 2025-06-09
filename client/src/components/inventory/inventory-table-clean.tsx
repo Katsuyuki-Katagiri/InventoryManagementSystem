@@ -56,7 +56,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
 
   const updateInventoryMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: any }) => {
-      return apiRequest(`/api/inventory/${id}`, "PATCH", data);
+      return apiRequest("PATCH", `/api/inventory/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/inventory/detailed"] });
