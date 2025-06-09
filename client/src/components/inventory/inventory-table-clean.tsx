@@ -168,27 +168,27 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="relative">
+        <div className="relative overflow-x-auto">
           {/* 固定ヘッダー */}
           <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
-            <div className="flex bg-white text-xs font-medium text-gray-700 py-3 px-2 min-w-max">
-              <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">商品コード</div>
-              <div className="w-32 px-1 text-left border-r border-gray-200 flex-shrink-0">製品名</div>
-              <div className="w-12 px-1 text-center border-r border-gray-200 flex-shrink-0">在庫数</div>
-              <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">出荷伝票日付</div>
-              <div className="w-16 px-1 text-left border-r border-gray-200 flex-shrink-0">出荷伝票№</div>
-              <div className="w-16 px-1 text-left border-r border-gray-200 flex-shrink-0">LOT</div>
-              <div className="w-16 px-1 text-left border-r border-gray-200 flex-shrink-0">UBD</div>
-              <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">保管場所</div>
-              <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">施設名</div>
-              <div className="w-16 px-1 text-left border-r border-gray-200 flex-shrink-0">担当者名</div>
-              <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">備考</div>
-              <div className="w-12 px-1 text-center flex-shrink-0">操作</div>
+            <div className="flex bg-white text-xs font-medium text-gray-700 py-3 px-2" style={{ minWidth: '1200px' }}>
+              <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">商品コード</div>
+              <div className="w-40 px-1 text-left border-r border-gray-200 flex-shrink-0">製品名</div>
+              <div className="w-16 px-1 text-center border-r border-gray-200 flex-shrink-0">在庫数</div>
+              <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">出荷伝票日付</div>
+              <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">出荷伝票№</div>
+              <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">LOT</div>
+              <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">UBD</div>
+              <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">保管場所</div>
+              <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">施設名</div>
+              <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">担当者名</div>
+              <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">備考</div>
+              <div className="w-16 px-1 text-center flex-shrink-0">操作</div>
             </div>
           </div>
           
           {/* スクロール可能なコンテンツ */}
-          <div className="h-[calc(100vh-450px)] overflow-auto">
+          <div className="h-[calc(100vh-450px)] overflow-y-auto overflow-x-auto">
             <div className="px-2">
               {isLoading ? (
                 <div className="text-center py-8">
@@ -204,9 +204,9 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                   const isEditing = editingRow === (item.inventoryId || item.id);
                   
                   return (
-                    <div key={`${item.id}-${item.inventoryId || 0}`} className="flex py-2 border-b hover:bg-gray-50 text-xs min-w-max">
-                      <div className="w-20 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.productCode}</div>
-                      <div className="w-32 px-1 border-r border-gray-200 flex-shrink-0">
+                    <div key={`${item.id}-${item.inventoryId || 0}`} className="flex py-2 border-b hover:bg-gray-50 text-xs" style={{ minWidth: '1200px' }}>
+                      <div className="w-24 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.productCode}</div>
+                      <div className="w-40 px-1 border-r border-gray-200 flex-shrink-0">
                         <div className="font-medium text-sm truncate">{item.genericName}</div>
                         {item.commercialName && (
                           <div className="text-xs text-gray-500 truncate">{item.commercialName}</div>
@@ -218,28 +218,28 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                           {item.category}
                         </Badge>
                       </div>
-                      <div className="w-12 px-1 text-center font-medium border-r border-gray-200 flex-shrink-0">{item.quantity}</div>
-                      <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
+                      <div className="w-16 px-1 text-center font-medium border-r border-gray-200 flex-shrink-0">{item.quantity}</div>
+                      <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentDate ? "bg-yellow-100" : ""}`}>
                         {formatDate(item.shipmentDate)}
                       </div>
-                      <div className={`w-16 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
+                      <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.shipmentNumber ? "bg-yellow-100" : ""}`}>
                         {item.shipmentNumber || "-"}
                       </div>
-                      <div className="w-16 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.lotNumber}</div>
-                      <div className="w-16 px-1 border-r border-gray-200 flex-shrink-0">{formatDate(item.expiryDate)}</div>
-                      <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.storageLocation ? "bg-yellow-100" : ""}`}>
+                      <div className="w-20 px-1 font-mono border-r border-gray-200 flex-shrink-0">{item.lotNumber}</div>
+                      <div className="w-20 px-1 border-r border-gray-200 flex-shrink-0">{formatDate(item.expiryDate)}</div>
+                      <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.storageLocation ? "bg-yellow-100" : ""}`}>
                         {item.storageLocation || "-"}
                       </div>
-                      <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
+                      <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
                         {item.facilityName || "-"}
                       </div>
-                      <div className={`w-16 px-1 border-r border-gray-200 flex-shrink-0 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
+                      <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
                         {item.responsiblePerson || "-"}
                       </div>
-                      <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.remarks ? "bg-yellow-100" : ""}`}>
+                      <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.remarks ? "bg-yellow-100" : ""}`}>
                         {item.remarks || "-"}
                       </div>
-                      <div className="w-12 px-1 text-center flex-shrink-0">
+                      <div className="w-16 px-1 text-center flex-shrink-0">
                         {isEditing ? (
                           <div className="flex flex-col gap-1">
                             <Button size="sm" onClick={handleSave} disabled={updateInventoryMutation.isPending}>
