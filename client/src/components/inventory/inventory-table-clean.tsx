@@ -40,8 +40,9 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
   const queryClient = useQueryClient();
 
   const { data: inventoryData = [], isLoading } = useQuery({
-    queryKey: ["/api/inventory/detailed", selectedMonth],
+    queryKey: ["/api/inventory/detailed", selectedMonth, selectedDepartment],
     queryFn: getQueryFn({ on401: "throw" }),
+    select: (data) => data,
   });
 
   const { data: departments = [] } = useQuery({

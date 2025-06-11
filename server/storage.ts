@@ -38,7 +38,7 @@ export interface IStorage {
   }>;
   getExpiringProducts(days: number): Promise<any[]>;
   getLowStockProducts(): Promise<any[]>;
-  getDetailedInventoryData(month?: string): Promise<any[]>;
+  getDetailedInventoryData(month?: string, department?: string): Promise<any[]>;
   updateInventoryItem(id: number, updates: any): Promise<any>;
 
   // Department operations
@@ -224,7 +224,7 @@ class DatabaseStorage implements IStorage {
     return lowStockQuery;
   }
 
-  async getDetailedInventoryData(month?: string): Promise<any[]> {
+  async getDetailedInventoryData(month?: string, department?: string): Promise<any[]> {
     const baseQuery = db
       .select({
         id: inventory.id,
@@ -253,8 +253,16 @@ class DatabaseStorage implements IStorage {
       .innerJoin(products, eq(inventory.productId, products.id))
       .innerJoin(departments, eq(inventory.departmentId, departments.id));
 
+    const conditions = [];
     if (month) {
-      return await baseQuery.where(eq(inventory.inventoryMonth, month)).orderBy(desc(inventory.createdAt));
+      conditions.push(eq(inventory.inventoryMonth, month));
+    }
+    if (department && department !== "all") {
+      conditions.push(eq(departments.departmentName, department));
+    }
+
+    if (conditions.length > 0) {
+      return await baseQuery.where(and(...conditions)).orderBy(desc(inventory.createdAt));
     }
 
     return await baseQuery.orderBy(desc(inventory.createdAt));
