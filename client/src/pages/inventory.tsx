@@ -119,7 +119,7 @@ export default function InventoryPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
           <div className="lg:col-span-3">
-            <StatsCards stats={stats} />
+            <StatsCards stats={stats} filteredData={filteredInventoryData} />
           </div>
           <div>
             <MonthlySelector

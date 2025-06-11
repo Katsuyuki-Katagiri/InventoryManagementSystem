@@ -10,6 +10,7 @@ interface StatsCardsProps {
     totalValue: number;
     categories: number;
   };
+  filteredData?: any[];
 }
 
 interface InventoryStats {
@@ -23,12 +24,31 @@ interface InventoryStats {
   };
 }
 
-export default function StatsCards({ stats }: StatsCardsProps) {
+export default function StatsCards({ stats, filteredData = [] }: StatsCardsProps) {
   const { data: inventoryStats } = useQuery<InventoryStats>({
     queryKey: ["/api/inventory/stats"],
   });
 
-  if (!stats || !inventoryStats) {
+  // Calculate filtered statistics from the provided data
+  const now = new Date();
+  const oneYearFromNow = new Date();
+  oneYearFromNow.setFullYear(now.getFullYear() + 1);
+
+  const filteredStats = {
+    totalInventory: filteredData.length,
+    expiringWithinYear: filteredData.filter(item => {
+      if (!item.expiryDate) return false;
+      const expiryDate = new Date(item.expiryDate);
+      return expiryDate > now && expiryDate <= oneYearFromNow;
+    }).length,
+    expiredItems: filteredData.filter(item => {
+      if (!item.expiryDate) return false;
+      const expiryDate = new Date(item.expiryDate);
+      return expiryDate <= now;
+    }).length
+  };
+
+  if (!stats) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {[...Array(3)].map((_, i) => (
@@ -72,12 +92,12 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-slate-600">在庫総数</p>
-                <p className="text-2xl font-semibold text-slate-900">{inventoryStats.totalInventory}</p>
+                <p className="text-2xl font-semibold text-slate-900">{filteredStats.totalInventory}</p>
               </div>
             </div>
             <div className="flex items-center text-sm text-slate-500">
-              {getTrendIcon(inventoryStats.totalInventory, inventoryStats.previousMonth.totalInventory)}
-              <span className="ml-1">{getTrendText(inventoryStats.totalInventory, inventoryStats.previousMonth.totalInventory)}</span>
+              {inventoryStats && getTrendIcon(filteredStats.totalInventory, inventoryStats.previousMonth.totalInventory)}
+              <span className="ml-1">{inventoryStats ? getTrendText(filteredStats.totalInventory, inventoryStats.previousMonth.totalInventory) : "データ読込中"}</span>
             </div>
           </div>
         </CardContent>
@@ -92,12 +112,12 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-slate-600">UBD1年未満</p>
-                <p className="text-2xl font-semibold text-slate-900">{inventoryStats.expiringWithinYear}</p>
+                <p className="text-2xl font-semibold text-slate-900">{filteredStats.expiringWithinYear}</p>
               </div>
             </div>
             <div className="flex items-center text-sm text-slate-500">
-              {getTrendIcon(inventoryStats.expiringWithinYear, inventoryStats.previousMonth.expiringWithinYear)}
-              <span className="ml-1">{getTrendText(inventoryStats.expiringWithinYear, inventoryStats.previousMonth.expiringWithinYear)}</span>
+              {inventoryStats && getTrendIcon(filteredStats.expiringWithinYear, inventoryStats.previousMonth.expiringWithinYear)}
+              <span className="ml-1">{inventoryStats ? getTrendText(filteredStats.expiringWithinYear, inventoryStats.previousMonth.expiringWithinYear) : "データ読込中"}</span>
             </div>
           </div>
         </CardContent>
@@ -112,12 +132,12 @@ export default function StatsCards({ stats }: StatsCardsProps) {
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-slate-600">UBD期限切れ</p>
-                <p className="text-2xl font-semibold text-slate-900">{inventoryStats.expiredItems}</p>
+                <p className="text-2xl font-semibold text-slate-900">{filteredStats.expiredItems}</p>
               </div>
             </div>
             <div className="flex items-center text-sm text-slate-500">
-              {getTrendIcon(inventoryStats.expiredItems, inventoryStats.previousMonth.expiredItems)}
-              <span className="ml-1">{getTrendText(inventoryStats.expiredItems, inventoryStats.previousMonth.expiredItems)}</span>
+              {inventoryStats && getTrendIcon(filteredStats.expiredItems, inventoryStats.previousMonth.expiredItems)}
+              <span className="ml-1">{inventoryStats ? getTrendText(filteredStats.expiredItems, inventoryStats.previousMonth.expiredItems) : "データ読込中"}</span>
             </div>
           </div>
         </CardContent>
