@@ -38,8 +38,31 @@ export default function InventoryPage() {
   });
 
   const { data: inventoryData = [] } = useQuery({
+    queryKey: ["/api/inventory/detailed", selectedMonth, selectedDepartment],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedMonth) params.append("month", selectedMonth);
+      if (selectedDepartment && selectedDepartment !== "all") params.append("department", selectedDepartment);
+      
+      const url = `/api/inventory/detailed${params.toString() ? `?${params.toString()}` : ""}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch inventory data");
+      return response.json();
+    },
+  });
+
+  // Get all departments for the dropdown (not filtered)
+  const { data: allInventoryData = [] } = useQuery({
     queryKey: ["/api/inventory/detailed", selectedMonth],
-    enabled: true,
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedMonth) params.append("month", selectedMonth);
+      
+      const url = `/api/inventory/detailed${params.toString() ? `?${params.toString()}` : ""}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch inventory data");
+      return response.json();
+    },
   });
 
   const handleEditProduct = (product: Product) => {
@@ -58,20 +81,17 @@ export default function InventoryPage() {
     setCategoryFilter(category === "all" ? "" : category);
   };
 
-  // Extract unique department names from inventory data
+  // Extract unique department names from all inventory data (for dropdown)
   const uniqueDepartments = Array.from(
     new Set(
-      (inventoryData as any[])
+      (allInventoryData as any[])
         .map((item: any) => item.departmentName)
         .filter(Boolean)
     )
   ) as string[];
 
-  // Filter inventory data based on selected department
-  const filteredInventoryData = (inventoryData as any[]).filter((item: any) => {
-    if (!selectedDepartment || selectedDepartment === "all") return true;
-    return item.departmentName === selectedDepartment;
-  });
+  // Use the already filtered inventory data from API
+  const filteredInventoryData = inventoryData as any[];
 
   return (
     <div className="min-h-screen bg-slate-50">

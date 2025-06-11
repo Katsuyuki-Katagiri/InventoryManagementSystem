@@ -41,8 +41,16 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
 
   const { data: inventoryData = [], isLoading } = useQuery({
     queryKey: ["/api/inventory/detailed", selectedMonth, selectedDepartment],
-    queryFn: getQueryFn({ on401: "throw" }),
-    select: (data) => data,
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (selectedMonth) params.append("month", selectedMonth);
+      if (selectedDepartment && selectedDepartment !== "all") params.append("department", selectedDepartment);
+      
+      const url = `/api/inventory/detailed${params.toString() ? `?${params.toString()}` : ""}`;
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Failed to fetch inventory data");
+      return response.json();
+    },
   });
 
   const { data: departments = [] } = useQuery({
