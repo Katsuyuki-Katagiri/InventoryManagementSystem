@@ -747,7 +747,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const month = req.query.month as string;
       const department = req.query.department as string;
+      console.log(`Department filter: "${department}"`);
       const inventoryData = await storage.getDetailedInventoryData(month, department);
+      console.log(`Found ${inventoryData.length} items`);
       res.json(inventoryData);
     } catch (error) {
       console.error("Error getting detailed inventory:", error);

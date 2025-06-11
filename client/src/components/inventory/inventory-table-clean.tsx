@@ -45,7 +45,7 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
       const params = new URLSearchParams();
       if (selectedMonth) params.append("month", selectedMonth);
       if (selectedDepartment && selectedDepartment !== "all") {
-        params.append("department", encodeURIComponent(selectedDepartment));
+        params.append("department", selectedDepartment);
       }
       
       const url = `/api/inventory/detailed${params.toString() ? `?${params.toString()}` : ""}`;
