@@ -14,7 +14,6 @@ import type { Product, Department, Facility } from "@shared/schema";
 interface InventoryTableProps {
   selectedMonth: string;
   onAddProduct: () => void;
-  onImportExcel: () => void;
 }
 
 interface InventoryItem extends Product {
@@ -30,7 +29,7 @@ interface InventoryItem extends Product {
   remarks: string | null;
 }
 
-export default function InventoryTableClean({ selectedMonth, onAddProduct, onImportExcel }: InventoryTableProps) {
+export default function InventoryTableClean({ selectedMonth, onAddProduct }: InventoryTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedPerson, setSelectedPerson] = useState("");
@@ -122,6 +121,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
       shipmentNumber: item.shipmentNumber,
       lotNumber: item.lotNumber,
       expiryDate: item.expiryDate,
+      storageLocation: item.storageLocation,
       facilityName: item.facilityName,
       responsiblePerson: item.responsiblePerson,
       remarks: item.remarks,
@@ -163,7 +163,6 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
           <CardTitle>在庫管理リスト</CardTitle>
           <div className="flex gap-2">
             <Button onClick={onAddProduct}>商品追加</Button>
-            <Button variant="outline" onClick={onImportExcel}>Excelインポート</Button>
           </div>
         </div>
         <div className="flex gap-4 items-center">
@@ -214,7 +213,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
               <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">出荷伝票№</div>
               <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">LOT</div>
               <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">UBD</div>
-
+              <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">保管場所</div>
               <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">施設名</div>
               <div className="w-20 px-1 text-left border-r border-gray-200 flex-shrink-0">担当者名</div>
               <div className="w-24 px-1 text-left border-r border-gray-200 flex-shrink-0">備考</div>
@@ -326,7 +325,20 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct, onImp
                         formatDate(item.expiryDate)
                       )}
                     </div>
-
+                    <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.storageLocation ? "bg-yellow-100" : ""}`}>
+                      {isEditing ? (
+                        <Input
+                          value={editData.storageLocation || ""}
+                          onChange={(e) => setEditData((prev: any) => ({
+                            ...prev,
+                            storageLocation: e.target.value
+                          }))}
+                          className="w-20 text-xs"
+                        />
+                      ) : (
+                        item.storageLocation || "-"
+                      )}
+                    </div>
                     <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
                       {isEditing ? (
                         <Input

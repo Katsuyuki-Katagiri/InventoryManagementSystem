@@ -102,7 +102,6 @@ export default function InventoryPage() {
         <InventoryTableClean
           selectedMonth={selectedMonth}
           onAddProduct={() => setIsAddModalOpen(true)}
-          onImportExcel={() => setIsImportModalOpen(true)}
         />
       </main>
 
