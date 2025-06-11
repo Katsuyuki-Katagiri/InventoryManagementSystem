@@ -243,13 +243,15 @@ class DatabaseStorage implements IStorage {
         shipmentDate: inventory.shipmentDate,
         shipmentNumber: inventory.shipmentNumber,
         facilityName: inventory.facilityName,
+        departmentName: departments.departmentName,
         responsiblePerson: inventory.responsiblePerson,
         remarks: inventory.remarks,
         inventoryMonth: inventory.inventoryMonth,
         departmentId: inventory.departmentId,
       })
       .from(inventory)
-      .innerJoin(products, eq(inventory.productId, products.id));
+      .innerJoin(products, eq(inventory.productId, products.id))
+      .innerJoin(departments, eq(inventory.departmentId, departments.id));
 
     if (month) {
       return await baseQuery.where(eq(inventory.inventoryMonth, month)).orderBy(desc(inventory.createdAt));
