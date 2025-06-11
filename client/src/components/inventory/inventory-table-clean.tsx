@@ -149,7 +149,7 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
       item.productCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.commercialName?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesDepartment = !selectedDepartment || selectedDepartment === "all" || (item as any).departmentName === selectedDepartment;
+    const matchesDepartment = !selectedDepartment || selectedDepartment === "all" || item.departmentName === selectedDepartment;
     const matchesPerson = !selectedPerson || selectedPerson === "all" || item.responsiblePerson === selectedPerson;
     
     return matchesSearch && matchesDepartment && matchesPerson;
