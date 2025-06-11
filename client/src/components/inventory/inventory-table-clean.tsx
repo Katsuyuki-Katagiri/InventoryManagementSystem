@@ -26,6 +26,7 @@ interface InventoryItem extends Product {
   shipmentDate: Date | null;
   shipmentNumber: string | null;
   facilityName: string | null;
+  departmentName: string | null;
   responsiblePerson: string | null;
   remarks: string | null;
 }
@@ -148,7 +149,7 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
       item.productCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.commercialName?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesDepartment = !selectedDepartment || selectedDepartment === "" || item.departmentName === selectedDepartment;
+    const matchesDepartment = !selectedDepartment || selectedDepartment === "all" || (item as any).departmentName === selectedDepartment;
     const matchesPerson = !selectedPerson || selectedPerson === "all" || item.responsiblePerson === selectedPerson;
     
     return matchesSearch && matchesDepartment && matchesPerson;

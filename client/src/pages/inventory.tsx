@@ -89,7 +89,7 @@ export default function InventoryPage() {
                     <SelectValue placeholder="部門を選択" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">全ての部門</SelectItem>
+                    <SelectItem value="all">全ての部門</SelectItem>
                     {uniqueDepartments.map((dept) => (
                       <SelectItem key={dept} value={dept}>
                         {dept}
