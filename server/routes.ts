@@ -746,7 +746,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/inventory/detailed", async (req: Request, res: Response) => {
     try {
       const month = req.query.month as string;
-      const department = req.query.department as string;
+      let department = req.query.department as string;
+      
+      // Decode URL-encoded Japanese characters
+      if (department) {
+        try {
+          department = decodeURIComponent(department);
+        } catch (e) {
+          // If decoding fails, use original value
+        }
+      }
+      
       console.log(`Department filter: "${department}"`);
       const inventoryData = await storage.getDetailedInventoryData(month, department);
       console.log(`Found ${inventoryData.length} items`);
