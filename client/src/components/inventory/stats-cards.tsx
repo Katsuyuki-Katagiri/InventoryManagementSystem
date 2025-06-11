@@ -32,8 +32,8 @@ export default function StatsCards({ stats, filteredData = [] }: StatsCardsProps
   };
 
   return (
-    <div className="flex flex-col gap-4 mb-8">
-      <Card className="w-full">
+    <div className="flex gap-4 mb-8">
+      <Card className="flex-1">
         <CardContent className="p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -47,7 +47,7 @@ export default function StatsCards({ stats, filteredData = [] }: StatsCardsProps
         </CardContent>
       </Card>
       
-      <Card className="w-full">
+      <Card className="flex-1">
         <CardContent className="p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
@@ -61,7 +61,7 @@ export default function StatsCards({ stats, filteredData = [] }: StatsCardsProps
         </CardContent>
       </Card>
 
-      <Card className="w-full">
+      <Card className="flex-1">
         <CardContent className="p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
