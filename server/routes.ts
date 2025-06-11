@@ -676,10 +676,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               quantity: monthEndQuantity,
               lotNumber: lotNumber,
               expiryDate: expiryDate,
-              storageLocation: findColumnValue(row,
-                '事業所名', '保管場所', 'Storage Location', '場所',
-                '倉庫', '保管先', '施設名'
-              ),
+              storageLocation: null, // Leave storage location empty initially
+              facilityName: null, // Only filled for loan items
+              responsiblePerson: null, // Only filled for loan items
               receivedDate: null
             };
 
