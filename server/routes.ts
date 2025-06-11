@@ -755,6 +755,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get inventory statistics
+  app.get("/api/inventory/stats", async (req: Request, res: Response) => {
+    try {
+      const now = new Date();
+      const oneYearFromNow = new Date();
+      oneYearFromNow.setFullYear(now.getFullYear() + 1);
+      
+      const lastMonth = new Date();
+      lastMonth.setMonth(lastMonth.getMonth() - 1);
+      const lastMonthStr = `${lastMonth.getFullYear()}-${String(lastMonth.getMonth() + 1).padStart(2, '0')}`;
+      
+      // Current month stats
+      const totalInventory = await db
+        .select({ total: sql<number>`sum(${inventory.quantity})` })
+        .from(inventory);
+      
+      const expiringWithinYear = await db
+        .select({ total: sql<number>`sum(${inventory.quantity})` })
+        .from(inventory)
+        .where(
+          and(
+            isNotNull(inventory.expiryDate),
+            sql`${inventory.expiryDate} BETWEEN ${now} AND ${oneYearFromNow}`
+          )
+        );
+      
+      const expiredItems = await db
+        .select({ total: sql<number>`sum(${inventory.quantity})` })
+        .from(inventory)
+        .where(
+          and(
+            isNotNull(inventory.expiryDate),
+            sql`${inventory.expiryDate} < ${now}`
+          )
+        );
+      
+      // Previous month stats
+      const previousTotalInventory = await db
+        .select({ total: sql<number>`sum(${inventory.quantity})` })
+        .from(inventory)
+        .where(eq(inventory.inventoryMonth, lastMonthStr));
+      
+      const previousExpiringWithinYear = await db
+        .select({ total: sql<number>`sum(${inventory.quantity})` })
+        .from(inventory)
+        .where(
+          and(
+            eq(inventory.inventoryMonth, lastMonthStr),
+            isNotNull(inventory.expiryDate),
+            sql`${inventory.expiryDate} BETWEEN ${now} AND ${oneYearFromNow}`
+          )
+        );
+      
+      const previousExpiredItems = await db
+        .select({ total: sql<number>`sum(${inventory.quantity})` })
+        .from(inventory)
+        .where(
+          and(
+            eq(inventory.inventoryMonth, lastMonthStr),
+            isNotNull(inventory.expiryDate),
+            sql`${inventory.expiryDate} < ${now}`
+          )
+        );
+      
+      const stats = {
+        totalInventory: totalInventory[0]?.total || 0,
+        expiringWithinYear: expiringWithinYear[0]?.total || 0,
+        expiredItems: expiredItems[0]?.total || 0,
+        previousMonth: {
+          totalInventory: previousTotalInventory[0]?.total || 0,
+          expiringWithinYear: previousExpiringWithinYear[0]?.total || 0,
+          expiredItems: previousExpiredItems[0]?.total || 0,
+        }
+      };
+      
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting inventory stats:", error);
+      res.status(500).json({ error: "統計データの取得に失敗しました" });
+    }
+  });
+
   // Update inventory item
   app.patch("/api/inventory/:id", async (req: Request, res: Response) => {
     try {

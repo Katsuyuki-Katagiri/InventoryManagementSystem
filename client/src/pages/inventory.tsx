@@ -63,12 +63,10 @@ export default function InventoryPage() {
             </div>
             <div className="flex items-center space-x-4">
               <nav className="flex items-center space-x-2 mr-4">
-                <Link href="/inventory">
-                  <Button variant={location === "/" || location === "/inventory" ? "default" : "ghost"} size="sm">
-                    <Box className="h-4 w-4 mr-2" />
-                    在庫管理
-                  </Button>
-                </Link>
+                <Button onClick={() => setIsImportModalOpen(true)} size="sm">
+                  <Box className="h-4 w-4 mr-2" />
+                  Excelインポート
+                </Button>
                 <Link href="/departments">
                   <Button variant={location === "/departments" ? "default" : "ghost"} size="sm">
                     <Building className="h-4 w-4 mr-2" />
