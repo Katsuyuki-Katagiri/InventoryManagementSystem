@@ -294,7 +294,7 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
                         item.shipmentNumber || "-"
                       )}
                     </div>
-                    <div className="w-20 px-1 font-mono border-r border-gray-200 flex-shrink-0">
+                    <div className={`w-20 px-1 font-mono border-r border-gray-200 flex-shrink-0 ${!item.lotNumber ? "bg-yellow-100" : ""}`}>
                       {isEditing ? (
                         <Input
                           value={editData.lotNumber || item.lotNumber}
@@ -308,7 +308,7 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
                         item.lotNumber
                       )}
                     </div>
-                    <div className="w-20 px-1 border-r border-gray-200 flex-shrink-0">
+                    <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.expiryDate ? "bg-yellow-100" : ""}`}>
                       {isEditing ? (
                         <Input
                           type="date"
@@ -337,7 +337,7 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
                         item.storageLocation || "-"
                       )}
                     </div>
-                    <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0`}>
+                    <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
                       {isEditing ? (
                         <Input
                           value={editData.facilityName || ""}
@@ -351,7 +351,7 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
                         item.facilityName || ""
                       )}
                     </div>
-                    <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0`}>
+                    <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
                       {isEditing ? (
                         <Input
                           value={editData.responsiblePerson || ""}
