@@ -7,7 +7,7 @@ import multer from "multer";
 import * as XLSX from "xlsx";
 import { db } from "./db";
 import { products, inventory, departments, facilities, insertProductSchema } from '../shared/schema';
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, isNotNull, desc, or, like } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Configure multer for file uploads
