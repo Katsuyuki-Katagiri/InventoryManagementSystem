@@ -13,6 +13,7 @@ import type { Product, Department, Facility } from "@shared/schema";
 
 interface InventoryTableProps {
   selectedMonth: string;
+  selectedDepartment?: string;
   onAddProduct: () => void;
 }
 
@@ -29,9 +30,8 @@ interface InventoryItem extends Product {
   remarks: string | null;
 }
 
-export default function InventoryTableClean({ selectedMonth, onAddProduct }: InventoryTableProps) {
+export default function InventoryTableClean({ selectedMonth, selectedDepartment, onAddProduct }: InventoryTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState("");
   const [selectedPerson, setSelectedPerson] = useState("");
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editData, setEditData] = useState<any>({});
@@ -148,7 +148,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct }: Inv
       item.productCode?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.commercialName?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesDepartment = !selectedDepartment || selectedDepartment === "all" || item.facilityName === selectedDepartment;
+    const matchesDepartment = !selectedDepartment || selectedDepartment === "" || item.departmentName === selectedDepartment;
     const matchesPerson = !selectedPerson || selectedPerson === "all" || item.responsiblePerson === selectedPerson;
     
     return matchesSearch && matchesDepartment && matchesPerson;
@@ -172,19 +172,7 @@ export default function InventoryTableClean({ selectedMonth, onAddProduct }: Inv
             onChange={(e) => setSearchQuery(e.target.value)}
             className="max-w-sm"
           />
-          <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="部門で絞り込み" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">すべての部門</SelectItem>
-              {(departments as Department[]).map((dept: Department) => (
-                <SelectItem key={dept.id} value={dept.departmentName}>
-                  {dept.departmentName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+
           <Select value={selectedPerson} onValueChange={setSelectedPerson}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="担当者で絞り込み" />

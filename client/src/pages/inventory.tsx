@@ -10,12 +10,14 @@ import ExcelImportModal from "@/components/inventory/excel-import-modal";
 import { type Product } from "@shared/schema";
 import { Box, Bell, User, Building } from "lucide-react";
 import { Link, useLocation } from "wouter";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function InventoryPage() {
   const [location] = useLocation();
   const [selectedMonth, setSelectedMonth] = useState("2025-04");
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -35,6 +37,11 @@ export default function InventoryPage() {
     enabled: true,
   });
 
+  const { data: inventoryData = [] } = useQuery({
+    queryKey: ["/api/inventory/detailed", selectedMonth],
+    enabled: true,
+  });
+
   const handleEditProduct = (product: Product) => {
     setEditingProduct(product);
   };
@@ -50,6 +57,15 @@ export default function InventoryPage() {
   const handleCategoryChange = (category: string) => {
     setCategoryFilter(category === "all" ? "" : category);
   };
+
+  // Extract unique department names from inventory data
+  const uniqueDepartments = Array.from(
+    new Set(
+      (inventoryData as any[])
+        .map((item: any) => item.departmentName)
+        .filter(Boolean)
+    )
+  ) as string[];
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -67,12 +83,20 @@ export default function InventoryPage() {
                   <Box className="h-4 w-4 mr-2" />
                   Excelインポート
                 </Button>
-                <Link href="/departments">
-                  <Button variant={location === "/departments" ? "default" : "ghost"} size="sm">
+                <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+                  <SelectTrigger className="w-48">
                     <Building className="h-4 w-4 mr-2" />
-                    部門管理
-                  </Button>
-                </Link>
+                    <SelectValue placeholder="部門を選択" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">全ての部門</SelectItem>
+                    {uniqueDepartments.map((dept) => (
+                      <SelectItem key={dept} value={dept}>
+                        {dept}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </nav>
               <button className="text-slate-600 hover:text-slate-900 transition-colors">
                 <Bell className="h-5 w-5" />
@@ -101,6 +125,7 @@ export default function InventoryPage() {
         
         <InventoryTableClean
           selectedMonth={selectedMonth}
+          selectedDepartment={selectedDepartment}
           onAddProduct={() => setIsAddModalOpen(true)}
         />
       </main>
