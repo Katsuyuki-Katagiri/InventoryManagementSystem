@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx';
+import XLSX from 'xlsx';
 
 const filePath = './attached_assets/貸出一覧（25-04）_1749634099925.xlsx';
 
