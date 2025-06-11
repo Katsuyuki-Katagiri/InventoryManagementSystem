@@ -67,6 +67,12 @@ export default function InventoryPage() {
     )
   ) as string[];
 
+  // Filter inventory data based on selected department
+  const filteredInventoryData = (inventoryData as any[]).filter((item: any) => {
+    if (!selectedDepartment || selectedDepartment === "all") return true;
+    return item.departmentName === selectedDepartment;
+  });
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}

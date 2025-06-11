@@ -328,10 +328,10 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
                         item.storageLocation || "-"
                       )}
                     </div>
-                    <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.facilityName ? "bg-yellow-100" : ""}`}>
+                    <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0`}>
                       {isEditing ? (
                         <Input
-                          value={editData.facilityName || item.facilityName || ""}
+                          value={editData.facilityName || ""}
                           onChange={(e) => setEditData((prev: any) => ({
                             ...prev,
                             facilityName: e.target.value
@@ -339,10 +339,10 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
                           className="w-20 text-xs"
                         />
                       ) : (
-                        item.facilityName || "-"
+                        item.facilityName || ""
                       )}
                     </div>
-                    <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0 ${!item.responsiblePerson ? "bg-yellow-100" : ""}`}>
+                    <div className={`w-20 px-1 border-r border-gray-200 flex-shrink-0`}>
                       {isEditing ? (
                         <Input
                           value={editData.responsiblePerson || ""}
@@ -353,7 +353,7 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
                           className="w-16 text-xs"
                         />
                       ) : (
-                        item.responsiblePerson || "-"
+                        item.responsiblePerson || ""
                       )}
                     </div>
                     <div className={`w-24 px-1 border-r border-gray-200 flex-shrink-0 ${!item.remarks ? "bg-yellow-100" : ""}`}>
