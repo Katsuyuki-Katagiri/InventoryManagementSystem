@@ -201,7 +201,7 @@ export default function InventoryTableClean({ selectedMonth, selectedDepartment,
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[calc(100vh-450px)] overflow-auto">
+        <div className="h-[calc(100vh-240px)] overflow-auto">
           {/* 固定ヘッダー */}
           <div className="sticky top-0 z-50 bg-white border-b-2 border-gray-300 shadow-sm">
             <div className="flex bg-white text-xs font-medium text-gray-700 py-3 px-2" style={{ minWidth: '1200px' }}>
