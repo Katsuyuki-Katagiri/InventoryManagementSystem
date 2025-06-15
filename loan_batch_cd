@@ -1,0 +1,50 @@
+    AND i.lot_number = '251054'
+    AND i.expiry_date = '2027-04-03'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000739',
+  facility_name = '帝京板橋',
+  responsible_person = '山下　亮輔',
+  shipment_date = '2024-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0240103500'
+    AND i.lot_number = '8079902'
+    AND i.expiry_date = '2027-02-01'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000739',
+  facility_name = '帝京板橋',
+  responsible_person = '山下　亮輔',
+  shipment_date = '2024-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0240103100'
+    AND i.lot_number = '9093228'
+    AND i.expiry_date = '2028-10-26'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000739',
+  facility_name = '帝京板橋',
+  responsible_person = '山下　亮輔',
+  shipment_date = '2024-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'

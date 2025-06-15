@@ -1,0 +1,50 @@
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0240110700'
+    AND i.lot_number = '230287641'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61303007602',
+  facility_name = '海浜病院',
+  responsible_person = '田上　剛',
+  shipment_date = '2023-03-08'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0043046100'
+    AND i.lot_number = '223321'
+    AND i.expiry_date = '2025-09-18'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A02019042',
+  facility_name = '海浜病院',
+  responsible_person = '田上　剛',
+  shipment_date = '2025-02-21'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '03200824H0'
+    AND i.lot_number = '240726'
+    AND i.expiry_date = '2027-07-25'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A02019042',
+  facility_name = '海浜病院',
+  responsible_person = '田上　剛',
+  shipment_date = '2025-02-21'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id

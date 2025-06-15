@@ -1,0 +1,50 @@
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07403000407',
+  facility_name = '昭和大学病院',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2024-03-08'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103500'
+    AND i.lot_number = '9149502'
+    AND i.expiry_date = '2028-11-09'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61105016844',
+  facility_name = '昭和大学病院',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2021-05-27'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103100'
+    AND i.lot_number = '7164425'
+    AND i.expiry_date = '2027-01-19'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61303024631',
+  facility_name = '昭和大学病院',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2023-03-29'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103400'
+    AND i.lot_number = '9160119'
+    AND i.expiry_date = '2028-12-15'

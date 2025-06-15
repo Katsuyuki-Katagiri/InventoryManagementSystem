@@ -1,0 +1,50 @@
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000173',
+  facility_name = '慶應義塾大学病院',
+  responsible_person = '齋藤　雄太',
+  shipment_date = '2024-04-02'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103500'
+    AND i.lot_number = '8927607'
+    AND i.expiry_date = '2028-09-14'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07412000761',
+  facility_name = '慶應義塾大学病院',
+  responsible_person = '齋藤　雄太',
+  shipment_date = '2024-12-16'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103300'
+    AND i.lot_number = 'A0395108'
+    AND i.expiry_date = '2030-06-07'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A02000116',
+  facility_name = '慶應義塾大学病院',
+  responsible_person = '齋藤　雄太',
+  shipment_date = '2025-02-05'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103200'
+    AND i.lot_number = '9657815'
+    AND i.expiry_date = '2029-09-25'

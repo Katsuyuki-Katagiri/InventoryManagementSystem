@@ -1,0 +1,50 @@
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0212022000'
+    AND i.lot_number = '8P4L2312'
+    AND i.expiry_date = '2028-01-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04000058',
+  facility_name = '江戸川病院',
+  responsible_person = '東　悠宇',
+  shipment_date = '2025-04-01'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0320040400'
+    AND i.lot_number = '250213'
+    AND i.expiry_date = '2028-02-12'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04000280',
+  facility_name = '江戸川病院',
+  responsible_person = '東　悠宇',
+  shipment_date = '2025-04-01'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '02502211H0'
+    AND i.lot_number = '244112'
+    AND i.expiry_date = '2027-11-30'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04000280',
+  facility_name = '江戸川病院',
+  responsible_person = '東　悠宇',
+  shipment_date = '2025-04-01'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id

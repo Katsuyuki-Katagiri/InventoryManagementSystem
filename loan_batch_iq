@@ -1,0 +1,50 @@
+    AND i.expiry_date = '2027-05-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04025663',
+  facility_name = 'メンズライフクリニック　千葉・柏院',
+  responsible_person = '内田　遥',
+  shipment_date = '2025-04-25'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0120103700'
+    AND i.lot_number = 'O-7613'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04026741',
+  facility_name = 'メンズライフクリニック　千葉・柏院',
+  responsible_person = '内田　遥',
+  shipment_date = '2025-04-25'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0120904500'
+    AND i.lot_number = '24K'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04026741',
+  facility_name = 'メンズライフクリニック　千葉・柏院',
+  responsible_person = '内田　遥',
+  shipment_date = '2025-04-25'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0120200300'

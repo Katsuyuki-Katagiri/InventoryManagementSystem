@@ -1,0 +1,50 @@
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '03200820H0'
+    AND i.lot_number = '12440526'
+    AND i.expiry_date = '2028-01-28'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A02021647',
+  facility_name = '帝京板橋',
+  responsible_person = '山下　亮輔',
+  shipment_date = '2025-02-26'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '02502210H0'
+    AND i.lot_number = '244037'
+    AND i.expiry_date = '2027-10-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07304000878',
+  facility_name = 'ブレストサージャリークリニック',
+  responsible_person = '東　悠宇',
+  shipment_date = '2023-04-18'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0103101100'
+    AND i.lot_number = '21661'
+    AND i.expiry_date = '2023-01-04'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07304000878',
+  facility_name = 'ブレストサージャリークリニック',
+  responsible_person = '東　悠宇',
+  shipment_date = '2023-04-18'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i

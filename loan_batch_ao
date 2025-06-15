@@ -1,0 +1,50 @@
+  facility_name = '順天堂練馬病院',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2024-04-02'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103300'
+    AND i.lot_number = '8100701'
+    AND i.expiry_date = '2027-04-06'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000182',
+  facility_name = '順天堂練馬病院',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2024-04-02'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103400'
+    AND i.lot_number = '8077515'
+    AND i.expiry_date = '2027-03-23'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000182',
+  facility_name = '順天堂練馬病院',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2024-04-02'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103500'
+    AND i.lot_number = '8079701'
+    AND i.expiry_date = '2027-02-01'
+);
+
+
+UPDATE inventory SET 

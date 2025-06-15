@@ -1,0 +1,50 @@
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '3900457600'
+    AND i.lot_number = '2409012NTT'
+    AND i.expiry_date = '2026-11-02'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B62A03001013',
+  facility_name = '船橋整形外科',
+  responsible_person = '柳澤　一暢',
+  shipment_date = '2025-03-26'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '3900457600'
+    AND i.lot_number = '2501008NTT'
+    AND i.expiry_date = '2027-02-01'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04011564',
+  facility_name = '海浜病院',
+  responsible_person = '田上　剛',
+  shipment_date = '2025-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0451204100'
+    AND i.lot_number = 'SIF0223F'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61410010382',
+  facility_name = '千葉医療',
+  responsible_person = '田上　剛',
+  shipment_date = '2024-10-10'

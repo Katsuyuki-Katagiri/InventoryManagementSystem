@@ -1,0 +1,50 @@
+    AND i.expiry_date = '2027-10-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61501019360',
+  facility_name = '杏林大',
+  responsible_person = '高橋　健児',
+  shipment_date = '2025-01-27'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0704'
+    AND p.product_code = '0250227200'
+    AND i.lot_number = '244003'
+    AND i.expiry_date = '2027-09-30'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A02005180',
+  facility_name = '杏林大',
+  responsible_person = '高橋　健児',
+  shipment_date = '2025-02-06'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0704'
+    AND p.product_code = '02502276H0'
+    AND i.lot_number = '243172'
+    AND i.expiry_date = '2027-09-30'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A02012536',
+  facility_name = '杏林大',
+  responsible_person = '高橋　健児',
+  shipment_date = '2025-02-17'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0704'
+    AND p.product_code = '02300212H0'

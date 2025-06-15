@@ -1,0 +1,50 @@
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0120703900'
+    AND i.lot_number = '25BJ'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61404015050',
+  facility_name = '永寿総合病院',
+  responsible_person = '前川　栞璃',
+  shipment_date = '2024-04-16'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '02502215H0'
+    AND i.lot_number = '241062'
+    AND i.expiry_date = '2027-01-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61409001926',
+  facility_name = '永寿総合病院',
+  responsible_person = '前川　栞璃',
+  shipment_date = '2024-09-03'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '02502211H0'
+    AND i.lot_number = '242073'
+    AND i.expiry_date = '2027-05-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61409001926',
+  facility_name = '永寿総合病院',
+  responsible_person = '前川　栞璃',
+  shipment_date = '2024-09-03'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id

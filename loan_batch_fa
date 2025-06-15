@@ -1,0 +1,50 @@
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '03200815H0'
+    AND i.lot_number = '12321249'
+    AND i.expiry_date = '2026-07-08'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000681',
+  facility_name = '日赤医療センタ－',
+  responsible_person = '片桐　日南多',
+  shipment_date = '2025-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0250215000'
+    AND i.lot_number = '244068'
+    AND i.expiry_date = '2027-11-30'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000681',
+  facility_name = '日赤医療センタ－',
+  responsible_person = '片桐　日南多',
+  shipment_date = '2025-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0250215800'
+    AND i.lot_number = '233071'
+    AND i.expiry_date = '2026-08-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000681',
+  facility_name = '日赤医療センタ－',
+  responsible_person = '片桐　日南多',

@@ -1,0 +1,50 @@
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212022000'
+    AND i.lot_number = '8P4F2008'
+    AND i.expiry_date = '2027-09-11'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A02012185',
+  facility_name = '柏厚生病院',
+  responsible_person = '市川　佳奈',
+  shipment_date = '2025-02-14'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212022100'
+    AND i.lot_number = '8P4J1005'
+    AND i.expiry_date = '2027-11-01'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A02012185',
+  facility_name = '柏厚生病院',
+  responsible_person = '市川　佳奈',
+  shipment_date = '2025-02-14'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212022200'
+    AND i.lot_number = '8P4K1305'
+    AND i.expiry_date = '2027-12-13'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04021617',
+  facility_name = '柏厚生病院',
+  responsible_person = '市川　佳奈',
+  shipment_date = '2025-04-22'

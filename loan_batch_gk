@@ -1,0 +1,50 @@
+  responsible_person = '柳澤　一暢',
+  shipment_date = '2024-10-30'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212022100'
+    AND i.lot_number = '8P4G1906'
+    AND i.expiry_date = '2027-08-14'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61411003740',
+  facility_name = '船橋医療センター',
+  responsible_person = '柳澤　一暢',
+  shipment_date = '2024-11-06'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212021500'
+    AND i.lot_number = 'S7P3F0814'
+    AND i.expiry_date = '2026-06-28'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61411003740',
+  facility_name = '船橋医療センター',
+  responsible_person = '柳澤　一暢',
+  shipment_date = '2024-11-06'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212021500'
+    AND i.lot_number = 'S7P3L0615'
+    AND i.expiry_date = '2027-01-24'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61501012659',

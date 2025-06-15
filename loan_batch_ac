@@ -1,0 +1,50 @@
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61304009577',
+  facility_name = '虎の門病院',
+  responsible_person = '齋藤　雄太',
+  shipment_date = '2023-04-12'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103500'
+    AND i.lot_number = '8789113'
+    AND i.expiry_date = '2028-09-14'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61309018393',
+  facility_name = '虎の門病院',
+  responsible_person = '齋藤　雄太',
+  shipment_date = '2023-09-25'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240104100'
+    AND i.lot_number = '9557507'
+    AND i.expiry_date = '2029-05-26'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61408010442',
+  facility_name = '虎の門病院',
+  responsible_person = '齋藤　雄太',
+  shipment_date = '2024-08-14'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103200'
+    AND i.lot_number = 'A0302821'

@@ -1,0 +1,50 @@
+
+UPDATE inventory SET 
+  shipment_number = 'B61A03020766',
+  facility_name = '*上野の森どうぶつ病院',
+  responsible_person = '田上　剛',
+  shipment_date = '2025-03-24'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0450000400'
+    AND i.lot_number = '60013'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A03020766',
+  facility_name = '*上野の森どうぶつ病院',
+  responsible_person = '田上　剛',
+  shipment_date = '2025-03-24'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0451821700'
+    AND i.lot_number = 'SIJ0623F'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A03020766',
+  facility_name = '*上野の森どうぶつ病院',
+  responsible_person = '田上　剛',
+  shipment_date = '2025-03-24'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0451821400'
+    AND i.lot_number = 'SID1220F'
+    AND i.expiry_date IS NULL
+);

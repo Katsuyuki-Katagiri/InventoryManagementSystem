@@ -1,0 +1,50 @@
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61411016318',
+  facility_name = '誠馨会　新東京病院',
+  responsible_person = '柳澤　一暢',
+  shipment_date = '2024-11-20'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0240103300'
+    AND i.lot_number = 'A0546409'
+    AND i.expiry_date = '2030-08-14'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A03008363',
+  facility_name = '誠馨会　新東京病院',
+  responsible_person = '柳澤　一暢',
+  shipment_date = '2025-03-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0240103100'
+    AND i.lot_number = 'A0853515'
+    AND i.expiry_date = '2031-02-07'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A03022635',
+  facility_name = '誠馨会　新東京病院',
+  responsible_person = '柳澤　一暢',
+  shipment_date = '2025-03-26'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0240103300'
+    AND i.lot_number = 'A0857924'

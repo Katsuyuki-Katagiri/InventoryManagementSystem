@@ -1,0 +1,50 @@
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A03001572',
+  facility_name = '帝京大ちば総合医療Ｃ',
+  responsible_person = '田上　剛',
+  shipment_date = '2025-03-31'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '02502266H0'
+    AND i.lot_number = '244168'
+    AND i.expiry_date = '2027-12-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A03001572',
+  facility_name = '帝京大ちば総合医療Ｃ',
+  responsible_person = '田上　剛',
+  shipment_date = '2025-03-31'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '02502266H0'
+    AND i.lot_number = '251028'
+    AND i.expiry_date = '2027-12-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A03025162',
+  facility_name = '帝京大ちば総合医療Ｃ',
+  responsible_person = '田上　剛',
+  shipment_date = '2025-03-28'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '02502259H0'
+    AND i.lot_number = '251104'

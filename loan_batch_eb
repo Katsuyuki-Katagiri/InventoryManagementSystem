@@ -1,0 +1,50 @@
+    AND i.expiry_date = '2026-10-25'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61401008457',
+  facility_name = '関東中央病院',
+  responsible_person = '藤江　尚樹',
+  shipment_date = '2024-01-16'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0212021500'
+    AND i.lot_number = 'S7P3J2312'
+    AND i.expiry_date = '2026-11-14'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61406004552',
+  facility_name = '関東中央病院',
+  responsible_person = '藤江　尚樹',
+  shipment_date = '2024-06-06'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '02502216H0'
+    AND i.lot_number = '241081'
+    AND i.expiry_date = '2027-02-28'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61410007626',
+  facility_name = '関東中央病院',
+  responsible_person = '藤江　尚樹',
+  shipment_date = '2024-10-08'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '02502212H0'

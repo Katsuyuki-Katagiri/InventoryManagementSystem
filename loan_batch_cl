@@ -1,0 +1,50 @@
+  shipment_date = '2025-04-23'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0120307300'
+    AND i.lot_number = '20C'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A03001391',
+  facility_name = '日本大学病院',
+  responsible_person = '東　悠宇',
+  shipment_date = '2025-03-26'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '03200822H0'
+    AND i.lot_number = '12510123'
+    AND i.expiry_date = '2028-02-21'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61405008717',
+  facility_name = '日本大学病院',
+  responsible_person = '東　悠宇',
+  shipment_date = '2024-05-14'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0230201400'
+    AND i.lot_number = '231078P'
+    AND i.expiry_date = '2026-02-08'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61410008764',
+  facility_name = '日本大学病院',

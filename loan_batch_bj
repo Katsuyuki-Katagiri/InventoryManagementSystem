@@ -1,0 +1,50 @@
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61407027518',
+  facility_name = '博慈会記念総合',
+  responsible_person = '原　千秋',
+  shipment_date = '2024-07-31'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0212022000'
+    AND i.lot_number = '8P4C1304'
+    AND i.expiry_date = '2027-04-16'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61410026004',
+  facility_name = '博慈会記念総合',
+  responsible_person = '原　千秋',
+  shipment_date = '2024-10-29'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0212022100'
+    AND i.lot_number = '8P4G1915'
+    AND i.expiry_date = '2027-08-14'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61411003760',
+  facility_name = '博慈会記念総合',
+  responsible_person = '原　千秋',
+  shipment_date = '2024-11-06'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0212022200'
+    AND i.lot_number = '8P4F1908'
+    AND i.expiry_date = '2027-07-11'

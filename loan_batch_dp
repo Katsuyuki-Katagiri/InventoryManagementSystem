@@ -1,0 +1,50 @@
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '02502261H0'
+    AND i.lot_number = '224009'
+    AND i.expiry_date = '2025-10-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000457',
+  facility_name = '健貢会　総合東京病院',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2025-04-08'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '02502262H0'
+    AND i.lot_number = '224039'
+    AND i.expiry_date = '2025-10-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000457',
+  facility_name = '健貢会　総合東京病院',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2025-04-08'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '03200815H0'
+    AND i.lot_number = '12430563'
+    AND i.expiry_date = '2027-09-09'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000457',
+  facility_name = '健貢会　総合東京病院',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2025-04-08'
+WHERE id IN (
+  SELECT i.id 

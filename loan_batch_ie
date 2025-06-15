@@ -1,0 +1,50 @@
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212022200'
+    AND i.lot_number = '8P3C0205'
+    AND i.expiry_date = '2026-03-24'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000153',
+  facility_name = '埼玉東部循環器病院',
+  responsible_person = '渥美　智基',
+  shipment_date = '2025-04-03'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212022100'
+    AND i.lot_number = '8P4E1507'
+    AND i.expiry_date = '2028-01-07'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61412027936',
+  facility_name = '埼玉東部循環器病院',
+  responsible_person = '渥美　智基',
+  shipment_date = '2024-12-26'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212022000'
+    AND i.lot_number = '8P4J0304'
+    AND i.expiry_date = '2027-11-20'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000262',
+  facility_name = 'おおたかの森病院',
+  responsible_person = '渥美　智基',
+  shipment_date = '2024-04-03'
+WHERE id IN (
+  SELECT i.id 

@@ -1,0 +1,50 @@
+  responsible_person = '藤江　尚樹',
+  shipment_date = '2024-03-14'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0212022200'
+    AND i.lot_number = '8P3F0614'
+    AND i.expiry_date = '2026-06-23'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61404023665',
+  facility_name = '池上総合病院',
+  responsible_person = '藤江　尚樹',
+  shipment_date = '2024-04-24'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0212021600'
+    AND i.lot_number = 'S7P4C1101'
+    AND i.expiry_date = '2027-04-02'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61405008453',
+  facility_name = '池上総合病院',
+  responsible_person = '藤江　尚樹',
+  shipment_date = '2024-05-13'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0212021500'
+    AND i.lot_number = 'S7P3K2106'
+    AND i.expiry_date = '2027-01-12'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61405012887',

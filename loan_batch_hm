@@ -1,0 +1,50 @@
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '03200824H0'
+    AND i.lot_number = '241002'
+    AND i.expiry_date = '2027-10-02'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61312001078',
+  facility_name = '亀田総合病院',
+  responsible_person = '田上　剛',
+  shipment_date = '2023-12-01'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0208005300'
+    AND i.lot_number = '23C'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61303013745',
+  facility_name = '千葉医療',
+  responsible_person = '田上　剛',
+  shipment_date = '2023-03-15'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212021500'
+    AND i.lot_number = 'S7P3A0609'
+    AND i.expiry_date = '2026-02-12'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61303013745',
+  facility_name = '千葉医療',
+  responsible_person = '田上　剛',
+  shipment_date = '2023-03-15'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i

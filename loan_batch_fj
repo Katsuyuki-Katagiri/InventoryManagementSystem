@@ -1,0 +1,50 @@
+    AND i.expiry_date = '2027-04-21'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A02000006',
+  facility_name = '榊原記念病院',
+  responsible_person = '塚本　怜生',
+  shipment_date = '2025-02-03'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0704'
+    AND p.product_code = '0240101100'
+    AND i.lot_number = '8258913'
+    AND i.expiry_date = '2027-08-20'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A02000621',
+  facility_name = '榊原記念病院',
+  responsible_person = '塚本　怜生',
+  shipment_date = '2025-02-14'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0704'
+    AND p.product_code = '0240103500'
+    AND i.lot_number = '9759211'
+    AND i.expiry_date = '2029-09-25'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A03000041',
+  facility_name = '榊原記念病院',
+  responsible_person = '塚本　怜生',
+  shipment_date = '2025-03-03'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0704'
+    AND p.product_code = '0240103400'

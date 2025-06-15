@@ -1,0 +1,50 @@
+    AND i.expiry_date = '2026-11-30'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61405000752',
+  facility_name = '大森赤十字病院',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2024-05-01'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '02502216H0'
+    AND i.lot_number = '241040'
+    AND i.expiry_date = '2027-01-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61408017629',
+  facility_name = '大森赤十字病院',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2024-08-23'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '03200820H0'
+    AND i.lot_number = '12421646'
+    AND i.expiry_date = '2027-07-04'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61412011178',
+  facility_name = '大森赤十字病院',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2024-12-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '02502216H0'

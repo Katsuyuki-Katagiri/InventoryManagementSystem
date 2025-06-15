@@ -1,0 +1,50 @@
+
+UPDATE inventory SET 
+  shipment_number = 'B55A04000512',
+  facility_name = '都立　小児総合医療Ｃ',
+  responsible_person = '山田　航',
+  shipment_date = '2025-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0200330700'
+    AND i.lot_number = '24392'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B55A04001000',
+  facility_name = '都立　小児総合医療Ｃ',
+  responsible_person = '山田　航',
+  shipment_date = '2025-04-25'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0200208700'
+    AND i.lot_number = '24735'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B55A04001000',
+  facility_name = '都立　小児総合医療Ｃ',
+  responsible_person = '山田　航',
+  shipment_date = '2025-04-25'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0200208600'
+    AND i.lot_number = '24807'
+    AND i.expiry_date IS NULL
+);

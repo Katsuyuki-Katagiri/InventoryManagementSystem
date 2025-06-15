@@ -1,0 +1,50 @@
+  shipment_date = '2025-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0250215800'
+    AND i.lot_number = '234100'
+    AND i.expiry_date = '2026-12-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04005796',
+  facility_name = '牧田総合病院',
+  responsible_person = '片桐　日南多',
+  shipment_date = '2025-04-04'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0043048100'
+    AND i.lot_number = '244715'
+    AND i.expiry_date = '2027-12-27'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04019819',
+  facility_name = '代官山バースクリニック',
+  responsible_person = '片桐　日南多',
+  shipment_date = '2025-04-18'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0120305200'
+    AND i.lot_number = '25B'
+    AND i.expiry_date IS NULL
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000405',
+  facility_name = '東邦大学医療センター大橋病院',

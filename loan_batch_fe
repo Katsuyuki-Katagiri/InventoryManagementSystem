@@ -1,0 +1,50 @@
+  shipment_number = 'B07A04000664',
+  facility_name = '東京科学大学病院',
+  responsible_person = '贄田　高典',
+  shipment_date = '2025-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0704'
+    AND p.product_code = '0240103300'
+    AND i.lot_number = 'A0327402'
+    AND i.expiry_date = '2030-05-08'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000664',
+  facility_name = '東京科学大学病院',
+  responsible_person = '贄田　高典',
+  shipment_date = '2025-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0704'
+    AND p.product_code = '0240103400'
+    AND i.lot_number = 'A0266511'
+    AND i.expiry_date = '2030-04-18'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000664',
+  facility_name = '東京科学大学病院',
+  responsible_person = '贄田　高典',
+  shipment_date = '2025-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0704'
+    AND p.product_code = '0240103500'
+    AND i.lot_number = '9796012'
+    AND i.expiry_date = '2029-09-25'
+);
+
+

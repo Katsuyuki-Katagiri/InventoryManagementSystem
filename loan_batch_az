@@ -1,0 +1,50 @@
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0212022200'
+    AND i.lot_number = '8P4J2309'
+    AND i.expiry_date = '2027-11-16'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000147',
+  facility_name = '浦安市川医療Ｃ',
+  responsible_person = '原　千秋',
+  shipment_date = '2024-04-02'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103200'
+    AND i.lot_number = '8599026'
+    AND i.expiry_date = '2028-01-07'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000147',
+  facility_name = '浦安市川医療Ｃ',
+  responsible_person = '原　千秋',
+  shipment_date = '2024-04-02'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103100'
+    AND i.lot_number = '7128109'
+    AND i.expiry_date = '2027-01-19'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07410000120',
+  facility_name = '浦安市川医療Ｃ',
+  responsible_person = '原　千秋',
+  shipment_date = '2024-10-02'
+WHERE id IN (
+  SELECT i.id 

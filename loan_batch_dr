@@ -1,0 +1,50 @@
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0240103100'
+    AND i.lot_number = '8011001'
+    AND i.expiry_date = '2027-04-06'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A03000265',
+  facility_name = '東京ハートセンター',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2025-03-06'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0240103200'
+    AND i.lot_number = 'A0382602'
+    AND i.expiry_date = '2030-06-07'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A03000265',
+  facility_name = '東京ハートセンター',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2025-03-06'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0240104100'
+    AND i.lot_number = 'A0734611'
+    AND i.expiry_date = '2030-11-20'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61301019423',
+  facility_name = '東京ハートセンター',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2023-01-30'

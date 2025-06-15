@@ -1,0 +1,50 @@
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240104100'
+    AND i.lot_number = 'A0824908'
+    AND i.expiry_date = '2030-11-20'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000551',
+  facility_name = '順天堂大',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2025-04-10'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103300'
+    AND i.lot_number = 'A0546420'
+    AND i.expiry_date = '2030-08-14'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000685',
+  facility_name = '順天堂大',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2025-04-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '02502243H0'
+    AND i.lot_number = '233050'
+    AND i.expiry_date = '2026-08-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07A04000788',
+  facility_name = '順天堂大',
+  responsible_person = '小倉　一哉',

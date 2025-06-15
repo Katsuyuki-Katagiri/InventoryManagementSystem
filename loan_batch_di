@@ -1,0 +1,50 @@
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04029395',
+  facility_name = '東京女子医大',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2025-04-30'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0240104100'
+    AND i.lot_number = 'A1077508'
+    AND i.expiry_date = '2031-02-26'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000614',
+  facility_name = '大森赤十字病院',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2024-04-10'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '02502211H0'
+    AND i.lot_number = '231165'
+    AND i.expiry_date = '2026-03-31'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000614',
+  facility_name = '大森赤十字病院',
+  responsible_person = '荒井　利浩',
+  shipment_date = '2024-04-10'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0703'
+    AND p.product_code = '0212021600'
+    AND i.lot_number = 'S7P3H0314'
+    AND i.expiry_date = '2026-08-26'

@@ -1,0 +1,50 @@
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0240103100'
+    AND i.lot_number = '8391011'
+    AND i.expiry_date = '2027-12-02'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61203008288',
+  facility_name = '葛飾ハートセンター',
+  responsible_person = '東　悠宇',
+  shipment_date = '2022-03-09'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0240103500'
+    AND i.lot_number = '8265903'
+    AND i.expiry_date = '2027-08-27'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61308013851',
+  facility_name = '葛飾ハートセンター',
+  responsible_person = '東　悠宇',
+  shipment_date = '2023-08-18'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0702'
+    AND p.product_code = '0240103200'
+    AND i.lot_number = '9157102'
+    AND i.expiry_date = '2029-03-08'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61405020748',
+  facility_name = '葛飾ハートセンター',
+  responsible_person = '東　悠宇',
+  shipment_date = '2024-05-28'
+WHERE id IN (

@@ -1,0 +1,50 @@
+    AND i.expiry_date = '2029-09-25'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61409015503',
+  facility_name = '東邦大学医療センター　佐倉病院',
+  responsible_person = '堀越　拓',
+  shipment_date = '2024-09-19'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0240104100'
+    AND i.lot_number = 'A0335414'
+    AND i.expiry_date = '2030-06-07'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61406021861',
+  facility_name = '順天堂浦安病院',
+  responsible_person = '堀越　拓',
+  shipment_date = '2024-06-27'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0230010600'
+    AND i.lot_number = '240507P'
+    AND i.expiry_date = '2026-05-06'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B55A04001133',
+  facility_name = '君津中央病院',
+  responsible_person = '渥美　智基',
+  shipment_date = '2025-04-28'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0705'
+    AND p.product_code = '0212606100'

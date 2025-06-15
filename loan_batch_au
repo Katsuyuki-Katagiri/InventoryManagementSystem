@@ -1,0 +1,50 @@
+    AND i.expiry_date = '2030-10-16'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07305000333',
+  facility_name = '昭和大学江東豊洲病院',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2023-05-11'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103400'
+    AND i.lot_number = '8657409'
+    AND i.expiry_date = '2028-09-26'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07305000493',
+  facility_name = '昭和大学江東豊洲病院',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2023-05-16'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103500'
+    AND i.lot_number = '8337706'
+    AND i.expiry_date = '2027-09-20'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B07404000875',
+  facility_name = '昭和大学江東豊洲病院',
+  responsible_person = '小倉　一哉',
+  shipment_date = '2024-04-12'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240104100'

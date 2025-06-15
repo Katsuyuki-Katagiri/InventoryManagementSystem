@@ -1,0 +1,50 @@
+  facility_name = '聖路加国際病院',
+  responsible_person = '原　千秋',
+  shipment_date = '2025-04-25'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240103400'
+    AND i.lot_number = 'A1080012'
+    AND i.expiry_date = '2031-02-26'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61A04026842',
+  facility_name = '聖路加国際病院',
+  responsible_person = '原　千秋',
+  shipment_date = '2025-04-25'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '0240104100'
+    AND i.lot_number = 'A1067109'
+    AND i.expiry_date = '2031-02-26'
+);
+
+
+UPDATE inventory SET 
+  shipment_number = 'B61306001043',
+  facility_name = '森山記念病院',
+  responsible_person = '原　千秋',
+  shipment_date = '2023-06-01'
+WHERE id IN (
+  SELECT i.id 
+  FROM inventory i
+  JOIN products p ON i.product_id = p.id
+  JOIN departments d ON i.department_id = d.id
+  WHERE d.department_code = '0701'
+    AND p.product_code = '02502260H0'
+    AND i.lot_number = '231074'
+    AND i.expiry_date = '2026-01-31'
+);
+
+
+UPDATE inventory SET 
