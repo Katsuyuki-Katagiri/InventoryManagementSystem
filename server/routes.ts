@@ -625,7 +625,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`Using existing department ID: ${departmentId}`);
           }
 
-          // Check if this exact inventory record (product + lot + expiry) already exists
+          // Enhanced matching: Check if this exact inventory record (dept + product + lot + expiry) already exists
           let existingInventory;
           
           if (expiryDate) {
@@ -634,6 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               .from(inventory)
               .where(and(
                 eq(inventory.productId, productToUse.id),
+                eq(inventory.departmentId, departmentId),
                 eq(inventory.lotNumber, lotNumber),
                 eq(inventory.expiryDate, expiryDate)
               ));
@@ -643,6 +644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               .from(inventory)
               .where(and(
                 eq(inventory.productId, productToUse.id),
+                eq(inventory.departmentId, departmentId),
                 eq(inventory.lotNumber, lotNumber),
                 sql`${inventory.expiryDate} IS NULL`
               ));

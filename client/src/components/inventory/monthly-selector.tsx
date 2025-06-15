@@ -59,13 +59,13 @@ export default function MonthlySelector({
 
   return (
     <Card className={className}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center space-x-2 text-base">
+      <CardHeader className="pb-2 py-2">
+        <CardTitle className="flex items-center space-x-2 text-sm">
           <Calendar className="h-4 w-4" />
           <span>在庫棚卸月選択</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-2 py-3">
         {/* Navigation Controls */}
         <div className="flex items-center justify-between">
           <Button
