@@ -1,220 +1,159 @@
 import XLSX from 'xlsx';
 
-const loanFilePath = './attached_assets/貸出一覧（25-04）_1749634099925.xlsx';
-
-console.log('Analyzing loan vs inventory data for final accurate matching...');
+console.log('=== Excel貸出一覧データの完全構造分析 ===\n');
 
 try {
-  const workbook = XLSX.readFile(loanFilePath);
-  const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-  const loanData = XLSX.utils.sheet_to_json(worksheet);
-
-  // Process loan data and extract key matching criteria
-  const matchingCriteria = [];
-  const departmentGroups = {};
-
-  loanData.forEach((loan, index) => {
-    const departmentCode = String(loan['部門コード'] || '').trim();
-    const productCode = String(loan['商品コード'] || '').trim();
-    const lotNumber = String(loan['ロット番号'] || '').trim();
-    const expiryDateStr = String(loan['有効期限'] || '').trim();
-    const shipmentNumber = String(loan['出荷番号'] || '').trim();
-    const facilityName = String(loan['施設名'] || '').trim();
-    const responsiblePerson = String(loan['担当者名'] || '').trim();
-    const loanDateStr = loan['貸出日'];
-
-    if (!departmentCode || !productCode || !lotNumber) {
-      return;
-    }
-
-    // Parse expiry date
-    let expiryDate = null;
-    if (expiryDateStr && expiryDateStr !== '') {
-      try {
-        if (typeof expiryDateStr === 'number') {
-          expiryDate = new Date((Number(expiryDateStr) - 25569) * 86400 * 1000);
-        } else {
-          expiryDate = new Date(expiryDateStr);
-        }
-        if (isNaN(expiryDate.getTime())) {
-          expiryDate = null;
-        }
-      } catch (e) {
-        expiryDate = null;
-      }
-    }
-
-    // Parse loan date
-    let loanDate = null;
-    if (loanDateStr) {
-      try {
-        if (typeof loanDateStr === 'number') {
-          loanDate = new Date((Number(loanDateStr) - 25569) * 86400 * 1000);
-        } else {
-          loanDate = new Date(loanDateStr);
-        }
-        if (isNaN(loanDate.getTime())) {
-          loanDate = null;
-        }
-      } catch (e) {
-        loanDate = null;
-      }
-    }
-
-    const criteria = {
-      departmentCode,
-      productCode,
-      lotNumber,
-      expiryDate: expiryDate ? expiryDate.toISOString().split('T')[0] : null,
-      shipmentNumber,
-      facilityName: facilityName.replace(/'/g, "''"),
-      responsiblePerson: responsiblePerson.replace(/'/g, "''"),
-      loanDate: loanDate ? loanDate.toISOString().split('T')[0] : null
-    };
-
-    matchingCriteria.push(criteria);
-
-    // Group by department
-    if (!departmentGroups[departmentCode]) {
-      departmentGroups[departmentCode] = [];
-    }
-    departmentGroups[departmentCode].push(criteria);
-  });
-
-  console.log('\n=== LOAN DATA ANALYSIS ===');
-  console.log(`Total valid loan records: ${matchingCriteria.length}`);
+  // 貸出一覧データの詳細分析
+  const loanWorkbook = XLSX.readFile('./attached_assets/貸出一覧（25-04）_1749634099925.xlsx');
+  console.log(`シート名: ${loanWorkbook.SheetNames.join(', ')}`);
   
-  Object.entries(departmentGroups).forEach(([dept, records]) => {
-    console.log(`Department ${dept}: ${records.length} loan records`);
-    
-    // Show unique product codes for this department
-    const uniqueProducts = [...new Set(records.map(r => r.productCode))];
-    console.log(`  - Unique products: ${uniqueProducts.slice(0, 5).join(', ')}${uniqueProducts.length > 5 ? '...' : ''}`);
-    
-    // Show unique lot numbers for this department
-    const uniqueLots = [...new Set(records.map(r => r.lotNumber))];
-    console.log(`  - Unique lots: ${uniqueLots.slice(0, 5).join(', ')}${uniqueLots.length > 5 ? '...' : ''}`);
-    
-    // Show unique responsible persons for this department
-    const uniquePersons = [...new Set(records.map(r => r.responsiblePerson))];
-    console.log(`  - Responsible persons: ${uniquePersons.join(', ')}`);
-    
-    // Show unique facilities for this department
-    const uniqueFacilities = [...new Set(records.map(r => r.facilityName))];
-    console.log(`  - Facilities: ${uniqueFacilities.join(', ')}`);
-  });
-
-  // Generate comprehensive SQL for accurate matching
-  console.log('\n=== GENERATING COMPREHENSIVE SQL ===');
+  const loanWorksheet = loanWorkbook.Sheets[loanWorkbook.SheetNames[0]];
+  const loanData = XLSX.utils.sheet_to_json(loanWorksheet);
   
-  let sql = `-- Comprehensive accurate matching based on department + product + lot + expiry\n`;
+  console.log(`貸出データ総件数: ${loanData.length}件\n`);
   
-  Object.entries(departmentGroups).forEach(([deptCode, records]) => {
-    if (records.length === 0) return;
-    
-    sql += `\n-- Department ${deptCode} accurate matching\n`;
-    sql += `UPDATE inventory SET\n`;
-    sql += `  shipment_number = CASE\n`;
-    
-    records.forEach((record, index) => {
-      sql += `    WHEN EXISTS (\n`;
-      sql += `      SELECT 1 FROM products p, departments d\n`;
-      sql += `      WHERE p.id = inventory.product_id AND d.id = inventory.department_id\n`;
-      sql += `        AND d.department_code = '${deptCode}'\n`;
-      sql += `        AND p.product_code = '${record.productCode}'\n`;
-      sql += `        AND inventory.lot_number = '${record.lotNumber}'\n`;
-      
-      if (record.expiryDate) {
-        sql += `        AND inventory.expiry_date = '${record.expiryDate}'\n`;
-      } else {
-        sql += `        AND inventory.expiry_date IS NULL\n`;
-      }
-      
-      sql += `    ) THEN '${record.shipmentNumber}'\n`;
-    });
-    
-    sql += `    ELSE shipment_number\n`;
-    sql += `  END,\n`;
-    sql += `  facility_name = CASE\n`;
-    
-    records.forEach((record, index) => {
-      sql += `    WHEN EXISTS (\n`;
-      sql += `      SELECT 1 FROM products p, departments d\n`;
-      sql += `      WHERE p.id = inventory.product_id AND d.id = inventory.department_id\n`;
-      sql += `        AND d.department_code = '${deptCode}'\n`;
-      sql += `        AND p.product_code = '${record.productCode}'\n`;
-      sql += `        AND inventory.lot_number = '${record.lotNumber}'\n`;
-      
-      if (record.expiryDate) {
-        sql += `        AND inventory.expiry_date = '${record.expiryDate}'\n`;
-      } else {
-        sql += `        AND inventory.expiry_date IS NULL\n`;
-      }
-      
-      sql += `    ) THEN '${record.facilityName}'\n`;
-    });
-    
-    sql += `    ELSE facility_name\n`;
-    sql += `  END,\n`;
-    sql += `  responsible_person = CASE\n`;
-    
-    records.forEach((record, index) => {
-      sql += `    WHEN EXISTS (\n`;
-      sql += `      SELECT 1 FROM products p, departments d\n`;
-      sql += `      WHERE p.id = inventory.product_id AND d.id = inventory.department_id\n`;
-      sql += `        AND d.department_code = '${deptCode}'\n`;
-      sql += `        AND p.product_code = '${record.productCode}'\n`;
-      sql += `        AND inventory.lot_number = '${record.lotNumber}'\n`;
-      
-      if (record.expiryDate) {
-        sql += `        AND inventory.expiry_date = '${record.expiryDate}'\n`;
-      } else {
-        sql += `        AND inventory.expiry_date IS NULL\n`;
-      }
-      
-      sql += `    ) THEN '${record.responsiblePerson}'\n`;
-    });
-    
-    sql += `    ELSE responsible_person\n`;
-    sql += `  END,\n`;
-    sql += `  shipment_date = CASE\n`;
-    
-    records.forEach((record, index) => {
-      sql += `    WHEN EXISTS (\n`;
-      sql += `      SELECT 1 FROM products p, departments d\n`;
-      sql += `      WHERE p.id = inventory.product_id AND d.id = inventory.department_id\n`;
-      sql += `        AND d.department_code = '${deptCode}'\n`;
-      sql += `        AND p.product_code = '${record.productCode}'\n`;
-      sql += `        AND inventory.lot_number = '${record.lotNumber}'\n`;
-      
-      if (record.expiryDate) {
-        sql += `        AND inventory.expiry_date = '${record.expiryDate}'\n`;
-      } else {
-        sql += `        AND inventory.expiry_date IS NULL\n`;
-      }
-      
-      sql += `    ) THEN ${record.loanDate ? `'${record.loanDate}'` : 'NULL'}\n`;
-    });
-    
-    sql += `    ELSE shipment_date\n`;
-    sql += `  END\n`;
-    sql += `WHERE id IN (\n`;
-    sql += `  SELECT i.id FROM inventory i\n`;
-    sql += `  JOIN products p ON i.product_id = p.id\n`;
-    sql += `  JOIN departments d ON i.department_id = d.id\n`;
-    sql += `  WHERE d.department_code = '${deptCode}'\n`;
-    sql += `);\n\n`;
+  // 全ての列名を表示
+  const allColumns = loanData.length > 0 ? Object.keys(loanData[0]) : [];
+  console.log('貸出データの全列:');
+  allColumns.forEach((col, index) => {
+    console.log(`  ${index + 1}. ${col}`);
   });
-
-  console.log('SQL Generated successfully');
-  console.log('First 50 lines:');
-  console.log(sql.split('\n').slice(0, 50).join('\n'));
-
-  import('fs').then(fs => {
-    fs.writeFileSync('comprehensive-loan-matching.sql', sql);
-    console.log('\nComprehensive SQL written to comprehensive-loan-matching.sql');
+  
+  // 最初の5件の完全なデータを表示
+  console.log('\n最初の5件の完全なデータ:');
+  loanData.slice(0, 5).forEach((row, index) => {
+    console.log(`\n--- 貸出レコード ${index + 1} ---`);
+    Object.entries(row).forEach(([key, value]) => {
+      console.log(`  ${key}: ${value}`);
+    });
   });
-
+  
+  // 部門別データ分析
+  console.log('\n=== 部門別詳細分析 ===');
+  const deptAnalysis = {};
+  
+  loanData.forEach((row, index) => {
+    const deptCode = row['部門コード'] || row['DEPT_CODE'] || 'N/A';
+    const productCode = row['商品コード'] || row['PRODUCT_CODE'] || 'N/A';
+    const lotNumber = row['ロット番号'] || row['LOT_NUMBER'] || 'N/A';
+    const responsiblePerson = row['担当者名'] || row['RESPONSIBLE_PERSON'] || 'N/A';
+    const facilityName = row['施設名'] || row['FACILITY_NAME'] || 'N/A';
+    const shipmentNumber = row['出荷番号'] || row['SHIPMENT_NUMBER'] || 'N/A';
+    const loanDate = row['貸出日'] || row['LOAN_DATE'] || 'N/A';
+    const expiryDate = row['有効期限'] || row['EXPIRY_DATE'] || 'N/A';
+    
+    if (!deptAnalysis[deptCode]) {
+      deptAnalysis[deptCode] = {
+        totalRecords: 0,
+        uniqueProducts: new Set(),
+        uniqueLots: new Set(),
+        uniquePersons: new Set(),
+        uniqueFacilities: new Set(),
+        uniqueShipments: new Set(),
+        sampleRecords: []
+      };
+    }
+    
+    deptAnalysis[deptCode].totalRecords++;
+    deptAnalysis[deptCode].uniqueProducts.add(productCode);
+    deptAnalysis[deptCode].uniqueLots.add(lotNumber);
+    deptAnalysis[deptCode].uniquePersons.add(responsiblePerson);
+    deptAnalysis[deptCode].uniqueFacilities.add(facilityName);
+    deptAnalysis[deptCode].uniqueShipments.add(shipmentNumber);
+    
+    if (deptAnalysis[deptCode].sampleRecords.length < 3) {
+      deptAnalysis[deptCode].sampleRecords.push({
+        recordNumber: index + 1,
+        productCode,
+        lotNumber,
+        responsiblePerson,
+        facilityName,
+        shipmentNumber,
+        loanDate,
+        expiryDate
+      });
+    }
+  });
+  
+  // 部門別結果表示
+  Object.entries(deptAnalysis).forEach(([dept, data]) => {
+    console.log(`\n部門 ${dept}:`);
+    console.log(`  総レコード数: ${data.totalRecords}件`);
+    console.log(`  商品種類数: ${data.uniqueProducts.size}種類`);
+    console.log(`  ロット数: ${data.uniqueLots.size}個`);
+    console.log(`  担当者数: ${data.uniquePersons.size}名`);
+    console.log(`  施設数: ${data.uniqueFacilities.size}施設`);
+    console.log(`  出荷番号数: ${data.uniqueShipments.size}件`);
+    
+    console.log(`  担当者一覧: ${Array.from(data.uniquePersons).filter(p => p !== 'N/A').join(', ')}`);
+    console.log(`  施設一覧（上位5件）: ${Array.from(data.uniqueFacilities).filter(f => f !== 'N/A').slice(0, 5).join(', ')}`);
+    
+    console.log(`  サンプルレコード:`);
+    data.sampleRecords.forEach(sample => {
+      console.log(`    ${sample.recordNumber}. 商品:${sample.productCode} ロット:${sample.lotNumber} 担当:${sample.responsiblePerson} 施設:${sample.facilityName}`);
+      console.log(`       出荷:${sample.shipmentNumber} 貸出日:${sample.loanDate} 期限:${sample.expiryDate}`);
+    });
+  });
+  
+  // 在庫データとのマッチング条件確認
+  console.log('\n=== マッチング条件確認 ===');
+  console.log('貸出データで使用可能なマッチングキー:');
+  console.log(`  部門コード: ${loanData.filter(r => r['部門コード']).length}件`);
+  console.log(`  商品コード: ${loanData.filter(r => r['商品コード']).length}件`);
+  console.log(`  ロット番号: ${loanData.filter(r => r['ロット番号']).length}件`);
+  console.log(`  有効期限: ${loanData.filter(r => r['有効期限']).length}件`);
+  console.log(`  担当者名: ${loanData.filter(r => r['担当者名']).length}件`);
+  console.log(`  施設名: ${loanData.filter(r => r['施設名']).length}件`);
+  console.log(`  出荷番号: ${loanData.filter(r => r['出荷番号']).length}件`);
+  
+  // ユニークなマッチングパターンを分析
+  console.log('\n=== ユニークマッチングパターン分析 ===');
+  const matchingPatterns = new Map();
+  
+  loanData.forEach((row, index) => {
+    const deptCode = row['部門コード'] || '';
+    const productCode = row['商品コード'] || '';
+    const lotNumber = row['ロット番号'] || '';
+    const expiryDate = row['有効期限'] || '';
+    
+    if (deptCode && productCode && lotNumber) {
+      const pattern = `${deptCode}|${productCode}|${lotNumber}|${expiryDate}`;
+      if (!matchingPatterns.has(pattern)) {
+        matchingPatterns.set(pattern, {
+          count: 0,
+          responsiblePersons: new Set(),
+          facilities: new Set(),
+          shipmentNumbers: new Set(),
+          firstRecord: index + 1
+        });
+      }
+      
+      const data = matchingPatterns.get(pattern);
+      data.count++;
+      data.responsiblePersons.add(row['担当者名'] || '');
+      data.facilities.add(row['施設名'] || '');
+      data.shipmentNumbers.add(row['出荷番号'] || '');
+    }
+  });
+  
+  console.log(`総マッチングパターン数: ${matchingPatterns.size}件`);
+  console.log('重複パターン（同じ部門+商品+ロット+期限）:');
+  
+  let duplicateCount = 0;
+  matchingPatterns.forEach((data, pattern) => {
+    if (data.count > 1) {
+      duplicateCount++;
+      console.log(`  パターン: ${pattern}`);
+      console.log(`    出現回数: ${data.count}回`);
+      console.log(`    担当者: ${Array.from(data.responsiblePersons).join(', ')}`);
+      console.log(`    施設: ${Array.from(data.facilities).join(', ')}`);
+    }
+  });
+  
+  console.log(`\n重複パターン数: ${duplicateCount}件`);
+  console.log(`ユニークパターン数: ${matchingPatterns.size - duplicateCount}件`);
+  
 } catch (error) {
-  console.error('Error:', error);
+  console.error('エラー:', error.message);
+  console.error('スタック:', error.stack);
 }
