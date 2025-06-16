@@ -3,6 +3,9 @@ import { db } from './server/db.js';
 import { inventory, products, departments } from './shared/schema.js';
 import { eq, and } from 'drizzle-orm';
 
+// Use the provided accounting month or default to 2025-04
+const inventoryMonth = process.argv[2] || '2025-04';
+
 const loanFilePath = './attached_assets/貸出一覧（25-04）_1749634099925.xlsx';
 
 console.log('Starting accurate loan matching process...');
@@ -76,7 +79,8 @@ try {
               eq(departments.departmentCode, departmentCode),
               eq(products.productCode, productCode),
               eq(inventory.lotNumber, lotNumber),
-              eq(inventory.expiryDate, expiryDate)
+              eq(inventory.expiryDate, expiryDate),
+              eq(inventory.inventoryMonth, inventoryMonth)
             )
           );
       } else {
@@ -94,7 +98,8 @@ try {
             and(
               eq(departments.departmentCode, departmentCode),
               eq(products.productCode, productCode),
-              eq(inventory.lotNumber, lotNumber)
+              eq(inventory.lotNumber, lotNumber),
+              eq(inventory.inventoryMonth, inventoryMonth)
             )
           );
       }
@@ -158,6 +163,7 @@ try {
     })
     .from(departments)
     .leftJoin(inventory, eq(departments.id, inventory.departmentId))
+    .where(eq(inventory.inventoryMonth, inventoryMonth))
     .groupBy(departments.departmentCode, departments.departmentName)
     .orderBy(departments.departmentCode);
 
